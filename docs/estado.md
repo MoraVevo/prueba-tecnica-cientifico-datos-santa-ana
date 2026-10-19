@@ -58,7 +58,7 @@ Actualización: 2026-10-19, America/Guatemala.
 
 ### 4. Datos propios — documento de conclusiones
 
-- `docs/conclusiones-serie-I.md` responde los cuatro puntos y propone seguimiento de parcela/cohorte, clima por localidad y fecha, incidencias operativas/protocolos, variables de manejo/calidad/costos, causas de retiro y ensayo aleatorizado por bloques/sitios seguido durante socas. El contraste 2019–2020 justifica capturar clima y ejecución por separado; un indicador COVID aislado queda confundido con el año y no identifica causalidad.
+- `docs/conclusiones-serie-I.md` responde los cuatro puntos y propone seguimiento parcela/cohorte, tamaño de parcela y área útil, clima por localidad/fecha, sistema y continuidad del riego, incidencias operativas/protocolos, variables de manejo/calidad/costos, causas de retiro y ensayo aleatorizado por bloques/sitios seguido durante socas. El contraste 2019–2020 justifica capturar clima y ejecución por separado; un indicador COVID aislado queda confundido con el año y no identifica causalidad. El riego queda como factor por medir, sin presumir causalidad, y debe separarse de localidad/suelo/manejo.
 - Ejemplo ilustrativo: tres sitios × tres bloques × cuatro variedades distintas =36 parcelas; no sustituye cálculo de tamaño muestral. Segunda fase compara políticas de renovación asignadas al azar en horizonte común. Solo propuesta, sin captura adicional ejecutada.
 
 ## Archivos y reproducción
@@ -71,7 +71,7 @@ Actualización: 2026-10-19, America/Guatemala.
 ## Git y privacidad
 
 - Repositorio privado: https://github.com/MoraVevo/prueba-tecnica-cientifico-datos-santa-ana ; rama `main`, remoto `origin`.
-- El repositorio sigue privado en `main`, con remoto `origin`. El último commit y si hay cambios pendientes se registran en Git; esta actualización documental se guarda localmente por petición del usuario. No se solicita ni realiza push en este paso.
+- El repositorio sigue privado en `main`, con remoto `origin`. El usuario requiere que el historial sea visible en GitHub; subir commits a `origin` al cerrar hitos coherentes y consultar `git status`/`git log` para confirmar sincronización.
 - `AGENTS.md` privado e ignorado; historial main reescrito anteriormente. La skill conserva advertencia de SHA antiguos aún consultables en GitHub y respaldo fuera del proyecto. No afirmar borrado universal del historial anterior.
 - PDF, datasets y entornos ignorados. Revisar ZIP/acceso antes de entrega.
 
