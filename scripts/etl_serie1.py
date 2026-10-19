@@ -1,4 +1,4 @@
-"""Prepara una copia analítica provisional de Serie I sin alterar el CSV original."""
+"""Prepara una copia analítica provisional de la Serie I sin alterar el CSV original."""
 
 from __future__ import annotations
 
@@ -9,207 +9,270 @@ from pathlib import Path
 import pandas as pd
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-INPUT_PATH = PROJECT_ROOT / "data" / "raw" / "louisiana_sugarcane_2010_2021.csv"
-OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
-OUTPUT_PATH = OUTPUT_DIR / "serie1_etl_provisional.csv"
-REPORT_PATH = OUTPUT_DIR / "serie1_resumen_calidad.json"
-REVIEW_PATH = OUTPUT_DIR / "serie1_filas_revision.csv"
-EXPECTED_SHA256 = "5e7b13de6bda8aed51479c5fdfc3de4a28e71ccbb45e4761b6688a34b7cff4b0"
+RAIZ_PROYECTO = Path(__file__).resolve().parents[1]
+RUTA_ENTRADA = RAIZ_PROYECTO / "data" / "raw" / "louisiana_sugarcane_2010_2021.csv"
+DIRECTORIO_SALIDA = RAIZ_PROYECTO / "data" / "processed"
+RUTA_SALIDA = DIRECTORIO_SALIDA / "serie1_etl_provisional.csv"
+RUTA_REPORTE = DIRECTORIO_SALIDA / "serie1_resumen_calidad.json"
+RUTA_REVISION = DIRECTORIO_SALIDA / "serie1_filas_revision.csv"
+SHA256_ESPERADO = "5e7b13de6bda8aed51479c5fdfc3de4a28e71ccbb45e4761b6688a34b7cff4b0"
 
-NUMERIC_COLUMNS = [
+COLUMNAS_NUMERICAS = [
     "YEAR", "CROP", "REP", "T_SPACRE", "TCA", "POPN", "MSTWT", "FIBER"
 ]
-KEY_CANDIDATE = ["CLONE", "YEAR", "STAGE", "LOC", "CROP", "REP"]
+CLAVE_CANDIDATA = ["CLONE", "YEAR", "STAGE", "LOC", "CROP", "REP"]
 
 
-def main() -> None:
-    """Valida la fuente, añade campos tipados y emite banderas de calidad."""
-    if not INPUT_PATH.exists():
+def leer_fuente_validada() -> tuple[pd.DataFrame, str]:
+    """Comprueba la versión del archivo y lo carga como texto."""
+    if not RUTA_ENTRADA.exists():
         raise SystemExit(
             "No se encontró el CSV. Ejecuta primero: "
             "python scripts/descargar_serie1.py"
         )
 
-    source_hash = hashlib.sha256(INPUT_PATH.read_bytes()).hexdigest()
-    if source_hash != EXPECTED_SHA256:
+    sha256 = hashlib.sha256(RUTA_ENTRADA.read_bytes()).hexdigest()
+    if sha256 != SHA256_ESPERADO:
         raise SystemExit(
             "El CSV no coincide con la versión auditada. No se procesó. "
-            f"Esperado: {EXPECTED_SHA256}; recibido: {source_hash}"
+            f"Esperado: {SHA256_ESPERADO}; recibido: {sha256}"
         )
 
-    raw = pd.read_csv(INPUT_PATH, dtype="string", keep_default_na=False)
-    prepared = raw.copy()
-    prepared.insert(0, "FILA_CSV", range(2, len(raw) + 2))
-    parse_error_columns: list[str] = []
+    fuente = pd.read_csv(RUTA_ENTRADA, dtype="string", keep_default_na=False)
+    return fuente, sha256
 
-    # Preserve the source text beside each parsed numeric field. Blank and '.'
-    # become missing values only in the analytical column.
-    for column in NUMERIC_COLUMNS:
-        source_text = raw[column].astype("string")
-        prepared[f"{column}_raw"] = source_text
-        cleaned = source_text.str.strip().replace({"": pd.NA, ".": pd.NA})
-        parsed = pd.to_numeric(cleaned, errors="coerce")
-        error_column = f"ERROR_PARSE_{column}"
-        prepared[error_column] = cleaned.notna() & parsed.isna()
-        parse_error_columns.append(error_column)
-        if column in {"YEAR", "CROP", "REP"}:
-            prepared[column] = parsed.astype("Int64")
+
+def convertir_mediciones(fuente: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
+    """Conserva cada valor original y añade sus columnas analíticas."""
+    datos = fuente.copy()
+    datos.insert(0, "FILA_CSV", range(2, len(fuente) + 2))
+    columnas_error = []
+
+    # Conserva el texto original junto al valor numérico. Los blancos y puntos
+    # pasan a ser faltantes solo en la columna analítica.
+    for columna in COLUMNAS_NUMERICAS:
+        texto = fuente[columna].astype("string")
+        datos[f"{columna}_raw"] = texto
+        limpio = texto.str.strip().replace({"": pd.NA, ".": pd.NA})
+        numero = pd.to_numeric(limpio, errors="coerce")
+        columna_error = f"ERROR_PARSE_{columna}"
+        datos[columna_error] = limpio.notna() & numero.isna()
+        columnas_error.append(columna_error)
+
+        if columna in {"YEAR", "CROP", "REP"}:
+            datos[columna] = numero.astype("Int64")
         else:
-            prepared[column] = parsed.astype("Float64")
+            datos[columna] = numero.astype("Float64")
 
-    # The field has two numeric components in many rows. Keep the original and
-    # expose both components; the last one is explicitly provisional.
-    trs_text = raw["TRS_TON"].astype("string")
-    prepared["TRS_TON_raw"] = trs_text
-    parts = trs_text.str.strip().replace({"": pd.NA, ".": pd.NA}).str.extract(
+    # Algunas celdas de TRS_TON tienen dos números. Se guardan ambos sin
+    # interpretar el prefijo; el último se usa solo como candidato provisional.
+    texto_trs = fuente["TRS_TON"].astype("string")
+    datos["TRS_TON_raw"] = texto_trs
+    partes = texto_trs.str.strip().replace({"": pd.NA, ".": pd.NA}).str.extract(
         r"^(?:(?P<prefijo>\d+)\s+)?(?P<componente_final>\d+(?:\.\d+)?)$"
     )
-    prepared["TRS_TON_prefijo_sin_interpretar"] = pd.to_numeric(
-        parts["prefijo"], errors="coerce"
+    datos["TRS_TON_prefijo_sin_interpretar"] = pd.to_numeric(
+        partes["prefijo"], errors="coerce"
     ).astype("Float64")
-    prepared["TRS_TON_candidato"] = pd.to_numeric(
-        parts["componente_final"], errors="coerce"
+    datos["TRS_TON_candidato"] = pd.to_numeric(
+        partes["componente_final"], errors="coerce"
     ).astype("Float64")
-    prepared["TRS_TON_formato"] = "vacio_o_formato_no_reconocido"
-    prepared.loc[parts["componente_final"].notna(), "TRS_TON_formato"] = "numero_simple"
-    prepared.loc[parts["prefijo"].notna(), "TRS_TON_formato"] = "dos_componentes"
-    prepared["ERROR_PARSE_TRS_TON"] = trs_text.str.strip().replace(
-        {"": pd.NA, ".": pd.NA}
-    ).notna() & parts["componente_final"].isna()
-    parse_error_columns.append("ERROR_PARSE_TRS_TON")
+    datos["TRS_TON_formato"] = "vacio_o_formato_no_reconocido"
+    datos.loc[partes["componente_final"].notna(), "TRS_TON_formato"] = "numero_simple"
+    datos.loc[partes["prefijo"].notna(), "TRS_TON_formato"] = "dos_componentes"
 
-    # Preserve the auxiliary fields, including the six loose annotations.
-    auxiliary = [column for column in raw.columns if column.startswith("Unnamed:")]
-    prepared = prepared.rename(
-        columns={column: f"AUX_{index}" for index, column in enumerate(auxiliary, start=1)}
+    limpio_trs = texto_trs.str.strip().replace({"": pd.NA, ".": pd.NA})
+    datos["ERROR_PARSE_TRS_TON"] = limpio_trs.notna() & partes["componente_final"].isna()
+    columnas_error.append("ERROR_PARSE_TRS_TON")
+
+    # Retiene las columnas auxiliares, incluidas las seis anotaciones sueltas.
+    auxiliares = [columna for columna in fuente.columns if columna.startswith("Unnamed:")]
+    datos = datos.rename(
+        columns={
+            columna: f"AUX_{indice}"
+            for indice, columna in enumerate(auxiliares, start=1)
+        }
+    )
+    return datos, columnas_error
+
+
+def marcar_duplicados(fuente: pd.DataFrame, datos: pd.DataFrame) -> int:
+    """Marca duplicados y cuenta grupos con mediciones distintas."""
+    datos["DUPLICADO_EXACTO"] = fuente.duplicated(keep=False)
+    datos["CLAVE_CANDIDATA_REPETIDA"] = fuente.duplicated(
+        CLAVE_CANDIDATA, keep=False
     )
 
-    prepared["DUPLICADO_EXACTO"] = raw.duplicated(keep=False)
-    prepared["CLAVE_CANDIDATA_REPETIDA"] = raw.duplicated(
-        KEY_CANDIDATE, keep=False
-    )
-
-    repeated_key = raw.duplicated(KEY_CANDIDATE, keep=False)
-    repeated_key_measurements = (
-        raw.loc[repeated_key]
-        .groupby(KEY_CANDIDATE, dropna=False)[NUMERIC_COLUMNS + ["TRS_TON"]]
+    clave_repetida = fuente.duplicated(CLAVE_CANDIDATA, keep=False)
+    mediciones_por_clave = (
+        fuente.loc[clave_repetida]
+        .groupby(CLAVE_CANDIDATA, dropna=False)[COLUMNAS_NUMERICAS + ["TRS_TON"]]
         .nunique(dropna=False)
     )
-    repeated_groups_with_different_measurements = int(
-        repeated_key_measurements.gt(1).any(axis=1).sum()
+    grupos_con_mediciones_distintas = int(
+        mediciones_por_clave.gt(1).any(axis=1).sum()
+    )
+    return grupos_con_mediciones_distintas
+
+
+def evaluar_relacion_dimensional(datos: pd.DataFrame) -> None:
+    """Compara el azúcar por acre con TCA por TRS_TON candidato."""
+    filas_positivas = (
+        datos["T_SPACRE"].gt(0)
+        & datos["TCA"].gt(0)
+        & datos["TRS_TON_candidato"].gt(0)
+    )
+    ratio_observado = datos.loc[filas_positivas, "T_SPACRE"] / (
+        datos.loc[filas_positivas, "TCA"]
+        * datos.loc[filas_positivas, "TRS_TON_candidato"]
+    )
+    dentro_tolerancia = ratio_observado.sub(1).abs().le(0.01)
+
+    datos["RATIO_T_SPACRE_SOBRE_ESPERADO"] = pd.Series(
+        pd.NA, index=datos.index, dtype="Float64"
+    )
+    datos.loc[filas_positivas, "RATIO_T_SPACRE_SOBRE_ESPERADO"] = ratio_observado
+    datos["ESTADO_RELACION_DIMENSIONAL"] = "sin_mediciones_completas"
+    datos.loc[ratio_observado.index, "ESTADO_RELACION_DIMENSIONAL"] = (
+        "dentro_1_por_ciento"
+    )
+    datos.loc[ratio_observado.index[~dentro_tolerancia], "ESTADO_RELACION_DIMENSIONAL"] = (
+        "fuera_1_por_ciento"
     )
 
-    positive = (
-        prepared["T_SPACRE"].gt(0)
-        & prepared["TCA"].gt(0)
-        & prepared["TRS_TON_candidato"].gt(0)
-    )
-    observed_ratio = prepared.loc[positive, "T_SPACRE"] / (
-        prepared.loc[positive, "TCA"] * prepared.loc[positive, "TRS_TON_candidato"]
-    )
-    within_tolerance = observed_ratio.sub(1).abs().le(0.01)
-    prepared["RATIO_T_SPACRE_SOBRE_ESPERADO"] = pd.Series(
-        pd.NA, index=prepared.index, dtype="Float64"
-    )
-    prepared.loc[positive, "RATIO_T_SPACRE_SOBRE_ESPERADO"] = observed_ratio
-    prepared["ESTADO_RELACION_DIMENSIONAL"] = "sin_mediciones_completas"
-    prepared.loc[observed_ratio.index, "ESTADO_RELACION_DIMENSIONAL"] = "dentro_1_por_ciento"
-    prepared.loc[observed_ratio.index[~within_tolerance], "ESTADO_RELACION_DIMENSIONAL"] = "fuera_1_por_ciento"
 
-    parse_errors = prepared[parse_error_columns].any(axis=1)
-    formula_outlier = prepared["ESTADO_RELACION_DIMENSIONAL"].eq("fuera_1_por_ciento")
-    review_reasons = pd.DataFrame(
+def marcar_revision(datos: pd.DataFrame, columnas_error: list[str]) -> None:
+    """Asigna motivos legibles y señala qué filas requieren revisión."""
+    errores_parseo = datos[columnas_error].any(axis=1)
+    fuera_tolerancia = datos["ESTADO_RELACION_DIMENSIONAL"].eq(
+        "fuera_1_por_ciento"
+    )
+    motivos = pd.DataFrame(
         {
-            "prefijo_TRS_sin_explicar": prepared["TRS_TON_prefijo_sin_interpretar"].notna(),
-            "duplicado_exacto": prepared["DUPLICADO_EXACTO"],
-            "clave_candidata_repetida": prepared["CLAVE_CANDIDATA_REPETIDA"],
-            "error_de_parseo": parse_errors,
-            "fuera_de_tolerancia_dimensional": formula_outlier,
+            "prefijo_TRS_sin_explicar": datos[
+                "TRS_TON_prefijo_sin_interpretar"
+            ].notna(),
+            "duplicado_exacto": datos["DUPLICADO_EXACTO"],
+            "clave_candidata_repetida": datos["CLAVE_CANDIDATA_REPETIDA"],
+            "error_de_parseo": errores_parseo,
+            "fuera_de_tolerancia_dimensional": fuera_tolerancia,
         },
-        index=prepared.index,
+        index=datos.index,
     )
-    prepared["MOTIVOS_REVISION"] = review_reasons.apply(
-        lambda row: ";".join(row.index[row].tolist()), axis=1
+    datos["MOTIVOS_REVISION"] = motivos.apply(
+        lambda fila: ";".join(fila.index[fila]), axis=1
     )
-    needs_review = (
-        prepared["TRS_TON_prefijo_sin_interpretar"].notna()
-        | prepared["DUPLICADO_EXACTO"]
-        | prepared["CLAVE_CANDIDATA_REPETIDA"]
-        | parse_errors
-        | formula_outlier
+    datos["REQUIERE_REVISION"] = (
+        datos["TRS_TON_prefijo_sin_interpretar"].notna()
+        | datos["DUPLICADO_EXACTO"]
+        | datos["CLAVE_CANDIDATA_REPETIDA"]
+        | errores_parseo
+        | fuera_tolerancia
     )
-    prepared["REQUIERE_REVISION"] = needs_review
-    review_rows = prepared.loc[needs_review].copy()
 
-    crop_summary = (
-        prepared.groupby("CROP", dropna=False)["T_SPACRE"]
+
+def resumir_calidad(
+    fuente: pd.DataFrame,
+    datos: pd.DataFrame,
+    sha256: str,
+    columnas_error: list[str],
+    grupos_con_mediciones_distintas: int,
+) -> dict:
+    """Resume la calidad de la fuente y las decisiones aplicadas."""
+    filas_completas = datos["ESTADO_RELACION_DIMENSIONAL"].ne(
+        "sin_mediciones_completas"
+    )
+    filas_dentro = datos["ESTADO_RELACION_DIMENSIONAL"].eq("dentro_1_por_ciento")
+    ratios = datos["RATIO_T_SPACRE_SOBRE_ESPERADO"].dropna()
+    resumen_cosecha = (
+        datos.groupby("CROP", dropna=False)["T_SPACRE"]
         .agg(n="count", media="mean", mediana="median")
         .reset_index()
         .to_dict(orient="records")
     )
-    quality_report = {
-        "source_file": INPUT_PATH.name,
-        "source_sha256": source_hash,
-        "rows": int(len(raw)),
-        "source_columns": list(raw.columns),
-        "missing_markers": {
-            column: {
-                "blank": int(raw[column].str.strip().eq("").sum()),
-                "dot": int(raw[column].str.strip().eq(".").sum()),
+
+    return {
+        "archivo_fuente": RUTA_ENTRADA.name,
+        "sha256_fuente": sha256,
+        "total_filas": int(len(fuente)),
+        "columnas_fuente": list(fuente.columns),
+        "marcadores_faltantes": {
+            columna: {
+                "en_blanco": int(fuente[columna].str.strip().eq("").sum()),
+                "punto": int(fuente[columna].str.strip().eq(".").sum()),
             }
-            for column in raw.columns
+            for columna in fuente.columns
         },
-        "trs_ton_format_counts": {
-            str(key): int(value)
-            for key, value in prepared["TRS_TON_formato"].value_counts(dropna=False).items()
+        "conteo_formato_trs_ton": {
+            str(clave): int(valor)
+            for clave, valor in datos["TRS_TON_formato"].value_counts(
+                dropna=False
+            ).items()
         },
-        "exact_duplicate_rows_including_first_copy": int(
-            prepared["DUPLICADO_EXACTO"].sum()
+        "filas_duplicadas_exactas_incluida_primera": int(
+            datos["DUPLICADO_EXACTO"].sum()
         ),
-        "exact_duplicate_extra_copies": int(raw.duplicated(keep="first").sum()),
-        "candidate_key_repeated_rows_including_first_copy": int(
-            prepared["CLAVE_CANDIDATA_REPETIDA"].sum()
+        "copias_duplicadas_adicionales": int(fuente.duplicated(keep="first").sum()),
+        "filas_con_clave_candidata_repetida": int(
+            datos["CLAVE_CANDIDATA_REPETIDA"].sum()
         ),
-        "candidate_key_groups_with_different_measurements": repeated_groups_with_different_measurements,
-        "numeric_parse_errors": {
-            column.removeprefix("ERROR_PARSE_"): int(prepared[column].sum())
-            for column in parse_error_columns
+        "grupos_con_mediciones_distintas": grupos_con_mediciones_distintas,
+        "errores_parseo_numerico": {
+            columna.removeprefix("ERROR_PARSE_"): int(datos[columna].sum())
+            for columna in columnas_error
         },
-        "positive_complete_formula_rows": int(positive.sum()),
-        "formula_rows_within_1_percent": int(within_tolerance.sum()),
-        "formula_rows_outside_1_percent": int((~within_tolerance).sum()),
-        "formula_median_observed_over_expected": float(observed_ratio.median()),
-        "rows_requiring_review": int(needs_review.sum()),
-        "rows_dropped": 0,
-        "crop_t_spacre_summary": crop_summary,
-        "decisions": [
-            "The raw source fields are preserved in *_raw columns.",
-            "Blank and dot markers become missing only in parsed analytical columns.",
-            "TRS_TON_candidato is the final numeric component; its prefix is retained without interpretation.",
-            "No rows are deleted, imputed, or aggregated.",
-            "The three unnamed source columns are retained as AUX_1, AUX_2, AUX_3.",
-            "Potentially problematic rows are also written to a separate review file; they remain in the provisional dataset.",
+        "filas_completas_positivas": int(filas_completas.sum()),
+        "filas_dentro_del_1_por_ciento": int(filas_dentro.sum()),
+        "filas_fuera_del_1_por_ciento": int((filas_completas & ~filas_dentro).sum()),
+        "mediana_ratio_observado_esperado": float(ratios.median()),
+        "filas_marcadas_para_revision": int(datos["REQUIERE_REVISION"].sum()),
+        "filas_descartadas": 0,
+        "resumen_t_spacre_por_cosecha": resumen_cosecha,
+        "decisiones": [
+            "Los campos originales se conservan en columnas terminadas en _raw.",
+            "Blancos y puntos se convierten en faltantes solo en columnas analíticas.",
+            "TRS_TON_candidato usa el último componente numérico; conserva el prefijo sin interpretarlo.",
+            "No se eliminan, imputan ni agregan filas.",
+            "Las tres columnas sin nombre se conservan como AUX_1, AUX_2 y AUX_3.",
+            "Las filas con alertas se copian a un archivo de revisión y permanecen en el dataset provisional.",
         ],
     }
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    prepared.to_csv(OUTPUT_PATH, index=False, na_rep="", encoding="utf-8")
-    review_rows.to_csv(REVIEW_PATH, index=False, na_rep="", encoding="utf-8")
-    REPORT_PATH.write_text(
-        json.dumps(quality_report, ensure_ascii=False, indent=2), encoding="utf-8"
+
+def guardar_resultados(datos: pd.DataFrame, resumen: dict) -> None:
+    """Guarda la tabla provisional, el subconjunto de revisión y el reporte."""
+    DIRECTORIO_SALIDA.mkdir(parents=True, exist_ok=True)
+    filas_revision = datos.loc[datos["REQUIERE_REVISION"]].copy()
+    datos.to_csv(RUTA_SALIDA, index=False, na_rep="", encoding="utf-8")
+    filas_revision.to_csv(RUTA_REVISION, index=False, na_rep="", encoding="utf-8")
+    RUTA_REPORTE.write_text(
+        json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    print(f"Registros preparados: {len(prepared):,}")
-    print(f"TRS_TON por formato: {quality_report['trs_ton_format_counts']}")
+
+def main() -> None:
+    """Ejecuta el ETL en pasos breves y ordenados."""
+    fuente, sha256 = leer_fuente_validada()
+    datos, columnas_error = convertir_mediciones(fuente)
+    grupos_distintos = marcar_duplicados(fuente, datos)
+    evaluar_relacion_dimensional(datos)
+    marcar_revision(datos, columnas_error)
+    resumen = resumir_calidad(
+        fuente, datos, sha256, columnas_error, grupos_distintos
+    )
+    guardar_resultados(datos, resumen)
+
+    print(f"Registros preparados: {len(datos):,}")
+    print(f"TRS_TON por formato: {resumen['conteo_formato_trs_ton']}")
     print(
         "Relación dimensional: "
-        f"{int(within_tolerance.sum()):,}/{int(positive.sum()):,} dentro del 1 %"
+        f"{resumen['filas_dentro_del_1_por_ciento']:,}/"
+        f"{resumen['filas_completas_positivas']:,} dentro del 1 %"
     )
-    print(f"CSV provisional: {OUTPUT_PATH.relative_to(PROJECT_ROOT)}")
-    print(f"Filas marcadas para revisión: {len(review_rows):,}")
-    print(f"CSV de revisión: {REVIEW_PATH.relative_to(PROJECT_ROOT)}")
-    print(f"Reporte: {REPORT_PATH.relative_to(PROJECT_ROOT)}")
+    print(f"CSV provisional: {RUTA_SALIDA.relative_to(RAIZ_PROYECTO)}")
+    print(f"Filas marcadas para revisión: {resumen['filas_marcadas_para_revision']:,}")
+    print(f"CSV de revisión: {RUTA_REVISION.relative_to(RAIZ_PROYECTO)}")
+    print(f"Reporte: {RUTA_REPORTE.relative_to(RAIZ_PROYECTO)}")
 
 
 if __name__ == "__main__":

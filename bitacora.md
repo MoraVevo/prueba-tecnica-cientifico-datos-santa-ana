@@ -37,3 +37,19 @@
 - Primer commit local creado con los archivos de código y documentación del hito `Inicia ETL y EDA de Serie I`. Verificado que los datos y el PDF quedan ignorados.
 - El usuario pidió configurar GitHub. Creado el repo privado `https://github.com/MoraVevo/prueba-tecnica-cientifico-datos-santa-ana`, configurado como `origin` y enviado el commit inicial a `main`. Verificada privacidad, rama remota, archivos versionados y árbol de trabajo limpio. No se añadieron colaboradores.
 - Creado `.gitignore` para excluir PDF confidencial, datos crudos, entornos, secretos y salidas; inicializado Git en `main`. No se hizo commit ni push.
+
+## 2026-10-19: investigación del prefijo de TRS_TON
+
+- Se comparó el CSV original con el XLSX publicado por USDA (recurso Figshare `49874103`); ambos contienen celdas `TRS_TON` con el patrón de prefijo más valor decimal. El XLSX se descargó solo en `data/raw/`, carpeta ignorada por Git.
+- Las 10,485 celdas compuestas tienen dos dígitos en el prefijo y tres decimales en el componente final. Se ubican en 2010–2019 y en diez clones; no aparecen en 2020–2021. Los prefijos recorren `00`–`99` y no muestran asociación lineal relevante con las variables de respuesta ni con año, cultivo, réplica o etapa.
+- La ficha USDA y el artículo técnico del programa describen los rasgos y el diseño experimental, pero no definen el token prefijo. `REP` ya es una columna separada y representa la réplica; el token `79` no debe confundirse con ella. El componente final sí reproduce la relación dimensional de `T_SPACRE` para el ejemplo examinado.
+- Decisión prudente: significado exacto sigue sin resolver. Se considera posiblemente un código auxiliar o residuo de una estructura histórica/exportación, sin afirmar que sea número de parcela ni una medida biológica. Conservar valor crudo y prefijo; usar el sufijo solo como candidato de TRS; no modelar ni monetizar el prefijo. Evidencia, ejemplo y código reproducible en `docs/interpretacion-serie-I.md`.
+- Fuentes consultadas: ficha oficial [USDA/Data.gov](https://catalog.data.gov/dataset/louisiana-sugarcane-yield-data-2010-2021-collected-for-the-louisiana-variety-development-p) y artículo de Shahi et al. (2025), [The Plant Genome](https://acsess.onlinelibrary.wiley.com/doi/10.1002/tpg2.20545). Ninguna fuente pública consultada asigna significado al prefijo.
+
+## 2026-10-19: simplificación y español en el ETL
+
+- Se tradujeron al español los comentarios, docstrings, mensajes y textos del reporte JSON. Se conservaron los nombres originales de columnas de la fuente para no alterar el esquema.
+- Se reorganizó `scripts/etl_serie1.py` en pasos legibles: validar/cargar fuente, convertir mediciones, marcar alertas, resumir calidad y guardar resultados. No se añadieron comportamientos para casos hipotéticos; la lógica de faltantes, formatos y alertas corresponde a valores presentes en el archivo.
+- Se volvió a ejecutar el ETL: 29,529 filas preparadas, 10,485 celdas `TRS_TON` con dos componentes, 29,317/29,340 relaciones dentro del 1 % y 10,682 filas para revisión. Los CSV provisional y de revisión conservaron exactamente sus hashes previos, confirmando que la reorganización no cambió sus resultados. El JSON ahora presenta claves y decisiones en español.
+- Se añadió a la skill `prueba-santa-ana` la preferencia del usuario: código y explicaciones en español, con nombres originales de fuente/API cuando corresponda; priorizar parsimonia y eliminar complejidad para escenarios no presentes.
+- Verificación: `py_compile` del ETL, ejecución completa del ETL y `git diff --check` sin errores. La skill también pasó `quick_validate.py` (`Skill is valid!`).
