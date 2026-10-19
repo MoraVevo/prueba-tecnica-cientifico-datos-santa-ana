@@ -8,9 +8,9 @@ El CSV oficial y la copia Kaggle del enunciado se verificaron como idénticos. E
 
 ## Serie I: cuatro respuestas
 
-Se presenta un **primer borrador completo**. La fórmula económica se reprodujo de forma independiente sin detectar discrepancias aritméticas; la segmentación también se reconstruyó y revisó priorizando interpretación. Sigue pendiente la revisión integral del modelo supervisado. Las limitaciones de cobertura, ajuste ambiental y costos se reflejan en la certeza de las conclusiones. Se utiliza el dataset entregado y escenarios económicos explícitos.
+**Serie I completada en su alcance analítico.** Se respondieron los cuatro apartados y se revisaron los cálculos económicos, las particiones y métricas supervisadas, y la construcción de segmentos. Hay 21 pruebas automatizadas: 13 unitarias y 8 de integración con los datos locales. Las limitaciones de cobertura, ajuste ambiental, costos y error predictivo se conservan en las conclusiones. Se utiliza el dataset entregado y escenarios económicos explícitos.
 
-| Pregunta | Respuesta del borrador | Evidencia |
+| Pregunta | Respuesta | Evidencia |
 | --- | --- | --- |
 | Variedades y renovación | HOCP14-885, L01-299 y HO12-615 encabezan el aporte parcial anual estimado entre las 17 variedades que cumplen la cobertura propuesta. Duraciones iniciales: tres, cuatro y cuatro cosechas. La recomendación de HO12-615 como tercera opción está condicionada al ajuste ambiental aditivo; con promedios directos, L01-283 queda por encima. Prolongar podría elevar el aporte, aunque los cortes adicionales tienen menor respaldo; no se ha demostrado un máximo económico. | Notebook 03 |
 | Modelo supervisado | Ridge, árbol y bosque; selección por validación temporal 2019–2020 y evaluación reservada 2021. Ridge elegido: MAE 2,145 lb/acre, R² 0.25; utilidad moderada y errores visibles. | Notebook 04 |
@@ -50,13 +50,34 @@ python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.time
 
 El ETL guarda 29,403 filas analíticas y separa 126 copias exactas adicionales, con motivo por fila. Mantiene 224 registros de claves repetidas con mediciones distintas y 23 alertas dimensionales. Cada análisis conserva sus exclusiones, motivos y salidas en `data/processed/`. Las alertas se tratan mediante escenarios y no se corrige una medición arbitrariamente. La fuente permanece intacta.
 
+## Pruebas automatizadas
+
+Desde la raíz del proyecto, con el entorno activado:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+Este comando ejecuta 13 pruebas unitarias con datos pequeños y resultados conocidos; no necesita descargar datasets. Comprueba separación del prefijo TRS, conservación de datos crudos y ceros, deduplicación trazable, historia estrictamente anterior a la zafra, respaldos de la referencia y preprocesamiento ajustado solo con entrenamiento, incluidas categorías desconocidas.
+
+Después del ETL y de ejecutar los notebooks 01–05:
+
+```powershell
+python -m pytest tests/integracion -q
+```
+
+Las 8 pruebas de integración requieren los datos y resultados locales. Fallan con un mensaje si falta un archivo; no omiten la comprobación. Reconstruyen exclusiones del ETL, métricas de 2019/2020/2021 desde predicciones por fila, elección por validación, predicciones Ridge, errores por ambiente, políticas económicas y las cuatro dimensiones y pertenencias de los segmentos. Para ejecutar ambas suites juntas: `python -m pytest tests/unitarias tests/integracion -q`.
+
+El notebook 04 y las pruebas comparten `scripts/modelado_serie1.py`. Las predicciones de todos los métodos quedan en `serie1_predicciones_validacion.csv` y `serie1_predicciones_modelos_2021.csv`, dentro de `data/processed/`. Las pruebas revisan implementación y consistencia; la evaluación temporal mide el desempeño predictivo y no demuestra causalidad ni precisión futura garantizada.
+
 ## Supuestos y límites que afectan la decisión
 
 - Se aplica el costo de US$14/ton a `TCA` (toneladas de caña/acre), suponiendo compatibilidad entre las unidades de tonelada del dataset y el supuesto económico; el PDF no especifica el tipo. La fórmula se reprodujo independientemente sin discrepancia aritmética.
 - La rotación supone una cosecha anual, renovación inmediata, costos constantes y sin descuento ni descanso. Se comparan aportes **esperados**, no flujos observados de la misma parcela.
 - Los precios de US$0.15, 0.20 y 0.25/lb son escenarios ilustrativos de ±25 %; no son una distribución de mercado estimada.
 - La recomendación exige cobertura temporal/geográfica por corte y muestra duraciones adicionales de menor certeza. El escenario sin ajuste ambiental cambia el tercer puesto.
-- El modelo usa entradas disponibles antes de la zafra y medias de años anteriores. La precisión observada es limitada; MAE no es un intervalo de confianza.
+- El modelo usa entradas disponibles antes de la zafra y medias de años anteriores. La precisión observada es limitada y varía entre ambientes; en MAGNOLIA/etapa 5, el MAE y el sesgo positivo de 2021 son 3,498.54 lb/acre (72 observaciones). Se guarda el desglose por localidad/etapa; el MAE no es un intervalo de confianza.
 - Las validaciones de 2019 y 2020 son zafras contrastantes, no una referencia de años “normales”. En las filas usadas por el modelo, el promedio de `T_SPACRE` cayó entre 21 % y 27 % por etapa de 2018 a 2019 y subió entre 30 % y 41 % de 2019 a 2020. LSU AgCenter relaciona la baja de 2019 con la cosecha muy húmeda de 2018 y condiciones meteorológicas adversas. Para 2020 documenta efectos de las restricciones por COVID en operaciones de cruzamiento y en algunas pruebas de vivero; los ensayos finales outfield se reportaron en 12 localidades con tres repeticiones, y el resumen estatal informa mayores rendimientos de caña que en 2019. El dataset no permite aislar el efecto de COVID frente al clima, cambios de cobertura, manejo o medición; por ello se reportan errores por año y no se atribuye causalidad a la pandemia. [Contexto 2019](https://www.lsuagcenter.com/profiles/rbogren/articles/page1578688656809), [programa varietal 2020](https://www.lsuagcenter.com/~/media/system/2/d/4/f/2d4f56bf87ae85228f7652f9be15d589/03%20variety%20section%202020%20updatedpdf.pdf), [resumen estatal 2020](https://www.lsuagcenter.com/articles/page1677766893201).
 - En las validaciones Ridge, el sesgo `predicción − observado` fue +2,148 lb/acre en 2019 y −1,078 lb/acre en 2020. El aumento de `T_SPACRE` también aparece en combinaciones coincidentes de `STAGE`, `CLONE`, `LOC` y `CROP` entre ambos años (418 combinaciones; sube en 90 % de las de etapa 3, 95 % de etapa 4 y 76 % de etapa 5). Son claves coincidentes, no parcelas pareadas: la fuente no tiene identificador de parcela/cohorte. Esto apunta a un cambio amplio entre zafras, pero no identifica su causa.
 - Se preservan listas de variedades sin cobertura suficiente para economía/segmentación. Los faltantes extensos de fibra no se imputan para obligar a usarla.
@@ -65,6 +86,6 @@ El ETL guarda 29,403 filas analíticas y separa 126 copias exactas adicionales, 
 
 `notebooks/` contiene evidencia reproducible; `scripts/` contiene descarga y ETL; `docs/` contiene conclusiones y continuidad; `bitacora.md` registra decisiones e hipótesis corregidas. `requirements.txt` fija dependencias. `data/raw/` y `data/processed/`, el PDF confidencial y entornos locales están excluidos de Git. El ZIP final debe excluir datasets e incluir `.git`, según el PDF.
 
-## Pendientes
+## Pendientes de la prueba completa
 
-Completar la auditoría independiente del modelo supervisado y la consistencia final de las cuatro respuestas. Las cuatro entradas y las 17 asignaciones de la segmentación se reconstruyeron tras mejorar la comparación de cortes en ambientes comunes; sus perfiles siguen siendo exploratorios. Después priorizar las demás series, API y presentación. La ejecución sin errores solo acredita ejecución. Series II–V no se presentan como completadas. No se incorporaron datasets externos al modelado; las fuentes de contexto temporal están citadas arriba.
+La Serie I puede darse por cerrada como análisis del ejercicio, conservando sus supuestos y limitaciones explícitos. Series II–V, API, presentación y preparación final del ZIP siguen pendientes. Sus modelos y entregables no se presentan como completados. No se incorporaron datasets externos al modelado; las fuentes de contexto temporal están citadas arriba.

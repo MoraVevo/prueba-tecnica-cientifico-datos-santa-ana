@@ -2,157 +2,77 @@
 
 Actualización: 2026-10-19, America/Guatemala.
 
-## Alcance vigente
+## Alcance y forma de trabajo
 
-- Desarrollar las cuatro respuestas de Serie I con el dataset entregado y los supuestos del PDF. La última corrección del usuario prevalece sobre interpretaciones anteriores: las limitaciones deben modificar certeza y supuestos, sin impedir dar tres variedades, renovación, modelo, segmentos y propuesta de ensayos.
-- Por ahora no buscar ni descargar datos externos adicionales. Las búsquedas previas de metadatos/unidades forman parte del historial. El usuario pidió centrar las conclusiones en los datos y supuestos del ejercicio, sin repetir advertencias sobre adaptación a Santa Ana.
-- La fórmula económica y sus 198 políticas se reprodujeron en una revisión independiente el 2026-10-19; no se encontró discrepancia aritmética. En el modelo supervisado se añadió una lectura cauta de coeficientes Ridge; la auditoría integral de métricas/fugas sigue pendiente. En la segmentación se reprodujeron las 17 pertenencias desde el ETL y se añadió sensibilidad a dimensiones, que muestra dependencia de las variables seleccionadas.
-- Español en comentarios, docstrings y explicaciones; parsimonia en código, archivos y análisis. Guardar exclusiones con motivos. Sugerir Git en hitos; ejecutar commit/push cuando se autorice.
-- Preferencia explícita del usuario: en modelos no supervisados priorizar interpretabilidad y utilidad gerencial. Silueta, Davies–Bouldin e inercia son diagnósticos secundarios; no elegir grupos ni quitar dimensiones para optimizarlos.
-- Plazo informado: 48 horas; falta confirmar inicio y vencimiento absolutos. PDF exige ZIP con `.git`, sin datasets y enlace GitHub/GitLab. No convertir “lunes siguiente 8:00” en fecha sin referencia.
+- **Serie I completada y revisada en su alcance analítico:** cuatro respuestas, evidencia reproducible, evaluación gerencial y 21 pruebas automatizadas. El ejercicio completo aún no está terminado.
+- Usar solo el dataset entregado y los supuestos del PDF. No buscar ni descargar datasets externos adicionales por ahora. Las fuentes externas ya consultadas aportan contexto/unidades; no son nuevos predictores. Las limitaciones modifican certeza y supuestos, sin impedir responder las cuatro preguntas.
+- Español en comentarios, docstrings y explicaciones. Parsimonia en código, archivos y análisis. Mantener filas excluidas y motivos; no elegir arbitrariamente una medición conflictiva.
+- Preferencia del usuario: en no supervisado, priorizar interpretación y utilidad gerencial; silueta, Davies–Bouldin e inercia son diagnósticos secundarios. No quitar dimensiones solicitadas para mejorar esas métricas.
+- El usuario tiene poca familiaridad con Git. Sugerir hitos y explicar qué se guarda. **Última instrucción: hacer commits locales y NO hacer push todavía.** Esta instrucción prevalece sobre el seguimiento anterior de subir hitos a GitHub.
+- Plazo informado: 48 horas, sin inicio/vencimiento absoluto confirmado. El PDF pide ZIP con `.git`, sin datasets, enlace GitHub/GitLab y presentación; no convertir “lunes siguiente 8:00” en fecha sin referencia.
 
-## Fuente y preparación
+## Fuente y ETL
 
-- PDF local de seis páginas leído y revisado; requisitos en la skill global `prueba-santa-ana/references/prueba.md`.
+- PDF local de seis páginas; requisitos en la skill `prueba-santa-ana/references/prueba.md`.
 - USDA y Kaggle Serie I son idénticos. SHA-256 CSV: `5e7b13de6bda8aed51479c5fdfc3de4a28e71ccbb45e4761b6688a34b7cff4b0`.
-- `T_SPACRE` se trata como lb azúcar/acre según USDA, corrigiendo la descripción del PDF. `TCA`: ton caña/acre; `TRS_TON`: lb/ton. El costo se aplica a la tonelada de TCA como supuesto del ejercicio.
-- `TRS_TON` analítico es el último componente numérico. Texto crudo y prefijo de dos dígitos se preservan; no hay definición pública confirmada del prefijo y no entra a métricas/modelos.
-- Fuente 29,529 filas; ETL 29,403 analíticas + 126 copias exactas adicionales excluidas con motivo. Las 224 filas en 112 pares de claves distintas en mediciones se mantienen marcadas; todas en etapa 3. Otras 23 filas tienen discrepancia dimensional >1 %.
-- La investigación contextual no eligió cuál fila de cada par corregir. Se conserva la incertidumbre y se evalúa sensibilidad. No seguir investigando indefinidamente el prefijo/llave como requisito para avanzar.
-- CROP 4 tiene 84 filas, 13 clones, una localidad y tres años. Fibra falta en 57.3 % del dataset analítico; no se fuerza su imputación.
+- `T_SPACRE`: lb azúcar/acre según USDA, corrigiendo la descripción del PDF. `TCA`: ton caña/acre; `TRS_TON`: lb/ton. Se supone compatibilidad de la tonelada de TCA con el costo de US$14/ton; el PDF no especifica su tipo.
+- `TRS_TON` analítico es el componente numérico final. Texto original y prefijo de dos dígitos se preservan; no hay definición confirmada del prefijo y no entra al modelado.
+- Fuente: 29,529 filas. ETL: 29,403 analíticas y 126 copias exactas adicionales excluidas con motivo. Se mantienen 224 filas en 112 pares de claves con mediciones distintas (etapa 3) y 23 alertas dimensionales. La investigación no permite elegir cuál fila de los pares corregir.
+- Fibra ausente en 57.3 % del analítico; no se fuerza imputación. CROP 4: 84 filas, 13 clones, GLENWOOD, 2019–2021. CROP 5 no existe en el CSV original; no fue eliminado por el ETL. Sin parcela/cohorte y motivo de retiro no se identifica renovación deliberada ni se explica toda ausencia por cierre temporal.
+- STAGE es etapa del programa: 2 second line, 3 nursery, 4 infield, 5 outfield, confirmado con la fuente técnica. Economía/segmentación usan etapa 5 por comparabilidad del diseño; el supervisado usa las etapas con objetivo disponible.
 
-## Primer borrador de las cuatro respuestas
+## 1. Economía — notebook 03
 
-### 1. Economía — notebook 03
+- Aporte anual de rotación: `[suma_cortes(precio × E[azúcar] − 14 × E[caña] − 350) − 1100] / número_cosechas`.
+- Una cosecha anual, renovación inmediata una vez por rotación, costos constantes, sin descuento ni descanso. Es aporte parcial esperado, no utilidad neta ni flujo observado de la misma parcela. Acre es una unidad de comparación; no se asignó superficie.
+- Etapa 5: 14,029 filas principales y 63 exclusiones conservadas. Promedio de réplicas por clon/corte/año/localidad; ajuste aditivo respecto a L01-299 en 4,197 de 4,708 celdas compartidas. Las no emparejadas se conservan aparte. El ajuste y el filtro de dos años/dos localidades por corte son decisiones del análisis.
+- A US$0.20/lb: HOCP14-885, 3 cosechas totales, US$727.58/acre/año; L01-299, 4, US$632.66; HO12-615, 4, US$629.21. Tres cosechas = plantía + dos socas; cuatro = plantía + tres socas. Se evaluaron 17 variedades elegibles, no solo las tres ganadoras.
+- Precios ilustrativos 0.15/0.20/0.25 USD/lb conservan esas duraciones. Sin ajuste ambiental, L01-283 desplaza a HO12-615 del tercer puesto; esa elección está condicionada al ajuste. Certeza media para L01-299 y media-baja para duración de HOCP14-885 y tercer puesto.
+- Las 198 políticas y escenarios se reconstruyeron independientemente. No se encontró error aritmético. Las cuatro filas etapa 5 marcadas no cambian el resultado a centavos. Las pruebas de integración conservan la comprobación de fórmula, cobertura y recomendaciones.
+- Remuestreo por año (500): rangos P05–P95 del aporte de la política elegida ≈652–834, 572–700 y 570–684 USD/acre/año; misma duración en 100/100/98.6 % de remuestras válidas. Son estabilidad dentro de la muestra/método, no probabilidad de superioridad del ranking. Solo 12 años.
+- Las duraciones 3/4/4 son fronteras de cobertura, no máximos económicos demostrados. Extensiones menos respaldadas elevan el aporte: HOCP14-885 a 4 cosechas, 753.75; L01-299 a 5, 667.14; HO12-615 a 5, 631.78. Conservar la redacción acordada sobre políticas iniciales e incertidumbre de cortes ausentes.
+- Regresión económica por CROP: propuesta opcional no ajustada. No es requisito adicional para cerrar Serie I y no se afirman sus coeficientes ni una extrapolación a CROP 5.
 
-- Formula aporte anual de rotación: `[suma_cortes(precio × E[azúcar] − 14 × E[caña] − 350) − 1100] / número_cosechas`.
-- Una cosecha/año, renovación inmediata, sin descuento ni descanso. Puede estimarse con expectativas por corte sin fingir que sean flujos de una misma parcela.
-- Etapa 5; 14,029 filas en escenario principal, 63 conservadas aparte por faltantes/alertas. Promediar réplicas por clon/corte/año/localidad y ajustar respecto a L01-299 en ambientes compartidos. 4,197 de 4,708 celdas emparejadas; las no emparejadas se conservan aparte.
-- Para recomendar se exige plantía + dos socas con dos años y dos localidades por corte; se permite tercera soca con igual criterio. CROP 4 y duraciones de menor cobertura se muestran como sensibilidad.
-- Tres recomendaciones del modelo de decisión a US$0.20/lb: HOCP14-885, tres cosechas totales, US$727.58/acre/año; L01-299, cuatro, US$632.66; HO12-615, cuatro, US$629.21.
-- Precios ilustrativos 0.15/0.20/0.25 USD/lb: se mantienen esas duraciones. Sin ajuste, L01-283 desplaza ligeramente a HO12-615 del tercer puesto. Certidumbre media para L01-299 y media-baja para HoCP14-885/duración y tercer puesto. No afirmar óptimo fuera del horizonte evaluado.
-- Remuestreo por año (500): rangos centrales 90 % del aporte de la política elegida ≈652–834, 572–700 y 570–684 USD/acre/año. Frecuencias misma duración: 100 %, 100 %, 98.6 %. No son probabilidades de superioridad real.
+## 2. Predicción — notebook 04 y scripts/modelado_serie1.py
 
-### Revisión económica independiente — 2026-10-19
+- Tres algoritmos: Ridge, árbol y bosque; dos referencias históricas. Entradas: CLONE, LOC, STAGE, CROP, YEAR y medias anteriores de azúcar por clon, localidad y clon/corte. No se usan TCA/TRS/POPN/MSTWT/FIBER contemporáneos.
+- Validación 2019 y 2020 con entrenamiento en años anteriores; selección por MAE promedio. Ridge elegido: 2,405.64 lb/acre. Test final 2021 reservado, sin usarlo para elegir algoritmo ni retocar hiperparámetros.
+- Test 2021 Ridge: MAE 2,144.55 lb/acre; RMSE 2,770.97; R²≈0.25; etapa 5 MAE 1,898.11. Referencias: MAE 2,662.69 histórica y 2,270.33 reciente. Error absoluto agregado / azúcar observada≈25.5 %. Utilidad moderada y heterogénea, sin intervalos de predicción calibrados.
+- Hay 2,288 filas de test: 1,980 de clones vistos (MAE 2,140.11) y 308 sin historia del clon (2,173.05). Se entregan errores por corte/etapa y por localidad/etapa. MAGNOLIA etapa 5: 72 observaciones, MAE y sesgo positivo 3,498.54; limitar el uso puntual en ese ambiente. No se atribuye una causa no observada.
+- Sesgo Ridge `predicción − observado`: +2,148 en 2019 y −1,078 en 2020. Caída/rebote del objetivo y uso de historia previa explican un posible desfase; no identifican efecto causal de clima/COVID. Contexto y fuentes en README.
+- Coeficientes Ridge evaluado en 2021: CROP≈−802 lb/acre por unidad, YEAR≈−25 lb/acre/año, condicionados y regularizados. No son efectos causales ni regla autónoma de renovación.
+- Principal: 28,981 filas, 422 exclusiones trazables; ocho ceros fuente conservados. Sensibilidad con alertas en entrenamiento/historia: MAE≈2,135.10 sobre la misma prueba limpia. Ejemplo de próxima zafra del archivo: 2022, ilustrativo y sin resultado observado.
+- Auditoría completada: funciones compartidas con pytest, historia estrictamente previa, transformaciones ajustadas en entrenamiento, elección solo por validación, métricas reconstruidas desde predicciones por fila de los cinco métodos en 2019/2020/2021 y reproducción de Ridge. La reorganización del código conservó exactamente las predicciones previas de 2021.
 
-- Se reconstruyeron las celdas elegibles desde el ETL y se recalcularon por separado coberturas, ajuste aditivo frente a L01-299, cosechas consecutivas y aporte anual. Las 198 políticas coincidieron con `serie1_politicas_renovacion.csv`; máxima diferencia por redondeo: menos de 0.000001 USD/acre/año. No se detectó error aritmético en la fórmula implementada.
-- Con precios de US$0.15, US$0.20 y US$0.25/lb se conservan las tres variedades y las duraciones seleccionadas; sus aportes cambian sustancialmente. Incluir las cuatro filas Stage 5 marcadas por revisión dimensional no cambia resultados a centavos. Sin el ajuste ambiental, L01-283 desplaza a HO12-615 del tercer puesto: esa elección depende del método de ajuste.
-- Un segundo remuestreo independiente por bloques de año da rangos P05–P95 próximos a los publicados y conserva las mismas duraciones en la gran mayoría de las remuestras válidas. El remuestreo usa solo 12 años, no evalúa la probabilidad de que cada variedad ocupe el top 3 y no es una prueba formal de diferencias.
-- Límites del supuesto económico: el cálculo trata cada CROP como una cosecha/año, cobra mantenimiento en cada año/cosecha y resta renovación una vez por rotación. Se usan TCA (toneladas de caña/acre) y el costo de US$14/ton con tonelada compatible, como indica el supuesto operativo, aunque el enunciado no especifica el tipo de tonelada. Se denomina aporte parcial, pues faltan otros costos e ingresos.
-- El ajuste ambiental es aditivo y toma a L01-299 como referencia en celdas compartidas. Es una forma de estandarización escogida, no una corrección causal o exigida por el enunciado; la sensibilidad sin ajuste cambia el tercer lugar. El filtro de dos años/dos localidades por corte también es una regla analítica, no una garantía estadística.
-- Resultado para defensa: no hay un error de cálculo identificado; la recomendación está condicionada a cobertura, ajuste aditivo y costos referenciales. Las duraciones 3/4/4 son políticas iniciales dentro de la cobertura establecida, no máximos económicos demostrados. No estimar certeza de ranking a partir de las frecuencias de duración.
+## 3. Segmentación — notebook 05
 
-### 2. Predicción — notebook 04
+- 17 variedades de etapa 5, plantía/dos socas y dos años/localidades por corte; otras 23 con motivo de cobertura insuficiente. Cuatro entradas estandarizadas: azúcar, TRS, conservación y variabilidad relativa centrada por variedad/corte. Conteos y códigos no entran a la distancia.
+- Conservación CROP 2/CROP 0 en los mismos años/localidades de cada variedad: 840 comparaciones, 18–110 ambientes por variedad, 2–12 años y 11–13 localidades. Se conservan 678 ambientes sin ambos cortes; contribuyen a otras dimensiones. No es seguimiento de parcela ni vida útil máxima.
+- K-means con K=2 por parsimonia/lectura gerencial. K=3/4 generan un grupo unitario. Silueta secundaria: 0.254/0.229/0.265 para K=2/3/4. No hay selección automática por máxima silueta.
+- Perfil 1: cinco variedades, azúcar≈7,997, TRS≈290, conservación≈75.4 %, variabilidad≈12.1 pp. HO05-961, HO07-613, HOCP00-950, HOCP96-540 y L03-371. Mayor vigilancia de continuidad de socas y excepciones individuales visibles.
+- Perfil 2: doce variedades, azúcar≈8,376, TRS≈277, conservación≈82.6 %, variabilidad≈9.8 pp. Incluye las tres recomendaciones económicas; no todos sus miembros conservan igual ni son igualmente rentables.
+- HO05-961 pasó de 83.6 % sin emparejar a 76.0 % en ambientes comunes, y de Perfil 2 a 1, con solo dos años comparables. Ward cambia L99-226 de perfil. Omitir variabilidad cambia seis pertenencias; esa prueba cambia la pregunta de negocio y no justifica eliminar una dimensión solicitada.
+- Reconstrucción independiente de cuatro entradas y 17 asignaciones: diferencia máxima <1e-12. Pruebas de integración lo reproducen. Tabla en unidades originales, cobertura individual y gráfica de cuatro dimensiones inspeccionada (`outputs/serie1_segmentos_perfiles.png`, también embebida).
+- Certeza exploratoria: productividad/TRS con coberturas diferentes, referencia ambiental variable, dimensiones correlacionadas y falta de cohortes. No son clases naturales ni un ranking económico.
 
-- Tres algoritmos: Ridge interpretable, árbol, bosque. Historial objetivo calculado estrictamente con años anteriores. Entradas: clon, localidad, etapa, CROP, YEAR y medias históricas. No usar TCA/TRS/otras mediciones contemporáneas como predictores de esa zafra.
-- Validaciones 2019 y 2020 con entrenamiento en años anteriores; selección por MAE promedio. Ridge elegido (MAE medio 2,405.64). Año final reservado 2021.
-- Se incorpora sesgo firmado por año en la tabla de validación: Ridge +2,148 lb/acre en 2019 (sobreestima en promedio) y −1,078 en 2020 (subestima). La caída/rebote de los promedios entre zafras es una explicación plausible de que el modelo, que usa historia previa, quede desfasado; no identifica causa climática u operativa.
-- Test 2021 Ridge: MAE 2,144.55 lb/acre, RMSE 2,770.97, R²≈0.25; MAE etapa 5: 1,898.11. Referencia histórica MAE 2,662.69; referencia clon-ambiente reciente ≈2,270.33. Utilidad moderada, no exagerar precisión. Todos los algoritmos fallan en R² 2019.
-- Para la Ridge evaluada en 2021, `CROP` se asocia con cerca de −802 lb/acre por unidad y `YEAR` con −25 lb/acre/año, condicionados a otras entradas. Se documenta que son coeficientes regularizados, no efectos causales ni regla de renovación.
-- Principal: 28,981 registros; 422 exclusiones con motivo. Se conservan ocho ceros fuente. Sensibilidad incluyendo alertas en entrenamiento e historia: MAE≈2,135.10 en la misma prueba limpia.
-- Se reajusta elegido hasta 2021 e ilustra entrada/predicción de 2022, sin afirmar que sea una zafra actual o evaluada.
+## 4. Datos propios y ensayos
 
-### 3. Segmentos — notebook 05
+- Conclusiones incluyen ID de parcela/cohorte/bloque, tamaño total y área útil, clima por fecha/localidad, sistema/fuente/volumen/continuidad del agua, manejo, calidad, costos y causas de retiro/eventos externos. Registrar interrupciones concretas; un indicador COVID aislado queda confundido con el año.
+- Ensayo ilustrativo: tres sitios × tres bloques × cuatro variedades únicas = 36 parcelas, con aleatorización y seguimiento de socas. Dimensionar repeticiones con variación real/diferencia relevante. Proponer segunda fase aleatorizada de políticas de renovación en horizonte común. Captura y ensayos se proponen, no se ejecutan.
 
-- Versión vigente: 17 variedades de etapa 5, plantía/dos socas, dos años/localidades por corte; otras 23 conservadas con motivo. Cuatro entradas estandarizadas: azúcar, TRS, conservación y variabilidad ambiental relativa centrada por variedad/corte. Conteos de cobertura y códigos no entran a la distancia.
-- Mejora de conservación: CROP 2/CROP 0 usando exactamente los mismos años/localidades de cada variedad. Hay 840 ambientes comparables (18–110 por variedad, 2–12 años y 11–13 localidades); 678 ambientes incompletos quedan en archivo con motivo, sin retirarlos de otras dimensiones. Sigue siendo comparación de plantaciones distintas, sin causalidad ni vida útil máxima.
-- K=2 se elige explícitamente por parsimonia y lectura gerencial, con métricas secundarias. K=3/4 generan un grupo unitario. Silueta K=2: 0.254; K=3: 0.229; K=4: 0.265. Se eliminó la selección automática de máxima silueta y la regla rígida de al menos tres variedades por grupo.
-- Perfil 1: cinco variedades, azúcar≈7,997, TRS≈290, conservación≈75.4 %, variabilidad del índice≈12.1 pp. HO05-961, HO07-613, HOCP00-950, HOCP96-540 y L03-371. Mayor vigilancia de continuidad de socas, con excepciones individuales visibles.
-- Perfil 2: doce variedades, azúcar≈8,376, TRS≈277, conservación≈82.6 %, variabilidad≈9.8 pp. Incluye las tres recomendadas económicamente. No todas presentan la misma conservación ni son igualmente rentables.
-- HO05-961 cambia desde la versión anterior: conservación 83.6 % sin emparejar → 76.0 % en ambientes comunes, y Perfil 2 → 1; solo dos años comparables. Ward cambia L99-226 de perfil. Sensibilidad por omisión: ARI≈0.560/0.339/0.560/0.026 al retirar productividad/calidad/conservación/variabilidad, con 2/3/2/6 cambios; omitir una dimensión cambia la pregunta, no es motivo para descartarla.
-- Reconstrucción independiente desde el ETL de las cuatro entradas y 17 asignaciones actuales: coincidencia numérica (diferencia máxima <1e-12). Entradas, perfiles y métricas sin NaN/inf. Faltantes estructurales en el archivo de ambientes sin ambos cortes son intencionales. Se muestran unidades originales y soporte individual; gráfica de cuatro dimensiones en el notebook y `outputs/serie1_segmentos_perfiles.png` inspeccionada visualmente.
-- Certeza exploratoria: productividad/TRS con coberturas diferentes, referencia ambiental variable, dimensiones parcialmente correlacionadas y ausencia de parcelas/cohortes. Los segmentos complementan la comparación económica; las tres recomendaciones no cambian.
+## Pruebas y reproducción
 
-### 4. Datos propios — documento de conclusiones
+- Entorno Python 3.13.14; `requirements.txt` para análisis, `requirements-dev.txt` añade pytest 8.4.2. Desde la raíz: instalar dependencias, ejecutar descargador/ETL y notebooks 01–05 según README.
+- `python -m pytest -q`: 13 unitarias sin datasets; `pytest.ini` fija esa suite por defecto.
+- `python -m pytest tests/integracion -q`: 8 de integración con datos/resultados locales. Si falta un archivo, fallan con instrucción, sin saltarse la prueba.
+- `python -m pytest tests/unitarias tests/integracion -q`: ambas suites. Última ejecución: **21 pruebas aprobadas**. Comprobaciones de prefijo/ceros/exclusiones, invariancia temporal, referencia, imputación/escalado/categorías desconocidas, predicciones/métricas/particiones, errores por ambiente, políticas y segmentos.
+- Perfiles, predicciones y métricas numéricas revisados sin NaN/inf inesperados. Las historias desconocidas/primer año y los cortes ausentes en `serie1_segmentacion_ambientes_sin_par.csv` contienen faltantes intencionales y trazables.
+- Notebooks 03/04 reejecutados al cerrar; 05 ejecutado tras su revisión. Los cinco notebooks tienen esquema válido y cero salidas de error guardadas. `pip check` sin dependencias rotas. Verificar resultados de los comandos en bitácora antes de afirmar futuras ejecuciones.
+- Las pruebas verifican implementación y consistencia, no eliminan incertidumbre estadística ni validan supuestos como hechos.
 
-- `docs/conclusiones-serie-I.md` responde los cuatro puntos y propone seguimiento parcela/cohorte, tamaño de parcela y área útil, clima por localidad/fecha, sistema y continuidad del riego, incidencias operativas/protocolos, variables de manejo/calidad/costos, causas de retiro y ensayo aleatorizado por bloques/sitios seguido durante socas. El contraste 2019–2020 justifica capturar clima y ejecución por separado; un indicador COVID aislado queda confundido con el año y no identifica causalidad. El riego queda como factor por medir, sin presumir causalidad, y debe separarse de localidad/suelo/manejo.
-- Ejemplo ilustrativo: tres sitios × tres bloques × cuatro variedades distintas =36 parcelas; no sustituye cálculo de tamaño muestral. Segunda fase compara políticas de renovación asignadas al azar en horizonte común. Solo propuesta, sin captura adicional ejecutada.
+## Git, privacidad y siguientes pasos
 
-## Archivos y reproducción
-
-- `scripts/descargar_serie1.py`; `scripts/etl_serie1.py`; notebooks 01–05 en orden; requisitos e instrucciones en README.
-- Notebooks 01/02: fuente/unidades, calidad y cobertura. 03: decisión económica. 04: comparación/modelo. 05: segmentos.
-- Salidas y exclusiones por análisis en `data/processed/`, ignoradas por Git. Bitácora conserva decisiones, uso de IA, sugerencias descartadas y corrección metodológica.
-- Ejecución final: notebooks 01–05 completos; tras la revisión de segmentación hay 30 celdas de código y cero salidas de error guardadas. JSON/esquema de notebooks comprobados. `py_compile`, `pip check` y `git diff --check` sin errores; skill `quick_validate.py`: válida. Figura de segmentos inspeccionada visualmente. Estas comprobaciones no sustituyen la revisión independiente de fórmulas, diseño y métricas.
-
-## Git y privacidad
-
-- Repositorio privado: https://github.com/MoraVevo/prueba-tecnica-cientifico-datos-santa-ana ; rama `main`, remoto `origin`.
-- El repositorio sigue privado en `main`, con remoto `origin`. El usuario requiere que el historial sea visible en GitHub; subir commits a `origin` al cerrar hitos coherentes y consultar `git status`/`git log` para confirmar sincronización.
-- `AGENTS.md` privado e ignorado; historial main reescrito anteriormente. La skill conserva advertencia de SHA antiguos aún consultables en GitHub y respaldo fuera del proyecto. No afirmar borrado universal del historial anterior.
-- PDF, datasets y entornos ignorados. Revisar ZIP/acceso antes de entrega.
-
-## Pendiente concreto
-
-1. La revisión económica independiente y la reproducción/sensibilidad de la segmentación ya están documentadas. Sigue pendiente la auditoría integral del supervisado: ausencia de fuga temporal, elección/métricas, referencias y errores por ambiente. No confundir esta revisión con ejecutar los notebooks.
-2. Revisar certeza del tercer puesto y duración por frontera de cobertura; conservar sensibilidad y alternativas.
-3. Las actualizaciones recientes de documentación y Serie I se subieron a `origin/main` en hitos; mantener commits reales y visibles, sin fabricar historial retroactivo.
-4. Series II–V, API y presentación siguen pendientes; solo hubo inspecciones remotas iniciales de otros datasets. No se afirman realizadas.
-
-## Aclaraciones para defender la decisión económica
-
-- No se asignó superficie a las variedades: acre es la unidad de comparación. Una cosecha anual y escala proporcional son supuestos, no una medición de superficie asignada.
-- Se evaluaron 17 variedades elegibles de 40 presentes en la base económica de etapa 5; 23 quedaron fuera del ranking por la cobertura mínima declarada. Para cada elegible, el código sí compara duraciones de una cosecha hasta el último corte admitido, no solo tres o cuatro.
-- L01-299 se eligió como referencia con amplia cobertura (393 celdas clon/corte/año/localidad; 12 años y 15 localidades en total); no es la variedad con más celdas. El ajuste aditivo es una decisión metodológica, no una exigencia del PDF ni una corrección causal demostrada.
-- Dos años y dos localidades por corte y exigir plantía/dos socas son filtros propuestos por el análisis. No son garantías estadísticas ni reglas del enunciado.
-- En las tres recomendaciones, la mejor duración coincide con el último corte admitido por cobertura. Las extensiones observadas con menor cobertura aumentan el aporte calculado: HOCP14-885 pasa de 727.58 (3 cosechas) a 753.75 (4); L01-299 de 632.66 (4) a 667.14 (5); HO12-615 de 629.21 (4) a 631.78 (5). No se identificó una caída del aporte que establezca un máximo económico interior. Explicar la renovación como política provisional respaldada hasta ese corte y revisar este criterio antes de afirmar una duración óptima.
-- El ranking económico procede de medias por ambiente y enumeración de políticas; no de las predicciones Ridge ni del agrupamiento. Los escenarios de precio verificaron duración dentro de cada variedad; no equivalen a una optimización robusta de una cartera de tres variedades.
-
-
-### STAGE y cobertura de cosechas avanzadas
-
-STAGE es etapa del programa de selección, no etapa de crecimiento ni número de cosecha. Se añadió una sección descriptiva reproducible al notebook 02. En el ETL deduplicado, CROP 4 contiene 84 filas, todas en STAGE 5 y GLENWOOD durante 2019–2021 (27, 27 y 30 filas). HOCP14-885 aparece con CROP 0 desde 2018, CROP 1 desde 2019, CROP 2 desde 2020 y CROP 3 desde 2021; es compatible con truncamiento por el fin del archivo, sin demostrar continuidad de parcela ni duración exacta. L01-299 tiene historia desde 2010, pero CROP 4 solo aparece desde 2019, por lo que la juventud de las variedades no explica todo el desbalance. No se consultaron fuentes externas ni se ajustó una nueva regresión.
-
-Propuesta pendiente de decidir: estudiar aporte operativo por CROP, ajustando por variedad/año/localidad y separando el costo único de renovación. Empezar con efectos por categoría antes de imponer una caída constante; tratar pendientes como asociaciones y extrapolaciones como escenarios. La existencia de menos filas no prueba inviabilidad de una soca.
-
-
-### Ausencia de CROP 5 y renovación no identificable
-
-Auditoría adicional en notebook 02, sección 7: el CSV original solo contiene CROP 0–4; el ETL no limita ni reinicia CROP. CROP 4 suma 28 combinaciones clon/etapa/localidad/año (84 filas), 18 anteriores al cierre 2021. En 8 de esas 18 aparece CROP 0 al año siguiente; en 25 de las 28 ya aparecen otros cortes el mismo año. Es presencia de variedades en plantaciones de distintas edades, sin una llave que permita afirmar una transición 4→0 de la misma parcela. No se pudo identificar renovación deliberada ni atribuir toda ausencia de CROP 5 al cierre temporal. CROP 5 sería sexta cosecha y no tiene observaciones para contrastar una extrapolación. La regresión económica propuesta sigue sin ajustarse. Conservar distinción entre aporte positivo de la próxima cosecha y mejora del aporte anual de la rotación; únicamente lo segundo justifica prolongarla frente a la política comparada, bajo los supuestos del modelo. No hubo búsqueda externa ni nuevo commit.
-
-
-### Gráficas económicas solicitadas
-
-Por solicitud explícita se delegó a un agente GPT-6-Luna la elaboración de gráficas. El enunciado pide evidencia y presentación ejecutiva, pero no exige reservar estas visualizaciones para otro apartado; podrán reutilizarse después. El notebook 03 incorpora una celda con dos figuras: ranking de siete mejores aportes ajustados (tres recomendaciones resaltadas y rangos P05–P95 del remuestreo ya existente) y aporte medio anual por duración (extensiones de menor cobertura discontinuas, conteos de años/localidades y plantía negativa visible).
-
-Archivos locales: outputs/serie1_economia_ranking.png y outputs/serie1_economia_duracion.png, ignorados por Git; las figuras quedan embebidas y su código versionable en el notebook. Se inspeccionaron ambas imágenes y se corrigieron centrado de intervalos, visibilidad del aporte negativo y eje de cosechas hasta cinco; no se añaden supuestos ni una nueva regresión. La nota del ranking conserva la sensibilidad del tercer puesto a L01-283 sin ajuste; la figura de duración no afirma un óptimo económico demostrado. La revisión principal corrigió la ruta de exportación para derivarla de la raíz del ETL incluso si outputs aún no existe. Se ejecutaron las seis celdas del notebook 03 con kernel prueba-santa-ana, sin errores. Esta comprobación es de ejecución y presentación, no la validación económica independiente pendiente. Sin nuevo commit/push.
-
-
-### Claridad de las gráficas económicas y cierre en Git
-
-A petición del usuario se sustituyó la frase genérica sobre superioridad estadística por hechos concretos: L01-299 y HO12-615 tienen estimaciones muy próximas y rangos de remuestreo que se solapan; el tercer puesto cambia sin ajuste ambiental. No se realizó una prueba de diferencias ni se interpreta el solapamiento como una prueba formal.
-
-La figura de duración reemplaza anotaciones flotantes por un panel lateral identificado con nombre y color de cada variedad. Informa el número de cosecha, su CROP y los años/localidades en que se midió ese último corte: HOCP14-885, cosecha 4/CROP3, 1 año y 7 localidades; L01-299, cosecha 5/CROP4, 3 años y 1 localidad; HO12-615, cosecha 5/CROP4, 2 años y 1 localidad. El pie define las líneas continuas y discontinuas. Estos conteos describen la diversidad temporal/geográfica de las mediciones, no la duración de la rotación.
-
-Notebook 03 ejecutado de nuevo (seis celdas, cero errores) y ambas figuras inspeccionadas. Se conserva pendiente la validación económica independiente. El usuario autorizó guardar el avance acumulado de explicación, cobertura y gráficas con el commit «Documenta cobertura de cortes y mejora gráficas económicas». Esta autorización no solicita un nuevo push; comprobar el hash y estado actual con git log/status.
-
-
-### Verificación externa de STAGE solicitada por el usuario
-
-Se consultaron la ficha oficial USDA/Data.gov y Shahi et al. (DOI 10.1002/tpg2.20545), sección 2.1 y declaración de datos. El artículo enlaza explícitamente al dataset 27248787 y confirma STAGE 2 second line, 3 nursery, 4 infield y 5 outfield. La justificación y fuentes están en docs/interpretacion-serie-I.md. Mantener STAGE 5 para economía/segmentación por diseño y comparabilidad; no tratar otras etapas como errores. El modelo supervisado sigue usando todas las etapas. Se corrigió el texto anterior que decía que la correspondencia exacta no estaba documentada. Solo cambió markdown/documentación; no se ejecutaron modelos ni se alteraron datos o resultados. Sin nuevos datasets, commit ni push.
-
-Git al iniciar esta verificación: commit local 7f0f2d0, último push confirmado 1998c00. Estos cambios de documentación posteriores quedan pendientes de commit.
-
-
-## Criterio para cerrar Serie I
-
-Las cuatro respuestas están construidas como borrador. La justificación de STAGE 5 ya se incorpora a README, conclusiones y notebook 03 con fuente primaria. Pendiente para cierre:
-
-1. Revisión económica independiente completada en cuanto a reproducción aritmética, escenarios de precio, inclusión de filas marcadas y remuestreo descriptivo. No se encontró error aritmético. Los supuestos de tonelada compatible, mantenimiento anual, ajuste aditivo, cobertura y alcance del remuestreo quedaron explícitos arriba; son límites del análisis y no se resuelven con otra ejecución. La conclusión ya presenta las duraciones como políticas iniciales y no como máximos demostrados.
-2. Auditar predicción: historia estrictamente anterior al año predicho, separación temporal, ajuste de transformaciones en entrenamiento, selección de algoritmo y métricas/referencias. Ya existen tres algoritmos y train/validaciones/test temporal; no falta construirlos.
-3. Segmentación: fórmula y 17 pertenencias reconstruidas; sensibilidad por omisión de dimensión ya calculada y reproducible. Conservar la cautela sobre dependencia de variables, tamaño pequeño y ausencia de cohortes pareadas al cerrar las conclusiones.
-4. Consolidar conclusiones/notebooks/README: retirar formulaciones categóricas de renovación que contradigan la cobertura, referencias históricas superadas y lenguaje confuso; comprobar reproducción ordenada y cerrar con commit/push autorizado.
-
-Regresión económica por CROP: propuesta, todavía no ajustada. Solo es necesaria para incluir resultados b/R de esa regresión en la conclusión; no es una exigencia explícita adicional de Serie I. No extrapolar una cifra sin ajustar/evaluar el modelo. No exigir API (Serie IV), presentación (Serie V), nuevos datasets o programación lineal para dar por cerrado el análisis de Serie I.
-
-
-### Revisión de interpretabilidad supervisada y segmentación — 2026-10-19
-
-- La pregunta 2 pide tres algoritmos y uno interpretable. Se agregó a conclusiones/notebook la lectura condicional de Ridge (`CROP` ≈ −802 lb/acre por unidad; `YEAR` ≈ −25 lb/acre por año); no son efectos causales. La auditoría completa de validación/métricas queda pendiente.
-- La reconstrucción independiente del clustering desde el ETL coincide en las 17 asignaciones. La selección de K=2 y su sensibilidad a las dimensiones quedaron explicadas; los grupos no deben presentarse como clases naturales ni como ranking de variedades.
-- Notebook 05 reejecutado con cero errores tras añadir la tabla de sensibilidad. Este hito debe quedar reflejado en `origin/main`; consultar `git log` y `git status` para el hash y sincronización actuales.
-
-### Hito de Git y revisión no supervisada — 2026-10-19
-
-- Commit de Ridge solicitado por el usuario: `cdddb7e`, «Explica sesgo temporal del modelo Ridge», subido a `origin/main` (push confirmado). La revisión no supervisada posterior queda sin un segundo commit: README, bitácora, conclusiones, estado y notebook 05. Mensaje sugerido: «Mejora interpretación y comparación ambiental de segmentos».
-- Se priorizó interpretación por instrucción expresa: entradas comparables, dos perfiles sencillos, unidades/soporte y excepciones visibles. Se mantienen cuatro dimensiones y K-means; la nueva silueta menor no se trata como un retroceso por sí sola. La sección 3 de este archivo y las conclusiones contienen los resultados vigentes, que sustituyen las cifras 4/13 y conservación no emparejada de notas históricas anteriores.
+- Repositorio privado: https://github.com/MoraVevo/prueba-tecnica-cientifico-datos-santa-ana ; rama main, origin.
+- Último push confirmado: `cdddb7e` (sesgo Ridge). Segmentación guardada localmente en `0c61391`; pruebas y cierre constituyen otro hito local. **No hacer push hasta nueva autorización del usuario.** Consultar `git log` y `git status` para hashes/sincronización actuales.
+- `AGENTS.md` privado e ignorado en cualquier carpeta. Historial main reescrito anteriormente; los SHA antiguos aún respondían a consultas directas de GitHub, por lo que no afirmar borrado universal. Respaldo fuera del proyecto en `../respaldo-agents-historial.bundle`, fuera del ZIP/Git. PDF, datasets, entornos y outputs excluidos de Git.
+- La Serie I se puede cerrar con los supuestos y limitaciones declarados. Series II–V, API, presentación y entrega ZIP siguen pendientes; no convertirlos en requisitos para cerrar el análisis de Serie I. Siguiente paso sugerido: continuar con la siguiente serie, conservando estos resultados para la presentación y entrega general.

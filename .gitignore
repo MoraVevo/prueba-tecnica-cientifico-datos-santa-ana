@@ -11,6 +11,7 @@ venv/
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
+.pytest_cache/
 
 # Instrucciones locales de la carpeta
 AGENTS.md

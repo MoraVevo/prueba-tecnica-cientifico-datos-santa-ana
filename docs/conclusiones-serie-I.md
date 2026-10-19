@@ -1,6 +1,6 @@
 # Serie I: respuestas a Gerencia
 
-Estado: primer borrador completo de los cuatro apartados. La fórmula económica se reprodujo independientemente sin discrepancias aritméticas. Ya se añadió una lectura cuantitativa de Ridge y se reconstruyeron independientemente las 17 pertenencias de la segmentación; la sensibilidad a las variables limita qué tan firmes deben ser sus perfiles. La revisión integral del modelo supervisado sigue pendiente. Ejecutar un notebook no equivale a validar el análisis.
+Estado: los cuatro apartados de Serie I están completos y revisados en su alcance analítico. Se reconstruyeron las políticas económicas, las métricas y particiones supervisadas y las cuatro dimensiones y 17 pertenencias de la segmentación. Las 13 pruebas unitarias y 8 de integración verifican implementación y trazabilidad; la validación temporal informa desempeño. Las limitaciones y supuestos que siguen se conservan al interpretar y defender las decisiones.
 
 ## 1. Tres variedades, renovación y certeza
 
@@ -68,9 +68,11 @@ La lectura concreta de Ridge es que, manteniendo las demás entradas fijas, el a
 
 La mejora en 2021 es de aproximadamente 19.5 % respecto a la referencia histórica sencilla y 5.5 % respecto a la referencia reciente más exigente. En etapa 5 el MAE es 1,898.11 lb/acre. El error absoluto agregado representa aproximadamente 25.5 % del azúcar observado; la utilidad es moderada para presupuestar y comparar escenarios, y baja para comprometer un rendimiento exacto por parcela. A US$0.20/lb, el MAE global equivale a unos US$428.91/acre de ingreso bruto, sin ser un intervalo de confianza ni error del beneficio total.
 
+El error global no describe por igual cada ambiente: en MAGNOLIA, etapa 5, el MAE de 2021 es 3,498.54 lb/acre en 72 observaciones, con sesgo de +3,498.54 lb/acre. Hay sobreestimación sistemática en esa muestra. Se entrega el desglose por localidad/etapa con su conteo; no se reajusta el modelo usando el test reservado. Las variables disponibles no permiten atribuir ese desvío a una causa específica.
+
 En 2019 todos los algoritmos tienen R² negativo, señal de que las entradas no explican bien esa zafra. El sesgo de Ridge (`predicción − observado`) es +2,148 lb/acre en 2019 —sobreestimación media— y −1,078 en 2020 —subestimación media—. Una explicación plausible es el cambio de nivel entre años: el promedio del objetivo cayó entre 21 % y 27 % por etapa de 2018 a 2019, y subió entre 30 % y 41 % de 2019 a 2020; al usar años anteriores, Ridge puede quedar alto ante una caída y tardar en reflejar un rebote. Esto describe un mecanismo compatible con la validación, no demuestra por qué cambió el rendimiento. Como contexto, se ha relacionado 2019 con la cosecha muy húmeda de 2018 y condiciones meteorológicas adversas; en 2020 se documentaron cambios operativos por COVID y mayores rendimientos estatales de caña frente a 2019. La fuente no permite aislar clima, operación, manejo, cobertura o medición, y las claves coincidentes entre años no identifican parcelas pareadas. La sensibilidad incluyendo alertas de calidad en entrenamiento e historia da MAE cercano a 2,135.10 en las mismas filas limpias de 2021; se conserva el escenario principal más conservador. Las predicciones deben acompañarse de errores por corte/ambiente y monitoreo de sesgo; se requiere calibración específica antes de ofrecer intervalos de predicción.
 
-Evidencia: `notebooks/04_modelo_supervisado_serie1.ipynb`; comparación temporal, predicciones y evaluación por fila en `data/processed/`.
+Evidencia: `notebooks/04_modelo_supervisado_serie1.ipynb`, funciones y pipelines compartidos en `scripts/modelado_serie1.py`, y pruebas en `tests/`. Se guardan predicciones por fila de los cinco métodos en las tres particiones, métricas y errores por localidad/etapa en `data/processed/`. La reorganización para probar el código conservó exactamente las predicciones previas de 2021.
 
 ## 3. Segmentación y significado gerencial
 
