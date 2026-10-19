@@ -93,11 +93,13 @@ Evidencia: `notebooks/05_segmentacion_variedades_serie1.ipynb`; miembros, perfil
 
 | Bloque | Campos prioritarios | Decisión que permite |
 | --- | --- | --- |
-| Identidad y seguimiento | ID único de ensayo, parcela, bloque, cohorte de plantación; variedad/lote de semilla; ubicación, superficie y unidades; fechas de siembra/cosecha; corte planeado/real | Seguir la misma unidad entre socas y distinguir repeticiones de registros duplicados. |
+| Identidad y seguimiento | ID único de ensayo, parcela, bloque y cohorte de plantación; variedad/lote de semilla; ubicación, superficie y unidades; fechas de siembra/cosecha; corte planeado/real; cambios de protocolo, cobertura o calendario | Seguir la misma unidad entre socas y separar cambios del ensayo de cambios en el rendimiento. |
 | Productividad y calidad | Caña pesada por parcela y área cosechada, azúcar recuperable y protocolo de laboratorio, TRS, fibra cuando se mida, tallos y peso de muestra | Medir rendimientos y explicar el intercambio entre cantidad de caña y recuperación de azúcar. |
-| Ambiente y manejo | Suelo y análisis, riego/lluvia, fertilización, labores, plagas/enfermedades, daños y fecha de cada aplicación | Explicar variación, comparar ambientes y disponer de entradas conocidas antes de la zafra. |
+| Ambiente y manejo | Suelo y análisis; lluvia, temperatura, humedad, inundaciones y eventos extremos por localidad y fecha, con fuente meteorológica; riego, fertilización, labores, plagas/enfermedades, daños y fechas | Explicar variación entre ambientes y años; distinguir condiciones meteorológicas de prácticas de manejo. |
 | Economía | Preparación, semilla/siembra, mantenimiento desglosado, corte/alce/transporte, área/cantidades/precio de cada insumo, precio efectivo y condiciones de liquidación | Completar el aporte, comparar renovación y someter la política a precio/costos reales. |
-| Pérdidas y decisiones | Parcelas sin cosecha, resiembra o abandono y su causa; fecha/motivo de renovación; rendimientos cero confirmados; ausencias y correcciones trazables | Evitar estudiar solo las socas supervivientes y distinguir un cero real de un dato ausente. |
+| Pérdidas y decisiones | Parcelas sin cosecha, resiembra o abandono y su causa; interrupciones o retrasos operativos y etapa afectada; fecha/motivo de renovación; rendimientos cero confirmados; ausencias y correcciones trazables | Evitar estudiar solo las socas supervivientes y distinguir un cero real, una pérdida o una interrupción de un dato ausente. |
+
+El contraste entre 2019 y 2020 muestra por qué conviene registrar estas variables: en el historial disponible coinciden cambios de clima y de operación del programa, pero faltan datos de parcela y ejecución para separar sus efectos. Un indicador aislado de COVID quedaría confundido con el año y no permitiría atribuir causalidad. Para explicar una zafra, se usarían el clima observado y las incidencias operativas con sus fechas; para pronosticar antes de cosechar, solo clima ya conocido o pronósticos emitidos a la fecha de decisión.
 
 ### Cómo ensayar
 

@@ -200,3 +200,10 @@ La auditoría valida que el código aplica de forma consistente la fórmula decl
 La revisión quedó inicialmente sin commit ni push.
 
 El usuario pidió dejar explícito que HO12-615 ocupa el tercer puesto solo bajo el ajuste ambiental aditivo; con promedios directos, L01-283 queda por encima. Se aclaró en README, conclusiones y respuesta gerencial del notebook económico antes de guardar este hito.
+
+
+### Clima, operación del programa y variables por capturar — 2026-10-19
+
+El usuario pidió incorporar al punto 4 de Serie I lo aprendido al revisar los años 2019 y 2020. Se amplió la propuesta de captura para conservar clima por localidad/fecha (lluvia, temperatura, humedad, inundaciones y eventos extremos), cambios de protocolo/cobertura/calendario e interrupciones operativas con fechas y etapa afectada. La finalidad es separar, hasta donde permitan los datos, variación meteorológica de cambios de ejecución y de faltantes.
+
+Se descartó convertir un indicador binario de COVID en explicación causal o feature aislado: en este historial queda confundido con YEAR y no distingue pandemia de clima, cobertura, manejo o medición. Para el análisis retrospectivo se pueden usar condiciones observadas; para un pronóstico previo a cosecha solo variables conocidas al momento de decidir, como clima acumulado o pronósticos ya emitidos. Cambio documental únicamente; no se modificaron datos ni modelos. El usuario pidió guardar esta unidad con un commit y mensaje explícito; no pidió push.
