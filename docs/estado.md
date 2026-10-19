@@ -45,6 +45,7 @@ Actualización: 2026-10-19, America/Guatemala.
 
 - Tres algoritmos: Ridge interpretable, árbol, bosque. Historial objetivo calculado estrictamente con años anteriores. Entradas: clon, localidad, etapa, CROP, YEAR y medias históricas. No usar TCA/TRS/otras mediciones contemporáneas como predictores de esa zafra.
 - Validaciones 2019 y 2020 con entrenamiento en años anteriores; selección por MAE promedio. Ridge elegido (MAE medio 2,405.64). Año final reservado 2021.
+- Se incorpora sesgo firmado por año en la tabla de validación: Ridge +2,148 lb/acre en 2019 (sobreestima en promedio) y −1,078 en 2020 (subestima). La caída/rebote de los promedios entre zafras es una explicación plausible de que el modelo, que usa historia previa, quede desfasado; no identifica causa climática u operativa.
 - Test 2021 Ridge: MAE 2,144.55 lb/acre, RMSE 2,770.97, R²≈0.25; MAE etapa 5: 1,898.11. Referencia histórica MAE 2,662.69; referencia clon-ambiente reciente ≈2,270.33. Utilidad moderada, no exagerar precisión. Todos los algoritmos fallan en R² 2019.
 - Para la Ridge evaluada en 2021, `CROP` se asocia con cerca de −802 lb/acre por unidad y `YEAR` con −25 lb/acre/año, condicionados a otras entradas. Se documenta que son coeficientes regularizados, no efectos causales ni regla de renovación.
 - Principal: 28,981 registros; 422 exclusiones con motivo. Se conservan ocho ceros fuente. Sensibilidad incluyendo alertas en entrenamiento e historia: MAE≈2,135.10 en la misma prueba limpia.
