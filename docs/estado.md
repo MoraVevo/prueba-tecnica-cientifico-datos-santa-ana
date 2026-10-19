@@ -4,7 +4,7 @@
 
 ## Solicitud y alcance actual
 
-La solicitud inicial fue leer el PDF y crear una skill con contexto suficiente para continuar en otros chats. El usuario tiene poca familiaridad con Git, commits y push y quiere sugerencias cuando convenga utilizarlos. Ya pidió empezar la Serie I y autorizó verificar la unidad, preparar README, entorno reproducible y análisis inicial del dataset. Aún no ha pedido un commit, un push ni publicar el repositorio.
+La solicitud inicial fue leer el PDF y crear una skill con contexto suficiente para continuar en otros chats. El usuario tiene poca familiaridad con Git, commits y push y quiere sugerencias cuando convenga utilizarlos. Ya pidió empezar la Serie I, autorizó el primer commit y pidió crear/configurar GitHub. El proyecto está en un repositorio privado con un primer push; no hacerlo público ni invitar evaluadores sin que el usuario defina ese acceso.
 
 En el mensaje más reciente, el usuario precisó que dispone de 48 horas para entregar y que entiende que debe entregar tanto un ZIP como el proyecto en GitHub, probablemente para que revisen el historial de commits. Esto concuerda con el PDF, que exige ZIP con `.git` y enlace GitHub/GitLab, y especifica que el historial forma parte de la evaluación. Registrar 48 horas como plazo relativo informado por el usuario; la hora de inicio y fecha/hora absoluta de vencimiento aún no se han confirmado.
 
@@ -44,18 +44,19 @@ En el mensaje más reciente, el usuario precisó que dispone de 48 horas para en
 - Entorno limpio de Python 3.13.14 creado con `requirements.txt`; `pip check` no reportó dependencias rotas. El notebook volvió a ejecutarse con el kernel de `.venv` y los paquetes fijados.
 - Skill validada con `quick_validate.py`: `Skill is valid!`. Comprobadas las referencias internas y la codificación UTF-8 de los documentos y metadatos; selección automática habilitada por defecto.
 
-## Git al crear el contexto
+## Git: estado actual
 
-- Inicializado un repositorio local Git en la carpeta con rama `main`, después de preparar `.gitignore` para excluir PDF confidencial y datos.
-- Todavía no hay commits ni remoto; no se hizo push.
-- Primer commit local realizado en `main` (`Inicia ETL y EDA de Serie I`). Incluye archivos de código/documentación; PDF y datos raw/processed están excluidos. El árbol de trabajo quedó limpio después de registrarlo. Aún no se configuró remoto ni se hizo push.
-- Volver a comprobar el estado real antes de actuar: esta sección describe solo lo observado en la sesión inicial.
+- Repositorio privado: https://github.com/MoraVevo/prueba-tecnica-cientifico-datos-santa-ana.
+- Remoto `origin` apunta a ese repo; `main` sigue a `origin/main`.
+- Primer commit `Inicia ETL y EDA de Serie I` ya fue enviado. Solo incluye código y documentación; PDF y datos raw/processed están excluidos.
+- Privacidad y rama `main` verificadas en GitHub. No se han invitado evaluadores ni hecho público el repo.
+- Revisar `git status` y el remoto real antes de futuros commits/push; sugerir hitos de Git porque el usuario prefiere guía explícita.
 
 ## Pendientes y siguiente paso sugerido
 
 - Siguiente paso: revisar el subconjunto de filas marcadas para comprender prefijos y grupos repetidos; resolver qué define una observación experimental. Después ampliar EDA de cobertura, faltantes, rangos y comparaciones por CROP/clon con tamaños de muestra y diseño experimental. Cualquier exclusión analítica futura debe guardarse aparte con criterio y motivo.
 - Aún falta conocer la hora desde la cual se cuentan las 48 horas para fijar el vencimiento exacto. El usuario puede aportar ese dato mientras se avanza en tareas independientes.
 - Antes de publicar, decidir cómo dar acceso a los evaluadores sin incumplir la indicación de confidencialidad del PDF; revisar si se puede añadirlos al repositorio privado.
-- Priorizar análisis reproducibles y profundos, controlar el alcance y sugerir commits frecuentes que reflejen trabajo real. El repo local ya está inicializado; faltan commit y remoto.
+- Priorizar análisis reproducibles y profundos, controlar el alcance y sugerir commits frecuentes que reflejen trabajo real. Repo remoto ya creado y primer commit enviado; el usuario debe definir cómo dar acceso a los evaluadores.
 - El README y `bitacora.md` ya documentan la decisión de fuente y el primer análisis reproducible; seguir actualizándolos conforme avance el trabajo.
 - Conservar para cada resultado futuro la ruta al notebook/script y el comando que permite reproducirlo, además de decisiones, supuestos, pruebas realizadas y pendientes.
