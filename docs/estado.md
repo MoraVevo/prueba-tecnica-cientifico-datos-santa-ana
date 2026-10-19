@@ -1,64 +1,74 @@
-# Estado persistente de la prueba Santa Ana
+# Estado persistente — prueba Santa Ana
 
-Última actualización: 2026-10-19, America/Guatemala.
+Actualización: 2026-10-19, America/Guatemala.
 
-## Solicitud y alcance actual
+## Alcance vigente
 
-La prueba técnica de Científico de Datos de Ingenio Santa Ana se desarrolla con la Serie I como punto de partida, manteniendo el análisis reproducible y documentado. El proyecto está en un repositorio privado; no hacerlo público ni invitar evaluadores sin que se defina ese acceso.
+- Desarrollar las cuatro respuestas de Serie I con el dataset entregado y los supuestos del PDF. La última corrección del usuario prevalece sobre interpretaciones anteriores: las limitaciones deben modificar certeza y supuestos, sin impedir dar tres variedades, renovación, modelo, segmentos y propuesta de ensayos.
+- Por ahora no buscar ni descargar datos externos adicionales. Las búsquedas previas de metadatos/unidades forman parte del historial; liberación comercial o adaptación a Santa Ana no son condiciones para resolver este ejercicio.
+- Cálculos/métricas reproducibles pero pendientes de revisión independiente con tiempo específico. Ejecutar sin errores no es validar fórmula ni negocio.
+- Español en comentarios, docstrings y explicaciones; parsimonia en código, archivos y análisis. Guardar exclusiones con motivos. Sugerir Git en hitos; ejecutar commit/push cuando se autorice.
+- Plazo informado: 48 horas; falta confirmar inicio y vencimiento absolutos. PDF exige ZIP con `.git`, sin datasets y enlace GitHub/GitLab. No convertir “lunes siguiente 8:00” en fecha sin referencia.
 
-El plazo informado para la entrega es de 48 horas. La entrega prevista incluye un ZIP y el repositorio GitHub; el PDF exige ZIP con `.git` y enlace GitHub/GitLab, y especifica que el historial forma parte de la evaluación. La hora de inicio y fecha/hora absoluta de vencimiento aún no se han confirmado.
+## Fuente y preparación
 
-## Trabajo completado
+- PDF local de seis páginas leído y revisado; requisitos en la skill global `prueba-santa-ana/references/prueba.md`.
+- USDA y Kaggle Serie I son idénticos. SHA-256 CSV: `5e7b13de6bda8aed51479c5fdfc3de4a28e71ccbb45e4761b6688a34b7cff4b0`.
+- `T_SPACRE` se trata como lb azúcar/acre según USDA, corrigiendo la descripción del PDF. `TCA`: ton caña/acre; `TRS_TON`: lb/ton. El costo se aplica a la tonelada de TCA como supuesto del ejercicio.
+- `TRS_TON` analítico es el último componente numérico. Texto crudo y prefijo de dos dígitos se preservan; no hay definición pública confirmada del prefijo y no entra a métricas/modelos.
+- Fuente 29,529 filas; ETL 29,403 analíticas + 126 copias exactas adicionales excluidas con motivo. Las 224 filas en 112 pares de claves distintas en mediciones se mantienen marcadas; todas en etapa 3. Otras 23 filas tienen discrepancia dimensional >1 %.
+- La investigación contextual no eligió cuál fila de cada par corregir. Se conserva la incertidumbre y se evalúa sensibilidad. No seguir investigando indefinidamente el prefijo/llave como requisito para avanzar.
+- CROP 4 tiene 84 filas, 13 clones, una localidad y tres años. Fibra falta en 57.3 % del dataset analítico; no se fuerza su imputación.
 
-- Leídas y revisadas visualmente las seis páginas de `Prueba de conocimientos técnicos Científico de Datos.pdf`; extraídos también sus enlaces a datasets.
-- Creada la skill global `prueba-santa-ana` en `C:/Users/user/.codex/skills/prueba-santa-ana/`.
-- Requisitos de las cinco series, extras, datos, supuestos económicos y entrega guardados en `references/prueba.md` dentro de la skill, con referencias de página.
-- Preferencia de acompañamiento de Git y rutina de persistencia guardadas en la skill.
-- Inspeccionados metadatos y listado de archivos de las cuatro fuentes de Kaggle y encabezados/primeras filas mediante HTTP Range de seis CSV. Inventario y posibles cruces en `docs/inventario-datasets.md`.
-- Iniciada `bitacora.md` con decisiones propuestas, supuestos evitados y verificación del uso de IA durante este inventario.
-- Explicación de cada columna de Serie I y su lógica de negocio/económica, con fuentes y alertas metodológicas, en `docs/interpretacion-serie-I.md`.
-- Discrepancia de `T_SPACRE` verificada contra el CSV USDA completo. README abre con la decisión de fuente y unidad; se prepararon descargador con checksum y notebook reproducible.
+## Primer borrador de las cuatro respuestas
 
-## Resultados y decisiones
+### 1. Economía — notebook 03
 
-- No hay todavía rankings, modelos ni recomendaciones de negocio. Se inició EDA descriptiva de la Serie I; el notebook inicial describe la fuente original, y el ETL separa las copias exactas adicionales del dataset analítico.
-- La serie elegida para empezar es la Serie I. El ETL provisional preserva valores crudos y banderas de calidad, excluye las copias idénticas adicionales a un archivo separado y mantiene en el dataset analítico las filas con claves repetidas pero mediciones distintas. `TRS_TON` contiene solo el valor numérico final; el texto original y el prefijo sin interpretar quedan en campos separados. Falta validar la unidad experimental antes de considerar un dataset limpio final.
-- La información es confidencial según el PDF. Se recomienda repositorio privado cuando se configure la entrega.
-- Se prioriza profundidad y justificación de decisiones. Las actividades pendientes se documentarán en README y los extras son opcionales.
-- Decisión de unidad: PDF describe T_SPACRE en toneladas/acre; ficha oficial USDA lo define en libras/acre. La copia Kaggle y el recurso USDA son idénticos. En 10,485 celdas del valor fuente de `TRS_TON` hay dos componentes numéricos separados por espacios; el ETL conserva el texto original en `TRS_TON_raw`, el prefijo como texto y el componente final en la columna analítica `TRS_TON`. La relación dimensional queda dentro del 1 % en 29,317 de 29,340 filas positivas completas. Quedan 23 observaciones fuera de tolerancia.
-- Investigación posterior del prefijo: también está en el XLSX oficial USDA; tiene dos dígitos `00`–`99`, aparece únicamente en 2010–2019 y en diez clones, y no se comporta como una medición agronómica ni como `REP`. No se encontró una definición pública. Podría ser un código auxiliar o residuo de estructura/exportación, pero no se afirma que sea un número de parcela. Mantenerlo crudo y fuera de métricas/modelos hasta obtener confirmación. Ver análisis, fuente técnica y snippet reproducible en `docs/interpretacion-serie-I.md`.
-- Perfil crudo de `CROP`: mediana de `T_SPACRE` disminuye de 10,100.7 a 6,772.5 lb/acre entre CROP 0 y 4; CROP 4 solo tiene 84 observaciones y existe desbalance por etapa. Es una asociación descriptiva, no causal.
-- Calidad: por decisión del usuario, las 126 copias idénticas posteriores a su primera aparición se excluyen del dataset analítico y se conservan con motivo en `data/processed/serie1_filas_excluidas.csv`; no se altera la fuente. Las 252 filas pertenecientes a grupos de duplicados exactos incluyen las primeras apariciones, que sí se mantienen. La clave candidata `(CLONE, YEAR, STAGE, LOC, CROP, REP)` tenía 476 filas repetidas en la fuente; tras separar copias idénticas quedan 224 filas en 112 grupos con mediciones distintas, que permanecen para revisión. `FIBER` tiene 16,861 faltantes/puntos de 29,529 filas fuente; `POPN`, 3,533.
-- FAOSTAT realmente tiene años en columnas Y1961-Y2023: requiere reorganización para obtener país-año. Caldera tiene dos archivos data con iguales encabezados y primeras filas, relación completa por determinar. Sugar_data.csv tiene fecha y OHLC/volumen.
-- Cruce principal propuesto: FAOSTAT país-año con precios agregados y rezagados de manera justificada. No unir automáticamente campo, caldera y mercado por compartir fechas o tema.
-- Para Serie I, el ingreso bruto por acre se vincularía a `T_SPACRE` y el costo de cosecha/transporte a `TCA`; la contribución es parcial con los costos del PDF. La discrepancia de unidad quedó resuelta a favor de USDA, pero falta confirmar escalas de costos para cerrar cálculos.
+- Formula aporte anual de rotación: `[suma_cortes(precio × E[azúcar] − 14 × E[caña] − 350) − 1100] / número_cosechas`.
+- Una cosecha/año, renovación inmediata, sin descuento ni descanso. Puede estimarse con expectativas por corte sin fingir que sean flujos de una misma parcela.
+- Etapa 5; 14,029 filas en escenario principal, 63 conservadas aparte por faltantes/alertas. Promediar réplicas por clon/corte/año/localidad y ajustar respecto a L01-299 en ambientes compartidos. 4,197 de 4,708 celdas emparejadas; las no emparejadas se conservan aparte.
+- Para recomendar se exige plantía + dos socas con dos años y dos localidades por corte; se permite tercera soca con igual criterio. CROP 4 y duraciones de menor cobertura se muestran como sensibilidad.
+- Tres recomendaciones del modelo de decisión a US$0.20/lb: HOCP14-885, tres cosechas totales, US$727.58/acre/año; L01-299, cuatro, US$632.66; HO12-615, cuatro, US$629.21.
+- Precios ilustrativos 0.15/0.20/0.25 USD/lb: se mantienen esas duraciones. Sin ajuste, L01-283 desplaza ligeramente a HO12-615 del tercer puesto. Certidumbre media para L01-299 y media-baja para HoCP14-885/duración y tercer puesto. No afirmar óptimo fuera del horizonte evaluado.
+- Remuestreo por año (500): rangos centrales 90 % del aporte de la política elegida ≈652–834, 572–700 y 570–684 USD/acre/año. Frecuencias misma duración: 100 %, 100 %, 98.6 %. No son probabilidades de superioridad real.
 
-## Verificaciones
+### 2. Predicción — notebook 04
 
-- PDF: seis páginas, texto extraído y revisión visual de todas ellas.
-- SHA-256 del PDF: `d5797133d33baacea0e2e1befc7ee4eb215b64dd8a942567f320324a2d8de67f`.
-- Se extrajeron cuatro enlaces de datasets de las anotaciones del PDF y posteriormente se contrastaron sus metadatos. Para Serie I se descargó el CSV completo de la fuente oficial y se validó su SHA-256.
-- Serie I: el descargador verificó 1,950,511 bytes y el SHA-256 documentado; el recurso USDA y Kaggle son byte por byte idénticos. Los notebooks 01 (unidad/fuente) y 02 (perfil EDA) describen las 29,529 filas fuente sin modificar el CSV. `scripts/etl_serie1.py` genera un dataset analítico de 29,403 filas, un archivo de 126 copias exactas excluidas con motivo, un reporte y un subconjunto de revisión de 10,500 filas. No modifica la fuente ni imputa. Tras deduplicar las copias exactas, 29,191 de 29,214 filas positivas completas están dentro del 1 % de coherencia dimensional; 23 quedan fuera. La clave candidata aún tiene 224 filas en 112 grupos con mediciones distintas. `TRS_TON` contiene solo el componente numérico final; `TRS_TON_raw` preserva el texto y `TRS_TON_prefijo_sin_interpretar` conserva el prefijo como texto.
-- Series II y III: solo se inspeccionaron muestras remotas y metadatos; faltan descargas y auditorías completas.
-- Entorno limpio de Python 3.13.14 creado con `requirements.txt`; `pip check` no reportó dependencias rotas. El notebook volvió a ejecutarse con el kernel de `.venv` y los paquetes fijados.
-- Skill validada con `quick_validate.py`: `Skill is valid!`. Comprobadas las referencias internas y la codificación UTF-8 de los documentos y metadatos; selección automática habilitada por defecto.
+- Tres algoritmos: Ridge interpretable, árbol, bosque. Historial objetivo calculado estrictamente con años anteriores. Entradas: clon, localidad, etapa, CROP, YEAR y medias históricas. No usar TCA/TRS/otras mediciones contemporáneas como predictores de esa zafra.
+- Validaciones 2019 y 2020 con entrenamiento en años anteriores; selección por MAE promedio. Ridge elegido (MAE medio 2,405.64). Año final reservado 2021.
+- Test 2021 Ridge: MAE 2,144.55 lb/acre, RMSE 2,770.97, R²≈0.25; MAE etapa 5: 1,898.11. Referencia histórica MAE 2,662.69; referencia clon-ambiente reciente ≈2,270.33. Utilidad moderada, no exagerar precisión. Todos los algoritmos fallan en R² 2019.
+- Principal: 28,981 registros; 422 exclusiones con motivo. Se conservan ocho ceros fuente. Sensibilidad incluyendo alertas en entrenamiento e historia: MAE≈2,135.10 en la misma prueba limpia.
+- Se reajusta elegido hasta 2021 e ilustra entrada/predicción de 2022, sin afirmar que sea una zafra actual o evaluada.
 
-## Git: estado actual
+### 3. Segmentos — notebook 05
 
-- El historial conserva cuatro hitos cronológicos del desarrollo.
-- El PDF de la prueba y las carpetas `data/raw/` y `data/processed/` permanecen excluidos de Git.
-- Repositorio privado: https://github.com/MoraVevo/prueba-tecnica-cientifico-datos-santa-ana.
-- Rama principal `main` con remoto `origin` asociado al repositorio privado.
-- Privacidad y rama `main` verificadas en GitHub. No se han invitado evaluadores ni hecho público el repo.
-- Este avance queda registrado en la rama `main` con el commit `Excluye copias exactas del dataset analítico`; las salidas locales de datos continúan excluidas de Git.
-- Antes de la entrega, revisar los archivos versionados, el contenido del ZIP y el acceso de los evaluadores.
+- 17 variedades de etapa 5 con plantía/dos socas y dos años/localidades por corte. Resto conservado sin segmento por cobertura. Cuatro variables estandarizadas: azúcar, TRS, conservación segunda soca/plantía, variación ambiental relativa centrada por clon/corte.
+- Comparar K-means 2/3/4; mayor silueta con al menos tres variedades/grupo: dos grupos, silueta≈0.30.
+- Perfil 1, cuatro clones: mayor TRS≈290, menor azúcar≈7,940, conservación≈74 %, más variabilidad≈0.126. HO07-613, HOCP00-950, HOCP96-540, L03-371.
+- Perfil 2, trece clones: azúcar≈8,365, TRS≈278, conservación≈82 %, menor variación≈0.099. Incluye las tres recomendadas. Segmentos complementan economía, no son ranking.
 
-## Pendientes y siguiente paso sugerido
+### 4. Datos propios — documento de conclusiones
 
-- El prefijo de `TRS_TON` fue investigado en CSV/XLSX oficial y fuentes técnicas: continúa sin definición pública. El ETL lo conserva como texto separado de la variable analítica y no lo usa en métricas/modelos. El siguiente paso analítico es ampliar EDA de cobertura, faltantes, rangos y comparaciones por CROP/clon, aclarando unidad experimental y diseño; cualquier nueva exclusión debe guardarse aparte con criterio y motivo. Las 126 copias exactas ya se separan conforme a la decisión del usuario.
-- Aún falta conocer la hora desde la cual se cuentan las 48 horas para fijar el vencimiento exacto. El usuario puede aportar ese dato mientras se avanza en tareas independientes.
-- Antes de publicar, decidir cómo dar acceso a los evaluadores sin incumplir la indicación de confidencialidad del PDF; revisar si se puede añadirlos al repositorio privado.
-- Priorizar análisis reproducibles y profundos, controlar el alcance y sugerir commits frecuentes que reflejen trabajo real. Repo remoto ya creado y primer commit enviado; el usuario debe definir cómo dar acceso a los evaluadores.
-- El README y `bitacora.md` ya documentan la decisión de fuente y el primer análisis reproducible; seguir actualizándolos conforme avance el trabajo.
-- Conservar para cada resultado futuro la ruta al notebook/script y el comando que permite reproducirlo, además de decisiones, supuestos, pruebas realizadas y pendientes.
-- El ETL quedó reorganizado en funciones breves con comentarios, docstrings, mensajes y reporte en español; se conservaron los nombres de columnas originales. La reorganización produjo exactamente los mismos CSV que la versión anterior. La skill global ahora recoge la preferencia del usuario por parsimonia y eliminar código para escenarios hipotéticos.
+- `docs/conclusiones-serie-I.md` responde los cuatro puntos y propone seguimiento de parcela/cohorte, variables de ambiente/manejo/calidad/costos, causas de retiro y ensayo aleatorizado por bloques/sitios seguido durante socas.
+- Ejemplo ilustrativo: tres sitios × tres bloques × cuatro variedades distintas =36 parcelas; no sustituye cálculo de tamaño muestral. Segunda fase compara políticas de renovación asignadas al azar en horizonte común. Solo propuesta, sin captura adicional ejecutada.
+
+## Archivos y reproducción
+
+- `scripts/descargar_serie1.py`; `scripts/etl_serie1.py`; notebooks 01–05 en orden; requisitos e instrucciones en README.
+- Notebooks 01/02: fuente/unidades, calidad y cobertura. 03: decisión económica. 04: comparación/modelo. 05: segmentos.
+- Salidas y exclusiones por análisis en `data/processed/`, ignoradas por Git. Bitácora conserva decisiones, uso de IA, sugerencias descartadas y corrección metodológica.
+- Ejecución final: notebooks 01–05 completos con el kernel explícito `prueba-santa-ana` que apunta a `.venv`; 25 celdas de código ejecutadas, cero salidas de error. JSON/esquema de notebooks comprobados. `py_compile`, `pip check` y `git diff --check` sin errores; skill `quick_validate.py`: válida. Figura de segmentos inspeccionada visualmente. Estas comprobaciones no sustituyen la revisión independiente de fórmulas, diseño y métricas.
+
+## Git y privacidad
+
+- Repositorio privado: https://github.com/MoraVevo/prueba-tecnica-cientifico-datos-santa-ana ; rama `main`, remoto `origin`.
+- Último commit observado `e1adc18`, “Excluye copias exactas del dataset analítico”. Nuevos análisis, simplificación ETL y documentación sin commit ni push. No hay autorización nueva para publicarlos o invitar evaluadores.
+- `AGENTS.md` privado e ignorado; historial main reescrito anteriormente. La skill conserva advertencia de SHA antiguos aún consultables en GitHub y respaldo fuera del proyecto. No afirmar borrado universal del historial anterior.
+- PDF, datasets y entornos ignorados. Revisar ZIP/acceso antes de entrega.
+
+## Pendiente concreto
+
+1. Revisión independiente de unidades, fórmula de rotación, ajuste de ambientes, cobertura, remuestreo, ausencia de fuga temporal, métricas y segmentación. El usuario pidió dedicarle una sesión; no bloquear la construcción del borrador por esa revisión futura.
+2. Revisar certeza del tercer puesto y duración por frontera de cobertura; conservar sensibilidad y alternativas.
+3. Guardar un commit coherente cuando el usuario lo autorice; no fabricar historial retroactivo.
+4. Series II–V, API y presentación siguen pendientes; solo hubo inspecciones remotas iniciales de otros datasets. No se afirman realizadas.

@@ -2,60 +2,65 @@
 
 ## Decisión de fuente y unidad: Serie I
 
-El PDF de la prueba llama a `T_SPACRE` **toneladas de azúcar por acre**. La documentación del conjunto de datos publicada por el Servicio de Investigación Agrícola del Departamento de Agricultura de Estados Unidos (USDA-ARS) la define como **libras de azúcar por acre** (`lbs./acre`). Para este análisis se seguirá la unidad de la fuente oficial, porque es la institución que publica y documenta los datos originales. Consulta la [ficha del USDA-ARS en Data.gov](https://catalog.data.gov/dataset/louisiana-sugarcane-yield-data-2010-2021-collected-for-the-louisiana-variety-development-p) y el [CSV original asociado](https://ndownloader.figshare.com/files/49874100).
+El PDF describe `T_SPACRE` como toneladas de azúcar por acre, pero la [ficha oficial USDA-ARS](https://catalog.data.gov/dataset/louisiana-sugarcane-yield-data-2010-2021-collected-for-the-louisiana-variety-development-p) la define como **libras de azúcar por acre**. Se utiliza la definición USDA para que el precio de US$0.20/lb del ejercicio sea compatible. `TCA` está en ton de caña/acre y `TRS_TON` en lb de azúcar/ton de caña.
 
-Se contrastó el CSV oficial completo con la copia de Kaggle indicada en el enunciado: ambas descargas tienen el mismo SHA-256 y los mismos bytes. El perfil inicial detectó que 10,485 celdas de `TRS_TON` contienen dos componentes numéricos separados por espacios. El patrón también aparece en el XLSX oficial; la ficha de USDA no define el prefijo de dos dígitos. El ETL conserva el texto completo en `TRS_TON_raw`, guarda el prefijo como texto en `TRS_TON_prefijo_sin_interpretar` y deja `TRS_TON` como el componente numérico final, aislado para métricas y modelos. En la auditoría de la fuente original, antes de excluir copias, `T_SPACRE` coincide con `TCA × TRS_TON` dentro del 1 % en 29,317 de 29,340 filas completas y positivas; hay 23 filas fuera de esa tolerancia. Para el dataset analítico, el ETL excluye 126 copias exactas adicionales y conserva 29,403 filas; allí la relación está dentro del 1 % en 29,191 de 29,214 filas positivas completas, con las mismas 23 observaciones fuera de tolerancia. El componente final es coherente con la relación de unidades, pero el prefijo aún no tiene interpretación confirmada y no se tratará como variable agronómica. La relación dimensional es libras de azúcar por tonelada de caña × toneladas de caña por acre = libras de azúcar por acre. La unidad absoluta se adopta de la ficha oficial USDA. La auditoría de fuente está en [`notebooks/01_revision_fuente_y_unidades.ipynb`](notebooks/01_revision_fuente_y_unidades.ipynb) y el perfil inicial en [`notebooks/02_perfil_eda_inicial_serie1.ipynb`](notebooks/02_perfil_eda_inicial_serie1.ipynb).
+El CSV oficial y la copia Kaggle del enunciado se verificaron como idénticos. El descargador comprueba su SHA-256. En `TRS_TON` hay valores con prefijo sin definición: el ETL conserva el texto y prefijo aparte y utiliza el componente numérico final, coherente con `TCA × TRS_TON ≈ T_SPACRE`. No se utiliza el prefijo como variable agronómica.
 
-Esta precisión importa porque el PDF supone un precio de US$0.20 por libra de azúcar recuperable. Tratar `T_SPACRE` como toneladas cambiaría el ingreso estimado por un factor grande y no corresponde a la definición documentada del dataset.
+## Serie I: cuatro respuestas
 
-## Objetivo y alcance actual
+Se presenta un **primer borrador completo, pendiente de revisión independiente de cálculos y supuestos**. Las limitaciones se incorporan a la certeza de las conclusiones. Se utiliza el dataset entregado y escenarios económicos explícitos; no se requieren datos externos adicionales para resolver esta serie.
 
-La Serie I analiza ensayos varietales de caña de Louisiana entre 2010 y 2021. La fuente describe hasta 32 localidades y más de mil genotipos, no datos de las fincas de Ingenio Santa Ana. Los resultados se presentarán como evidencia de ensayos externos y se explicarán sus límites de transferencia al contexto guatemalteco.
+| Pregunta | Respuesta del borrador | Evidencia |
+| --- | --- | --- |
+| Variedades y renovación | HoCP14-885: tres cosechas; L01-299 y Ho12-615: cuatro. Aportes anuales esperados aproximados de US$728, US$633 y US$629/acre al precio del PDF. Tercer puesto sensible frente a L01-283. | Notebook 03 |
+| Modelo supervisado | Ridge, árbol y bosque; selección por validación temporal 2019–2020 y evaluación reservada 2021. Ridge elegido: MAE 2,145 lb/acre, R² 0.25; utilidad moderada y errores visibles. | Notebook 04 |
+| Segmentación | Dos perfiles sobre productividad, TRS, conservación en soca y estabilidad; 17 variedades segmentadas y restantes con razón de cobertura insuficiente. | Notebook 05 |
+| Datos y ensayos propios | Seguimiento de parcela/cohorte, mediciones y costos; variedades aleatorizadas por bloques/sitios y seguimiento de socas; fase para contrastar políticas de renovación. | Documento de conclusiones |
 
-El primer notebook documenta la fuente, verifica unidades y registra alertas de calidad visibles en el archivo. Todavía no contiene una recomendación de variedades, análisis de renovación ni modelos predictivos; esos resultados se desarrollarán y validarán en los siguientes pasos.
+El detalle de recomendaciones, certeza, impacto y riesgos está en [conclusiones de Serie I](docs/conclusiones-serie-I.md). Tres cosechas significan plantía + dos socas; cuatro significan plantía + tres socas.
 
-## Fuente y descarga
+## Reproducción
 
-La fuente prioritaria es la ficha oficial del [USDA-ARS en Data.gov](https://catalog.data.gov/dataset/louisiana-sugarcane-yield-data-2010-2021-collected-for-the-louisiana-variety-development-p). El CSV original se descarga desde el recurso asociado de [Ag Data Commons / Figshare](https://ndownloader.figshare.com/files/49874100). El archivo de Kaggle enlazado por el PDF se verificó como una copia idéntica; se cita USDA como fuente de autoridad y para documentar las unidades.
-
-El archivo se guarda en `data/raw/`, carpeta excluida de Git y de la entrega ZIP. Para repetir el análisis en Windows PowerShell:
+Entorno preparado con Python 3.13.14. En Windows PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python scripts/descargar_serie1.py
 python scripts/etl_serie1.py
 jupyter lab
 ```
 
-Después abre y ejecuta los notebooks de `notebooks/` en orden. El script ETL crea el dataset analítico provisional, un reporte de calidad, un subconjunto de filas marcadas para revisión y `serie1_filas_excluidas.csv` en `data/processed/`. Excluye del dataset analítico las copias idénticas adicionales —126 en la versión auditada— y conserva cada una en el archivo de excluidos con `FILA_CSV` y `MOTIVO_EXCLUSION`. La primera aparición se mantiene. El CSV fuente no se modifica. Las filas que comparten la clave candidata pero tienen mediciones distintas permanecen en el dataset y se marcan para revisión; no se promedian ni se elige una arbitrariamente. El ETL no imputa registros. También conserva `TRS_TON` original en `TRS_TON_raw`, separa el prefijo no interpretado y deja la columna analítica `TRS_TON` libre de ese prefijo. El script de descarga comprueba el SHA-256 de la versión documentada para detectar cambios o descargas incompletas.
+Ejecutar los notebooks en orden:
 
-## Estructura del proyecto
+1. `01_revision_fuente_y_unidades.ipynb`: procedencia y unidades.
+2. `02_perfil_eda_inicial_serie1.ipynb`: calidad, repetidos y cobertura.
+3. `03_analisis_economico_serie1.ipynb`: aporte, políticas de renovación, precio y certeza.
+4. `04_modelo_supervisado_serie1.ipynb`: tres algoritmos, referencias, evaluación temporal y ejemplo de siguiente zafra.
+5. `05_segmentacion_variedades_serie1.ipynb`: variables por clon, elección de segmentos y lectura gerencial.
 
-```text
-.
-├── data/raw/                       # CSV local, ignorado por Git
-├── docs/                           # Contexto, decisiones y avance
-├── notebooks/
-│   ├── 01_revision_fuente_y_unidades.ipynb
-│   └── 02_perfil_eda_inicial_serie1.ipynb
-├── scripts/
-│   ├── etl_serie1.py
-│   └── descargar_serie1.py
-├── README.md
-├── bitacora.md
-└── requirements.txt
+También se pueden ejecutar sin interfaz, por ejemplo:
+
+```powershell
+python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 notebooks/04_modelo_supervisado_serie1.ipynb
 ```
 
-## Reproducibilidad y decisiones
+El ETL guarda 29,403 filas analíticas y separa 126 copias exactas adicionales, con motivo por fila. Mantiene 224 registros de claves repetidas con mediciones distintas y 23 alertas dimensionales. Cada análisis conserva sus exclusiones, motivos y salidas en `data/processed/`. Las alertas se tratan mediante escenarios y no se corrige una medición arbitrariamente. La fuente permanece intacta.
 
-- Las cifras de los hallazgos deben recalcularse desde el CSV de USDA mediante los notebooks y scripts del repositorio.
-- Los datos crudos, el PDF confidencial, secretos y entornos locales no forman parte de Git.
-- El CSV tiene tres columnas finales auxiliares sin nombre estándar y seis notas sueltas en la última. El primer notebook las identifica por separado de las doce variables del ensayo.
-- Mantendremos explícitos los supuestos, limitaciones y tareas pendientes en el notebook, la bitácora y esta guía conforme avance la prueba.
+## Supuestos y límites que afectan la decisión
 
-## Pendiente
+- Se adopta la tonelada de `TCA` como unidad del costo US$14/ton del ejercicio. La revisión independiente comprobará la compatibilidad y todas las fórmulas.
+- La rotación supone una cosecha anual, renovación inmediata, costos constantes y sin descuento ni descanso. Se comparan aportes **esperados**, no flujos observados de la misma parcela.
+- Los precios de US$0.15, 0.20 y 0.25/lb son escenarios ilustrativos de ±25 %; no son una distribución de mercado estimada.
+- La recomendación exige cobertura temporal/geográfica por corte y muestra duraciones adicionales de menor certeza. El escenario sin ajuste ambiental cambia el tercer puesto.
+- El modelo usa entradas disponibles antes de la zafra y medias de años anteriores. La precisión observada es limitada; MAE no es un intervalo de confianza.
+- Se preservan listas de variedades sin cobertura suficiente para economía/segmentación. Los faltantes extensos de fibra no se imputan para obligar a usarla.
 
-Validar la unidad experimental y el significado del prefijo observado en 10,485 celdas `TRS_TON`; ampliar el análisis de productividad, calidad, longevidad y estabilidad; comparar modelos para la siguiente zafra; evaluar sensibilidad económica al precio; y proponer un plan de captura y ensayos propios. Las actividades fuera del alcance se documentarán junto con cómo se abordarían.
+## Archivos y entrega
+
+`notebooks/` contiene evidencia reproducible; `scripts/` contiene descarga y ETL; `docs/` contiene conclusiones y continuidad; `bitacora.md` registra decisiones e hipótesis corregidas. `requirements.txt` fija dependencias. `data/raw/` y `data/processed/`, el PDF confidencial y entornos locales están excluidos de Git. El ZIP final debe excluir datasets e incluir `.git`, según el PDF.
+
+## Pendientes
+
+Revisar de manera independiente cálculos económicos, agregaciones, remuestreo, métricas y diseño de validación; revisar redacción final de certeza; y preparar las demás series, API y presentación según priorización. La ejecución sin errores solo acredita ejecución. Series II–V no se presentan como completadas. No se han descargado fuentes adicionales durante este desarrollo de las cuatro respuestas de Serie I.

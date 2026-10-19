@@ -160,16 +160,13 @@ def evaluar_relacion_dimensional(datos: pd.DataFrame) -> None:
 
 
 def marcar_revision(datos: pd.DataFrame, columnas_error: list[str]) -> None:
-    """Asigna motivos legibles y señala qué filas requieren revisión."""
+    """Señala alertas que requieren revisar filas individuales."""
     errores_parseo = datos[columnas_error].any(axis=1)
     fuera_tolerancia = datos["ESTADO_RELACION_DIMENSIONAL"].eq(
         "fuera_1_por_ciento"
     )
     motivos = pd.DataFrame(
         {
-            "prefijo_TRS_sin_explicar": datos[
-                "TRS_TON_prefijo_sin_interpretar"
-            ].notna(),
             "clave_candidata_repetida": datos["CLAVE_CANDIDATA_REPETIDA"],
             "error_de_parseo": errores_parseo,
             "fuera_de_tolerancia_dimensional": fuera_tolerancia,
@@ -180,8 +177,7 @@ def marcar_revision(datos: pd.DataFrame, columnas_error: list[str]) -> None:
         lambda fila: ";".join(fila.index[fila]), axis=1
     )
     datos["REQUIERE_REVISION"] = (
-        datos["TRS_TON_prefijo_sin_interpretar"].notna()
-        | datos["CLAVE_CANDIDATA_REPETIDA"]
+        datos["CLAVE_CANDIDATA_REPETIDA"]
         | errores_parseo
         | fuera_tolerancia
     )
@@ -201,13 +197,6 @@ def resumir_calidad(
     )
     filas_dentro = datos["ESTADO_RELACION_DIMENSIONAL"].eq("dentro_1_por_ciento")
     ratios = datos["RATIO_T_SPACRE_SOBRE_ESPERADO"].dropna()
-    resumen_cosecha = (
-        datos.groupby("CROP", dropna=False)["T_SPACRE"]
-        .agg(n="count", media="mean", mediana="median")
-        .reset_index()
-        .to_dict(orient="records")
-    )
-
     return {
         "archivo_fuente": RUTA_ENTRADA.name,
         "sha256_fuente": sha256,
@@ -229,6 +218,9 @@ def resumir_calidad(
                 dropna=False
             ).items()
         },
+        "filas_con_prefijo_TRS_TON_sin_interpretar": int(
+            datos["TRS_TON_prefijo_sin_interpretar"].notna().sum()
+        ),
         "filas_duplicadas_exactas_incluida_primera": int(
             fuente.duplicated(keep=False).sum()
         ),
@@ -249,13 +241,13 @@ def resumir_calidad(
         "filas_fuera_del_1_por_ciento": int((filas_completas & ~filas_dentro).sum()),
         "mediana_ratio_observado_esperado": float(ratios.median()),
         "filas_marcadas_para_revision": int(datos["REQUIERE_REVISION"].sum()),
-        "resumen_t_spacre_por_cosecha": resumen_cosecha,
         "decisiones": [
             "Los campos originales se conservan en columnas terminadas en _raw.",
             "Blancos y puntos se convierten en faltantes solo en columnas analíticas.",
             "TRS_TON contiene el componente numérico final; el prefijo se conserva aparte como texto sin interpretar.",
             "Se excluye del dataset analítico cada copia idéntica posterior a su primera aparición.",
             "Las copias excluidas se conservan en un archivo separado con el motivo por fila; el archivo fuente no se modifica.",
+            "El prefijo de TRS_TON se conserva como dato informativo y no marca por sí solo una fila para revisión.",
             "No se imputan ni agregan filas.",
             "Las tres columnas sin nombre se conservan como AUX_1, AUX_2 y AUX_3.",
             "Las filas con alertas se copian a un archivo de revisión y permanecen en el dataset provisional.",
