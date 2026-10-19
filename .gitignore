@@ -1,0 +1,23 @@
+# Dataset original (descarga local; fuera de Git y del ZIP de entrega)
+/data/raw/
+/data/processed/
+
+# PDF confidencial del proceso de selección
+/Prueba de conocimientos técnicos Científico de Datos.pdf
+
+# Python y notebooks
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Entornos locales y credenciales
+.env
+.env.*
+!.env.example
+
+# Salidas generadas y archivos temporales
+*.tmp
+*.log
+/outputs/
