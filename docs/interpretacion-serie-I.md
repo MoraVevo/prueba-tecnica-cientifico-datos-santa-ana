@@ -24,22 +24,26 @@ El dataset representa ensayos de variedades de caña de Louisiana. Una observaci
 | `MSTWT` | Peso medio del tallo; USDA indica libras. | Otro componente de la biomasa de caña. En conjunto con la población ayuda a entender si un rendimiento viene de más tallos, tallos más pesados o ambos. Verificar en el archivo si expresa libras por tallo y el método de muestreo. |
 | `FIBER` | Porcentaje de fibra. | Describe composición del tallo. Puede relacionarse con extracción de jugo y cantidad de bagazo para combustión/cogeneración, pero el signo neto económico no se deduce de esta columna sola. Sin datos de extracción, humedad, vapor y electricidad no asignar un valor monetario a la fibra. Confirmar escala del porcentaje y denominador en metadatos. |
 
-La ficha oficial de USDA define `T_SPACRE` como libras de azúcar por acre; `TRS` como libras de azúcar por tonelada de caña; `TCA` como toneladas de caña por acre; `POPN` como número de tallos; y `MSTWT` como peso medio del tallo en libras. Confirma además 32 localidades, los años 2010–2021, 1,158 genotipos, etapas 2–5 y cosechas/crops hasta 5. La comparación completa del CSV USDA con la copia Kaggle enlazada por el PDF dio archivos byte por byte idénticos. El perfil posterior encontró 10,485 celdas de `TRS_TON` con dos componentes numéricos; se preservó el prefijo sin asignarle significado y se usó solo el componente final como candidato para evaluar la relación dimensional. En 29,317 de 29,340 filas positivas completas, `TCA × componente_final` coincide con `T_SPACRE` dentro de 1 %; 23 filas quedan para revisión. La referencia técnica general de LSU describe que los datos de cosecha permiten derivar rendimiento de caña a partir de conteo de tallos y peso; no reemplaza la validación de las unidades de este CSV.
+La ficha oficial de USDA define `T_SPACRE` como libras de azúcar por acre; `TRS` como libras de azúcar por tonelada de caña; `TCA` como toneladas de caña por acre; `POPN` como número de tallos; y `MSTWT` como peso medio del tallo en libras. Confirma además 32 localidades, los años 2010–2021, 1,158 genotipos, etapas 2–5 y cosechas/crops hasta 5. La comparación completa del CSV USDA con la copia Kaggle enlazada por el PDF dio archivos byte por byte idénticos. El perfil posterior encontró 10,485 celdas fuente de `TRS_TON` con dos componentes numéricos; se preserva el prefijo sin asignarle significado y se usa el componente final como valor analítico `TRS_TON`. En 29,317 de 29,340 filas positivas completas, `TCA × TRS_TON` coincide con `T_SPACRE` dentro de 1 %; 23 filas quedan para revisión. La referencia técnica general de LSU describe que los datos de cosecha permiten derivar rendimiento de caña a partir de conteo de tallos y peso; no reemplaza la validación de las unidades de este CSV.
 
 ### Investigación del prefijo de `TRS_TON`
 
 Se revisaron el CSV y el XLSX que publica USDA, además del perfil de las 29,529 observaciones. El XLSX oficial también contiene las 10,485 celdas compuestas: el prefijo no se originó al descargar la copia de Kaggle ni durante nuestro ETL. En cada una, el prefijo tiene exactamente dos dígitos (`00`–`99`) y va seguido por un valor con tres decimales. Todas aparecen en registros de 2010–2019; no se encontraron en 2020–2021. Se concentran en diez clones y no mostraron asociación lineal relevante con `T_SPACRE`, `TCA`, el valor final de `TRS_TON`, el año, `CROP`, `REP` o `STAGE`.
 
-La ficha pública de USDA documenta `TRS`, `TCA`, `POPN`, `MSTWT` y las repeticiones del ensayo, pero no define un campo adicional de dos dígitos en `TRS_TON`. El artículo técnico asociado explica que `REP` corresponde a las réplicas experimentales (dos en algunas etapas y tres en la etapa 5), de modo que `79` no puede tratarse como el número de repetición; además, el archivo ya tiene una columna `REP` separada. Para el ejemplo `TRS_TON = "79    227.620"`, `TCA = 43.8` y `T_SPACRE = 9,977`, el componente final da `43.8 × 227.620 = 9,969.756`, coherente con `T_SPACRE` dentro del 1 %. El prefijo no es necesario para esa medición.
+La ficha pública de USDA documenta `TRS`, `TCA`, `POPN`, `MSTWT` y las repeticiones del ensayo, pero no define un campo adicional de dos dígitos en `TRS_TON`. El artículo técnico asociado explica que `REP` corresponde a las réplicas experimentales (dos en algunas etapas y tres en la etapa 5), de modo que `79` no puede tratarse como el número de repetición; además, el archivo ya tiene una columna `REP` separada. Para el ejemplo `TRS_TON_raw = "79    227.620"`, `TCA = 43.8` y `T_SPACRE = 9,977`, el componente final (`TRS_TON = 227.620`) da `43.8 × 227.620 = 9,969.756`, coherente con `T_SPACRE` dentro del 1 %. El prefijo no es necesario para esa medición.
 
-**Conclusión y límite:** no se encontró una fuente pública que asigne significado exacto al prefijo. La evidencia es más compatible con un código auxiliar o un residuo de la estructura histórica/exportación que con una medición agronómica, pero no permite distinguir entre esas posibilidades ni llamarlo número de parcela. Se conserva el texto original, el prefijo se mantiene como componente sin interpretar y se usa el último número únicamente como candidato de `TRS_TON`; no se incorpora el prefijo a métricas ni a modelos. Cualquier interpretación más específica requiere confirmación del responsable de los datos.
+**Conclusión y límite:** no se encontró una fuente pública que asigne significado exacto al prefijo. La evidencia es más compatible con un código auxiliar o un residuo de la estructura histórica/exportación que con una medición agronómica, pero no permite distinguir entre esas posibilidades ni llamarlo número de parcela. El ETL conserva el texto original en `TRS_TON_raw`, guarda el prefijo con su formato de texto en `TRS_TON_prefijo_sin_interpretar` (por ejemplo, `"00"`) y deja el valor numérico final en `TRS_TON`. Así el prefijo no entra inadvertidamente a métricas ni modelos y tampoco se pierde información de la fuente. Cualquier interpretación más específica requiere confirmación del responsable de los datos.
 
 Este perfil se reproduce desde el CSV procesado después de ejecutar `scripts/etl_serie1.py`:
 
 ```python
 import pandas as pd
 
-datos = pd.read_csv("data/processed/serie1_etl_provisional.csv", low_memory=False)
+datos = pd.read_csv(
+    "data/processed/serie1_etl_provisional.csv",
+    dtype={"TRS_TON_prefijo_sin_interpretar": "string"},
+    low_memory=False,
+)
 prefijo = datos.loc[datos["TRS_TON_prefijo_sin_interpretar"].notna()]
 print(prefijo.groupby("YEAR").size())
 print(prefijo.groupby("CLONE").size().sort_values(ascending=False))
@@ -56,7 +60,7 @@ rendimiento de caña (TCA)
              ≈ azúcar recuperable por acre (T_SPACRE)
 ```
 
-La aproximación solo es numéricamente válida cuando las unidades de `TCA` y `TRS_TON` son compatibles. La auditoría de Serie I confirmó la relación en 29,317 de 29,340 filas positivas completas con tolerancia de 1%; el valor crudo de `TRS_TON` debe mantenerse junto al candidato numérico porque 10,485 filas tienen un prefijo sin explicar. `POPN` y `MSTWT` aportan una descomposición agronómica del rendimiento de caña; no se deben sumar al azúcar producido.
+La aproximación solo es numéricamente válida cuando las unidades de `TCA` y `TRS_TON` son compatibles. La auditoría de Serie I confirmó la relación en 29,317 de 29,340 filas positivas completas con tolerancia de 1%; `TRS_TON_raw` mantiene el texto original de las 10,485 filas con prefijo, mientras que `TRS_TON` contiene únicamente el componente numérico final. `POPN` y `MSTWT` aportan una descomposición agronómica del rendimiento de caña; no se deben sumar al azúcar producido.
 
 El valor económico indicado en el PDF puede aproximarse así, una vez confirmadas las escalas de costo y las limitaciones del supuesto:
 
@@ -74,7 +78,7 @@ No llamar beneficio neto completo a esa cifra: el enunciado solo aporta algunos 
 ## Alertas que conviene resolver en el primer notebook
 
 1. Usar la unidad USDA para `T_SPACRE` (libras por acre) y mantener documentada la discrepancia del PDF. Esta decisión ya quedó respaldada por la auditoría de fuente y unidades.
-2. Revisar las 23 filas positivas que difieren más de 1 % de `TCA × componente_final_TRS`; aclarar también el prefijo no documentado antes de cerrar las reglas de ETL.
+2. Revisar las 23 filas positivas que difieren más de 1 % de `TCA × TRS_TON`; mantener el prefijo separado mientras no exista documentación que aclare su significado.
 3. Confirmar unidad de `TCA`, escala de `POPN`, definición porcentual de `FIBER` y sentido exacto de `YEAR`.
 4. Examinar las columnas sin nombre, seis notas incrustadas y puntos `.` del CSV.
 5. Contar filas y nulos, detectar claves repetidas y averiguar la unidad de ensayo antes de agregar. No elegir una clave única por intuición.

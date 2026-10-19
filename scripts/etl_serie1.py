@@ -64,17 +64,15 @@ def convertir_mediciones(fuente: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]
         else:
             datos[columna] = numero.astype("Float64")
 
-    # Algunas celdas de TRS_TON tienen dos números. Se guardan ambos sin
-    # interpretar el prefijo; el último se usa solo como candidato provisional.
+    # Se conserva el texto original, se separa el prefijo y TRS_TON queda
+    # como la medición numérica, sin el componente auxiliar.
     texto_trs = fuente["TRS_TON"].astype("string")
     datos["TRS_TON_raw"] = texto_trs
     partes = texto_trs.str.strip().replace({"": pd.NA, ".": pd.NA}).str.extract(
         r"^(?:(?P<prefijo>\d+)\s+)?(?P<componente_final>\d+(?:\.\d+)?)$"
     )
-    datos["TRS_TON_prefijo_sin_interpretar"] = pd.to_numeric(
-        partes["prefijo"], errors="coerce"
-    ).astype("Float64")
-    datos["TRS_TON_candidato"] = pd.to_numeric(
+    datos["TRS_TON_prefijo_sin_interpretar"] = partes["prefijo"].astype("string")
+    datos["TRS_TON"] = pd.to_numeric(
         partes["componente_final"], errors="coerce"
     ).astype("Float64")
     datos["TRS_TON_formato"] = "vacio_o_formato_no_reconocido"
@@ -116,15 +114,15 @@ def marcar_duplicados(fuente: pd.DataFrame, datos: pd.DataFrame) -> int:
 
 
 def evaluar_relacion_dimensional(datos: pd.DataFrame) -> None:
-    """Compara el azúcar por acre con TCA por TRS_TON candidato."""
+    """Compara el azúcar por acre con TCA por TRS_TON."""
     filas_positivas = (
         datos["T_SPACRE"].gt(0)
         & datos["TCA"].gt(0)
-        & datos["TRS_TON_candidato"].gt(0)
+        & datos["TRS_TON"].gt(0)
     )
     ratio_observado = datos.loc[filas_positivas, "T_SPACRE"] / (
         datos.loc[filas_positivas, "TCA"]
-        * datos.loc[filas_positivas, "TRS_TON_candidato"]
+        * datos.loc[filas_positivas, "TRS_TON"]
     )
     dentro_tolerancia = ratio_observado.sub(1).abs().le(0.01)
 
@@ -231,7 +229,7 @@ def resumir_calidad(
         "decisiones": [
             "Los campos originales se conservan en columnas terminadas en _raw.",
             "Blancos y puntos se convierten en faltantes solo en columnas analíticas.",
-            "TRS_TON_candidato usa el último componente numérico; conserva el prefijo sin interpretarlo.",
+            "TRS_TON contiene el componente numérico final; el prefijo se conserva aparte como texto sin interpretar.",
             "No se eliminan, imputan ni agregan filas.",
             "Las tres columnas sin nombre se conservan como AUX_1, AUX_2 y AUX_3.",
             "Las filas con alertas se copian a un archivo de revisión y permanecen en el dataset provisional.",
