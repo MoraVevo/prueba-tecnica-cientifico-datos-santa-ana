@@ -15,6 +15,7 @@ DIRECTORIO_SALIDA = RAIZ_PROYECTO / "data" / "processed"
 RUTA_SALIDA = DIRECTORIO_SALIDA / "serie1_etl_provisional.csv"
 RUTA_REPORTE = DIRECTORIO_SALIDA / "serie1_resumen_calidad.json"
 RUTA_REVISION = DIRECTORIO_SALIDA / "serie1_filas_revision.csv"
+RUTA_EXCLUIDAS = DIRECTORIO_SALIDA / "serie1_filas_excluidas.csv"
 SHA256_ESPERADO = "5e7b13de6bda8aed51479c5fdfc3de4a28e71ccbb45e4761b6688a34b7cff4b0"
 
 COLUMNAS_NUMERICAS = [
@@ -96,7 +97,7 @@ def convertir_mediciones(fuente: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]
 
 def marcar_duplicados(fuente: pd.DataFrame, datos: pd.DataFrame) -> int:
     """Marca duplicados y cuenta grupos con mediciones distintas."""
-    datos["DUPLICADO_EXACTO"] = fuente.duplicated(keep=False)
+    datos["DUPLICADO_EXACTO_EN_FUENTE"] = fuente.duplicated(keep=False)
     datos["CLAVE_CANDIDATA_REPETIDA"] = fuente.duplicated(
         CLAVE_CANDIDATA, keep=False
     )
@@ -111,6 +112,25 @@ def marcar_duplicados(fuente: pd.DataFrame, datos: pd.DataFrame) -> int:
         mediciones_por_clave.gt(1).any(axis=1).sum()
     )
     return grupos_con_mediciones_distintas
+
+
+def excluir_copias_duplicadas(
+    fuente: pd.DataFrame, datos: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Separa las copias exactas adicionales y conserva su motivo."""
+    copias_adicionales = fuente.duplicated(keep="first")
+    filas_excluidas = datos.loc[copias_adicionales].copy()
+    filas_excluidas["MOTIVO_EXCLUSION"] = (
+        "Copia idéntica adicional; se conserva la primera aparición."
+    )
+
+    datos_analiticos = datos.loc[~copias_adicionales].copy()
+    datos_analiticos["CLAVE_CANDIDATA_REPETIDA"] = (
+        fuente.loc[~copias_adicionales]
+        .duplicated(CLAVE_CANDIDATA, keep=False)
+        .to_numpy()
+    )
+    return datos_analiticos, filas_excluidas
 
 
 def evaluar_relacion_dimensional(datos: pd.DataFrame) -> None:
@@ -150,7 +170,6 @@ def marcar_revision(datos: pd.DataFrame, columnas_error: list[str]) -> None:
             "prefijo_TRS_sin_explicar": datos[
                 "TRS_TON_prefijo_sin_interpretar"
             ].notna(),
-            "duplicado_exacto": datos["DUPLICADO_EXACTO"],
             "clave_candidata_repetida": datos["CLAVE_CANDIDATA_REPETIDA"],
             "error_de_parseo": errores_parseo,
             "fuera_de_tolerancia_dimensional": fuera_tolerancia,
@@ -162,7 +181,6 @@ def marcar_revision(datos: pd.DataFrame, columnas_error: list[str]) -> None:
     )
     datos["REQUIERE_REVISION"] = (
         datos["TRS_TON_prefijo_sin_interpretar"].notna()
-        | datos["DUPLICADO_EXACTO"]
         | datos["CLAVE_CANDIDATA_REPETIDA"]
         | errores_parseo
         | fuera_tolerancia
@@ -172,6 +190,7 @@ def marcar_revision(datos: pd.DataFrame, columnas_error: list[str]) -> None:
 def resumir_calidad(
     fuente: pd.DataFrame,
     datos: pd.DataFrame,
+    filas_excluidas: pd.DataFrame,
     sha256: str,
     columnas_error: list[str],
     grupos_con_mediciones_distintas: int,
@@ -192,7 +211,10 @@ def resumir_calidad(
     return {
         "archivo_fuente": RUTA_ENTRADA.name,
         "sha256_fuente": sha256,
-        "total_filas": int(len(fuente)),
+        "filas_fuente": int(len(fuente)),
+        "filas_dataset_analitico": int(len(datos)),
+        "filas_excluidas_del_dataset_analitico": int(len(filas_excluidas)),
+        "filas_eliminadas_del_archivo_fuente": 0,
         "columnas_fuente": list(fuente.columns),
         "marcadores_faltantes": {
             columna: {
@@ -208,10 +230,13 @@ def resumir_calidad(
             ).items()
         },
         "filas_duplicadas_exactas_incluida_primera": int(
-            datos["DUPLICADO_EXACTO"].sum()
+            fuente.duplicated(keep=False).sum()
         ),
-        "copias_duplicadas_adicionales": int(fuente.duplicated(keep="first").sum()),
-        "filas_con_clave_candidata_repetida": int(
+        "copias_duplicadas_adicionales_excluidas": int(len(filas_excluidas)),
+        "filas_con_clave_candidata_repetida_en_fuente": int(
+            fuente.duplicated(CLAVE_CANDIDATA, keep=False).sum()
+        ),
+        "filas_con_clave_candidata_repetida_en_dataset_analitico": int(
             datos["CLAVE_CANDIDATA_REPETIDA"].sum()
         ),
         "grupos_con_mediciones_distintas": grupos_con_mediciones_distintas,
@@ -224,25 +249,31 @@ def resumir_calidad(
         "filas_fuera_del_1_por_ciento": int((filas_completas & ~filas_dentro).sum()),
         "mediana_ratio_observado_esperado": float(ratios.median()),
         "filas_marcadas_para_revision": int(datos["REQUIERE_REVISION"].sum()),
-        "filas_descartadas": 0,
         "resumen_t_spacre_por_cosecha": resumen_cosecha,
         "decisiones": [
             "Los campos originales se conservan en columnas terminadas en _raw.",
             "Blancos y puntos se convierten en faltantes solo en columnas analíticas.",
             "TRS_TON contiene el componente numérico final; el prefijo se conserva aparte como texto sin interpretar.",
-            "No se eliminan, imputan ni agregan filas.",
+            "Se excluye del dataset analítico cada copia idéntica posterior a su primera aparición.",
+            "Las copias excluidas se conservan en un archivo separado con el motivo por fila; el archivo fuente no se modifica.",
+            "No se imputan ni agregan filas.",
             "Las tres columnas sin nombre se conservan como AUX_1, AUX_2 y AUX_3.",
             "Las filas con alertas se copian a un archivo de revisión y permanecen en el dataset provisional.",
         ],
     }
 
 
-def guardar_resultados(datos: pd.DataFrame, resumen: dict) -> None:
-    """Guarda la tabla provisional, el subconjunto de revisión y el reporte."""
+def guardar_resultados(
+    datos: pd.DataFrame, filas_excluidas: pd.DataFrame, resumen: dict
+) -> None:
+    """Guarda el dataset analítico, las filas excluidas y el reporte."""
     DIRECTORIO_SALIDA.mkdir(parents=True, exist_ok=True)
     filas_revision = datos.loc[datos["REQUIERE_REVISION"]].copy()
     datos.to_csv(RUTA_SALIDA, index=False, na_rep="", encoding="utf-8")
     filas_revision.to_csv(RUTA_REVISION, index=False, na_rep="", encoding="utf-8")
+    filas_excluidas.to_csv(
+        RUTA_EXCLUIDAS, index=False, na_rep="", encoding="utf-8"
+    )
     RUTA_REPORTE.write_text(
         json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8"
     )
@@ -254,13 +285,16 @@ def main() -> None:
     datos, columnas_error = convertir_mediciones(fuente)
     grupos_distintos = marcar_duplicados(fuente, datos)
     evaluar_relacion_dimensional(datos)
+    datos, filas_excluidas = excluir_copias_duplicadas(fuente, datos)
     marcar_revision(datos, columnas_error)
     resumen = resumir_calidad(
-        fuente, datos, sha256, columnas_error, grupos_distintos
+        fuente, datos, filas_excluidas, sha256, columnas_error, grupos_distintos
     )
-    guardar_resultados(datos, resumen)
+    guardar_resultados(datos, filas_excluidas, resumen)
 
-    print(f"Registros preparados: {len(datos):,}")
+    print(f"Filas de la fuente: {len(fuente):,}")
+    print(f"Filas excluidas por copia idéntica: {len(filas_excluidas):,}")
+    print(f"Registros en dataset analítico: {len(datos):,}")
     print(f"TRS_TON por formato: {resumen['conteo_formato_trs_ton']}")
     print(
         "Relación dimensional: "
@@ -270,6 +304,7 @@ def main() -> None:
     print(f"CSV provisional: {RUTA_SALIDA.relative_to(RAIZ_PROYECTO)}")
     print(f"Filas marcadas para revisión: {resumen['filas_marcadas_para_revision']:,}")
     print(f"CSV de revisión: {RUTA_REVISION.relative_to(RAIZ_PROYECTO)}")
+    print(f"CSV de filas excluidas: {RUTA_EXCLUIDAS.relative_to(RAIZ_PROYECTO)}")
     print(f"Reporte: {RUTA_REPORTE.relative_to(RAIZ_PROYECTO)}")
 
 

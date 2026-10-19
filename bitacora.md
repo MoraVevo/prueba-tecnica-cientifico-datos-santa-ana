@@ -59,3 +59,12 @@
 - Decisión de negocio del usuario: mantener el valor fuente completo para trazabilidad, pero evitar que el prefijo sin significado confirmado contamine métricas o modelos. El ETL conserva el texto fuente en `TRS_TON_raw`, el prefijo como texto en `TRS_TON_prefijo_sin_interpretar` y el componente numérico final en `TRS_TON`.
 - No se eliminaron filas ni datos del origen. El prefijo no se interpreta ni se incluye como variable agronómica; su significado sigue pendiente de confirmación documental.
 - Se actualizaron el ETL, los notebooks de auditoría y perfil, el README y los documentos de interpretación/estado. Ambos notebooks se ejecutaron sin errores. El ETL preparó 29,529 filas, mantuvo 10,485 prefijos y encontró 29,317/29,340 relaciones dimensionales dentro del 1 %.
+
+## 2026-10-19: exclusión analítica de copias exactas
+
+- Decisión del usuario: deduplicar las copias idénticas y conservarlas aparte en un DataFrame/archivo de excluidos con el motivo de exclusión.
+- `scripts/etl_serie1.py` mantiene intacto el CSV fuente, conserva la primera aparición de cada fila exacta y excluye las 126 copias adicionales del dataset analítico. Las guarda en `data/processed/serie1_filas_excluidas.csv`, con `FILA_CSV` y `MOTIVO_EXCLUSION`.
+- Los 29,403 registros analíticos se escriben en `serie1_etl_provisional.csv`. Las 224 filas que quedan en 112 grupos con claves candidatas repetidas y mediciones distintas siguen en el conjunto analítico y se marcan para revisión; no se promedian ni se eliminan.
+- Después de excluir las copias exactas, 29,191 de 29,214 filas positivas completas cumplen la tolerancia dimensional del 1 %; 23 quedan fuera. El conjunto de revisión contiene 10,500 filas.
+- Se actualizaron el README, el estado del proyecto y el notebook de perfil para distinguir el análisis de la fuente sin modificar de la salida ETL deduplicada.
+- Verificación ejecutada: `py_compile`, ETL y notebook 02 completados sin errores; las comprobaciones confirmaron que las 126 filas excluidas coinciden exactamente con las copias adicionales de la fuente, el motivo está presente en todas y fuente = analíticas + excluidas (29,529 = 29,403 + 126). `git diff --check` no reportó errores. No se hizo commit ni push.
