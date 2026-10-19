@@ -6,7 +6,7 @@ Actualización: 2026-10-19, America/Guatemala.
 
 - Desarrollar las cuatro respuestas de Serie I con el dataset entregado y los supuestos del PDF. La última corrección del usuario prevalece sobre interpretaciones anteriores: las limitaciones deben modificar certeza y supuestos, sin impedir dar tres variedades, renovación, modelo, segmentos y propuesta de ensayos.
 - Por ahora no buscar ni descargar datos externos adicionales. Las búsquedas previas de metadatos/unidades forman parte del historial. El usuario pidió centrar las conclusiones en los datos y supuestos del ejercicio, sin repetir advertencias sobre adaptación a Santa Ana.
-- La fórmula económica y sus 198 políticas se reprodujeron en una revisión independiente el 2026-10-19; no se encontró discrepancia aritmética. Esto verifica la implementación frente al método elegido, no demuestra que todos sus supuestos sean los únicos correctos. La revisión independiente del modelo supervisado y de la segmentación sigue pendiente.
+- La fórmula económica y sus 198 políticas se reprodujeron en una revisión independiente el 2026-10-19; no se encontró discrepancia aritmética. En el modelo supervisado se añadió una lectura cauta de coeficientes Ridge; la auditoría integral de métricas/fugas sigue pendiente. En la segmentación se reprodujeron las 17 pertenencias desde el ETL y se añadió sensibilidad a dimensiones, que muestra dependencia de las variables seleccionadas.
 - Español en comentarios, docstrings y explicaciones; parsimonia en código, archivos y análisis. Guardar exclusiones con motivos. Sugerir Git en hitos; ejecutar commit/push cuando se autorice.
 - Plazo informado: 48 horas; falta confirmar inicio y vencimiento absolutos. PDF exige ZIP con `.git`, sin datasets y enlace GitHub/GitLab. No convertir “lunes siguiente 8:00” en fecha sin referencia.
 
@@ -46,6 +46,7 @@ Actualización: 2026-10-19, America/Guatemala.
 - Tres algoritmos: Ridge interpretable, árbol, bosque. Historial objetivo calculado estrictamente con años anteriores. Entradas: clon, localidad, etapa, CROP, YEAR y medias históricas. No usar TCA/TRS/otras mediciones contemporáneas como predictores de esa zafra.
 - Validaciones 2019 y 2020 con entrenamiento en años anteriores; selección por MAE promedio. Ridge elegido (MAE medio 2,405.64). Año final reservado 2021.
 - Test 2021 Ridge: MAE 2,144.55 lb/acre, RMSE 2,770.97, R²≈0.25; MAE etapa 5: 1,898.11. Referencia histórica MAE 2,662.69; referencia clon-ambiente reciente ≈2,270.33. Utilidad moderada, no exagerar precisión. Todos los algoritmos fallan en R² 2019.
+- Para la Ridge evaluada en 2021, `CROP` se asocia con cerca de −802 lb/acre por unidad y `YEAR` con −25 lb/acre/año, condicionados a otras entradas. Se documenta que son coeficientes regularizados, no efectos causales ni regla de renovación.
 - Principal: 28,981 registros; 422 exclusiones con motivo. Se conservan ocho ceros fuente. Sensibilidad incluyendo alertas en entrenamiento e historia: MAE≈2,135.10 en la misma prueba limpia.
 - Se reajusta elegido hasta 2021 e ilustra entrada/predicción de 2022, sin afirmar que sea una zafra actual o evaluada.
 
@@ -55,6 +56,7 @@ Actualización: 2026-10-19, America/Guatemala.
 - Comparar K-means 2/3/4; mayor silueta con al menos tres variedades/grupo: dos grupos, silueta≈0.30.
 - Perfil 1, cuatro clones: mayor TRS≈290, menor azúcar≈7,940, conservación≈74 %, más variabilidad≈0.126. HO07-613, HOCP00-950, HOCP96-540, L03-371.
 - Perfil 2, trece clones: azúcar≈8,365, TRS≈278, conservación≈82 %, menor variación≈0.099. Incluye las tres recomendadas. Segmentos complementan economía, no son ranking.
+- Se reconstruyeron las 17 asignaciones desde el ETL. K=2 da silueta 0.300 y tamaños 4/13; K=4 da 0.302 pero crea un singleton. Al quitar productividad, ARI=1.000; quitar calidad, conservación o inestabilidad baja ARI a 0.492, 0.387 y 0.130. Los perfiles son sensibles a las dimensiones y no clases naturales demostradas.
 
 ### 4. Datos propios — documento de conclusiones
 
@@ -66,7 +68,7 @@ Actualización: 2026-10-19, America/Guatemala.
 - `scripts/descargar_serie1.py`; `scripts/etl_serie1.py`; notebooks 01–05 en orden; requisitos e instrucciones en README.
 - Notebooks 01/02: fuente/unidades, calidad y cobertura. 03: decisión económica. 04: comparación/modelo. 05: segmentos.
 - Salidas y exclusiones por análisis en `data/processed/`, ignoradas por Git. Bitácora conserva decisiones, uso de IA, sugerencias descartadas y corrección metodológica.
-- Ejecución final: notebooks 01–05 completos con el kernel explícito `prueba-santa-ana` que apunta a `.venv`; 25 celdas de código ejecutadas, cero salidas de error. JSON/esquema de notebooks comprobados. `py_compile`, `pip check` y `git diff --check` sin errores; skill `quick_validate.py`: válida. Figura de segmentos inspeccionada visualmente. Estas comprobaciones no sustituyen la revisión independiente de fórmulas, diseño y métricas.
+- Ejecución final: notebooks 01–05 completos; tras añadir sensibilidad hay 29 celdas de código y cero salidas de error guardadas. JSON/esquema de notebooks comprobados. `py_compile`, `pip check` y `git diff --check` sin errores; skill `quick_validate.py`: válida. Figura de segmentos inspeccionada visualmente. Estas comprobaciones no sustituyen la revisión independiente de fórmulas, diseño y métricas.
 
 ## Git y privacidad
 
@@ -77,9 +79,9 @@ Actualización: 2026-10-19, America/Guatemala.
 
 ## Pendiente concreto
 
-1. Revisión independiente de unidades, fórmula de rotación, ajuste de ambientes, cobertura, remuestreo, ausencia de fuga temporal, métricas y segmentación. El usuario pidió dedicarle una sesión; no bloquear la construcción del borrador por esa revisión futura.
+1. La revisión económica independiente y la reproducción/sensibilidad de la segmentación ya están documentadas. Sigue pendiente la auditoría integral del supervisado: ausencia de fuga temporal, elección/métricas, referencias y errores por ambiente. No confundir esta revisión con ejecutar los notebooks.
 2. Revisar certeza del tercer puesto y duración por frontera de cobertura; conservar sensibilidad y alternativas.
-3. El borrador completo de Serie I ya tiene commit y push (`1998c00`). Sugerir un nuevo commit cuando se cierre la revisión metodológica; no fabricar historial retroactivo.
+3. Las actualizaciones recientes de documentación y Serie I se subieron a `origin/main` en hitos; mantener commits reales y visibles, sin fabricar historial retroactivo.
 4. Series II–V, API y presentación siguen pendientes; solo hubo inspecciones remotas iniciales de otros datasets. No se afirman realizadas.
 
 ## Aclaraciones para defender la decisión económica
@@ -133,9 +135,14 @@ Las cuatro respuestas están construidas como borrador. La justificación de STA
 
 1. Revisión económica independiente completada en cuanto a reproducción aritmética, escenarios de precio, inclusión de filas marcadas y remuestreo descriptivo. No se encontró error aritmético. Los supuestos de tonelada compatible, mantenimiento anual, ajuste aditivo, cobertura y alcance del remuestreo quedaron explícitos arriba; son límites del análisis y no se resuelven con otra ejecución. La conclusión ya presenta las duraciones como políticas iniciales y no como máximos demostrados.
 2. Auditar predicción: historia estrictamente anterior al año predicho, separación temporal, ajuste de transformaciones en entrenamiento, selección de algoritmo y métricas/referencias. Ya existen tres algoritmos y train/validaciones/test temporal; no falta construirlos.
-3. Revisar segmentación: definiciones y unidades de cuatro dimensiones, escalado/elección de grupos y correspondencia entre perfiles y lectura gerencial. Ya existe propuesta de captura y ensayos; comprobar coherencia con limitaciones detectadas.
+3. Segmentación: fórmula y 17 pertenencias reconstruidas; sensibilidad por omisión de dimensión ya calculada y reproducible. Conservar la cautela sobre dependencia de variables, tamaño pequeño y ausencia de cohortes pareadas al cerrar las conclusiones.
 4. Consolidar conclusiones/notebooks/README: retirar formulaciones categóricas de renovación que contradigan la cobertura, referencias históricas superadas y lenguaje confuso; comprobar reproducción ordenada y cerrar con commit/push autorizado.
 
 Regresión económica por CROP: propuesta, todavía no ajustada. Solo es necesaria para incluir resultados b/R de esa regresión en la conclusión; no es una exigencia explícita adicional de Serie I. No extrapolar una cifra sin ajustar/evaluar el modelo. No exigir API (Serie IV), presentación (Serie V), nuevos datasets o programación lineal para dar por cerrado el análisis de Serie I.
 
-La revisión de STAGE y la auditoría económica se guardan en el commit de este hito; último push confirmado: 1998c00. Consultar `git log` para el hash local más reciente. La revisión aritmética económica se completó y no cambió resultados numéricos; siguen pendientes las revisiones independientes de los puntos 2 y 3 y la consolidación final.
+
+### Revisión de interpretabilidad supervisada y segmentación — 2026-10-19
+
+- La pregunta 2 pide tres algoritmos y uno interpretable. Se agregó a conclusiones/notebook la lectura condicional de Ridge (`CROP` ≈ −802 lb/acre por unidad; `YEAR` ≈ −25 lb/acre por año); no son efectos causales. La auditoría completa de validación/métricas queda pendiente.
+- La reconstrucción independiente del clustering desde el ETL coincide en las 17 asignaciones. La selección de K=2 y su sensibilidad a las dimensiones quedaron explicadas; los grupos no deben presentarse como clases naturales ni como ranking de variedades.
+- Notebook 05 reejecutado con cero errores tras añadir la tabla de sensibilidad. Este hito debe quedar reflejado en `origin/main`; consultar `git log` y `git status` para el hash y sincronización actuales.

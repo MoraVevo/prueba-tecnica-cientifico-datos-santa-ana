@@ -67,4 +67,4 @@ El ETL guarda 29,403 filas analíticas y separa 126 copias exactas adicionales, 
 
 ## Pendientes
 
-Revisar independientemente el modelo supervisado, la segmentación y la consistencia final de las cuatro respuestas; después priorizar las demás series, API y presentación. La ejecución sin errores solo acredita ejecución. Series II–V no se presentan como completadas. No se incorporaron datasets externos al modelado; las fuentes de contexto temporal están citadas arriba.
+Completar la auditoría independiente del modelo supervisado y la consistencia final de las cuatro respuestas. Las asignaciones y sensibilidad de la segmentación ya se reconstruyeron; sus perfiles siguen siendo exploratorios. Después priorizar las demás series, API y presentación. La ejecución sin errores solo acredita ejecución. Series II–V no se presentan como completadas. No se incorporaron datasets externos al modelado; las fuentes de contexto temporal están citadas arriba.

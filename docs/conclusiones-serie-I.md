@@ -1,6 +1,6 @@
 # Serie I: respuestas a Gerencia
 
-Estado: primer borrador completo de los cuatro apartados. La fórmula económica se reprodujo independientemente sin discrepancias aritméticas; aún falta revisar de forma independiente el modelo supervisado y la segmentación. Ejecutar un notebook no equivale a validar el análisis.
+Estado: primer borrador completo de los cuatro apartados. La fórmula económica se reprodujo independientemente sin discrepancias aritméticas. Ya se añadió una lectura cuantitativa de Ridge y se reconstruyeron independientemente las 17 pertenencias de la segmentación; la sensibilidad a las variables limita qué tan firmes deben ser sus perfiles. La revisión integral del modelo supervisado sigue pendiente. Ejecutar un notebook no equivale a validar el análisis.
 
 ## 1. Tres variedades, renovación y certeza
 
@@ -64,6 +64,8 @@ Las entradas son variedad, localidad, etapa, corte planificado, año y promedios
 
 Ridge ofrece una explicación aditiva; el árbol aporta reglas y el bosque permite interacciones. Se muestran coeficientes numéricos y reglas en el notebook, con interpretación asociativa. Tras conservar la evaluación de 2021, se reajusta Ridge hasta ese año para ilustrar una predicción de 2022, siguiente zafra disponible en el ejercicio.
 
+La lectura concreta de Ridge es que, manteniendo las demás entradas fijas, el ajuste evaluado en 2021 asocia una unidad adicional de `CROP` con aproximadamente 802 lb/acre menos y un año calendario más con 25 lb/acre menos. Son coeficientes regularizados y condicionados a los otros predictores; no demuestran que cada soca cause una caída constante ni bastan para decidir cuándo renovar. Las medias históricas del clon, la localidad y su combinación con el corte aportan el contexto previo que el modelo utiliza.
+
 La mejora en 2021 es de aproximadamente 19.5 % respecto a la referencia histórica sencilla y 5.5 % respecto a la referencia reciente más exigente. En etapa 5 el MAE es 1,898.11 lb/acre. El error absoluto agregado representa aproximadamente 25.5 % del azúcar observado; la utilidad es moderada para presupuestar y comparar escenarios, y baja para comprometer un rendimiento exacto por parcela. A US$0.20/lb, el MAE global equivale a unos US$428.91/acre de ingreso bruto, sin ser un intervalo de confianza ni error del beneficio total.
 
 En 2019 todos los algoritmos tienen R² negativo: hay una variación anual que estas entradas no explican bien. No se inventa una causa climática. La sensibilidad incluyendo alertas de calidad en entrenamiento e historia da MAE cercano a 2,135.10 en las mismas filas limpias de 2021; se conserva el escenario principal más conservador. Las predicciones deben acompañarse de errores por corte/ambiente y monitoreo de sesgo; se requiere calibración específica antes de ofrecer intervalos de predicción.
@@ -75,6 +77,10 @@ Evidencia: `notebooks/04_modelo_supervisado_serie1.ipynb`; comparación temporal
 Se segmentan 17 variedades con cobertura de plantía y dos socas, dos años y dos localidades por corte. Las restantes de etapa 5 se conservan en una lista sin segmento por falta de evidencia. Las cuatro dimensiones son productividad de azúcar, TRS, conservación segunda soca/plantía y variabilidad relativa entre localidades/años centrada por clon/corte. No se completa fibra ausente para forzar su uso.
 
 Se comparan K-means con 2, 3 y 4 grupos sobre variables estandarizadas. Se elige la mayor silueta entre soluciones con al menos tres variedades por grupo: dos segmentos, silueta aproximada de 0.30. Es una separación moderada, útil como perfil inicial y no como clasificación biológica definitiva.
+
+Una reconstrucción independiente desde el ETL reprodujo las 17 pertenencias. K=4 obtiene una silueta apenas mayor (0.302 frente a 0.300), pero deja un grupo de una sola variedad; K=3 tiene silueta 0.269 y un grupo de dos. Por la regla explícita de al menos tres variedades por grupo se mantiene K=2, no porque se haya demostrado que existan dos clases naturales.
+
+La partición también depende de las dimensiones incluidas. Al quitar productividad se conservan las mismas asignaciones (ARI=1.000); al quitar calidad, conservación en segunda soca o inestabilidad relativa, el ARI frente a la solución completa cae a 0.492, 0.387 y 0.130, respectivamente. Por eso los grupos se interpretan como perfiles conjuntos sensibles a cómo se representa calidad, longevidad y estabilidad; no como segmentos definitivos. La tabla reproducible está en el notebook 05.
 
 | Perfil | Variedades | Azúcar medio, lb/acre | TRS, lb/ton | Conservación en segunda soca | Variabilidad relativa |
 | --- | ---: | ---: | ---: | ---: | ---: |

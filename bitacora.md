@@ -212,3 +212,10 @@ Se descartó convertir un indicador binario de COVID en explicación causal o fe
 ### Granularidad de parcela y disponibilidad de agua — 2026-10-19
 
 El usuario propuso incluir tamaño de parcela, tipo de riego y estabilidad del suministro. Se incorporaron área total y área útil cosechada, sistema/fuente de agua, fechas/volumen aplicado e interrupciones, además de un registro general de eventos externos. La hipótesis de que el riego acompañe mayor productividad es plausible, pero no se presenta como resultado: habría que controlar por localidad, suelo, variedad, manejo y costo; si riego y localidad coinciden, no se separa su efecto. También se aclaró que para predicción solo deben usarse agua/manejo conocidos o planificados en la fecha de decisión. No se modificaron datos ni modelos.
+
+
+### Interpretabilidad supervisada y revisión de segmentación — 2026-10-19
+
+El enunciado de Serie I exige comparar al menos tres algoritmos e incluir uno interpretable; no exige una descomposición causal. Ridge ya tenía tabla de coeficientes y sección gerencial en el notebook. Se agregó a las conclusiones la lectura del ajuste evaluado en 2021: `CROP` ≈ −802 lb/acre por unidad y `YEAR` ≈ −25 lb/acre por año, condicionados a otras entradas. Se advierte que son asociaciones regularizadas, no pérdidas causales ni regla autónoma de renovación.
+
+Se reconstruyó de forma independiente la segmentación desde el ETL: coinciden las 17 asignaciones exportadas. La selección k=2 (silueta 0.300, tamaños 4/13) sigue la regla de al menos tres variedades por grupo; k=4 apenas supera la silueta (0.302) pero produce un grupo unitario. Se añadió al notebook una prueba reproducible omitiendo una dimensión: ARI frente a la solución completa es 1.000 sin productividad, 0.492 sin calidad, 0.387 sin conservación y 0.130 sin inestabilidad. Esto muestra que los perfiles son sensibles a las variables, especialmente a las últimas tres. El notebook 05 se ejecutó completo sin errores; no se cambiaron datos ni segmentos seleccionados.
