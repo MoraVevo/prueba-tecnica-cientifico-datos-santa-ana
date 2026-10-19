@@ -32,7 +32,13 @@ La comparación sin ajuste produce US$637.01, US$632.66 y US$601.45 por acre/añ
 
 Revisaría la decisión después de cada cosecha: mantener la siguiente soca mientras su aporte esperado supere el promedio anual de reiniciar la rotación. Las duraciones adicionales observadas con cobertura reducida se muestran en el notebook; no se afirma que sean inferiores por falta de datos. El seguimiento evita convertir la recomendación inicial en una regla rígida.
 
-Evidencia: `notebooks/03_analisis_economico_serie1.ipynb`; salidas locales de políticas, sensibilidad y remuestreo en `data/processed/`.
+Evidencia: `notebooks/03_analisis_economico_serie1.ipynb`; salidas locales de políticas, sensibilidad y remuestreo en `data/processed/`. El notebook incluye gráficas del ranking frente a otras alternativas y del aporte anual por duración, distinguiendo las extensiones con menor cobertura. Los intervalos y la sensibilidad del tercer puesto impiden interpretar el orden como superioridad estadística demostrada.
+
+### Aclaración sobre cortes no observados y renovación
+
+La ausencia de CROP 5 (sexta cosecha) ya existe en el CSV original. CROP 4 aparece en 2019 y 2020, además del último año 2021; el cierre temporal no permite explicar por sí solo todos los casos. La coexistencia de varios CROP para igual variedad/localidad/año impide interpretar una plantía posterior como renovación de la misma parcela. Sin identificación de parcela/cohorte o motivo de retiro, no se distingue renovación deliberada de un límite de seguimiento o de cobertura del archivo. No se interpreta la falta de observación como rendimiento o aporte cero.
+
+Una futura regresión económica podría estimar el aporte de cosechas adicionales, pero todavía no se ha ajustado. La decisión de prolongar debe comparar el aporte anual de rotaciones completas, incluido el costo de renovación, y revisar su sensibilidad a precio e incertidumbre. Un aporte positivo en una soca adicional no establece por sí solo que prolongar sea la mejor decisión. Una predicción para CROP 5 sería extrapolación sin contraste directo en ese corte.
 
 ## 2. Modelo supervisado para la siguiente zafra
 

@@ -140,3 +140,38 @@
 - Todo continúa como borrador pendiente de la revisión independiente solicitada. Las comprobaciones de ejecución, formato y dependencias se documentan por separado; no equivalen a validar los cálculos. No se realizó nueva búsqueda ni descarga externa. No se hizo commit ni push.
 
 - Cierre de ejecución del borrador: se ejecutaron los cinco notebooks con kernel explícito que usa `.venv/Scripts/python.exe`; los notebooks nuevos imprimen el intérprete. Se cambió el ejemplo de ejecución a `python -m nbconvert` para invocar el módulo con el intérprete elegido. Las 25 celdas de código finalizan sin salidas de error; el esquema de notebooks es válido. `py_compile`, `pip check`, `git diff --check` y validador de skill sin errores. La figura de segmentos se inspeccionó visualmente. Estas son comprobaciones de ejecución/formato/entorno y no validación independiente de los cálculos. Sin commit ni push.
+
+
+### Explicación de la selección económica y alcance de renovación
+
+El usuario solicitó entender y poder discutir la elección de variedades, cortes y el uso de acres. Se contrastó la explicación con el código y las tablas existentes del notebook 03; no se cambiaron cálculos ni se realizó la revisión independiente pendiente. El ranking usa 17 variedades con cobertura mínima, promedios de réplicas por ambiente y ajuste aditivo contra L01-299. Acre es una unidad, sin asignación de superficie. Los filtros de cobertura y la referencia son decisiones del análisis, no requisitos del PDF.
+
+Se hizo explícito un límite de la interpretación: las tres duraciones ganadoras son el último corte admitido por cobertura y las extensiones con menos datos aumentan el aporte calculado. Por tanto, no se ha demostrado una caída económica que determine el corte óptimo de renovación; las duraciones son políticas provisionales limitadas por evidencia. Esto debe discutirse antes de presentar una renovación como óptimo demostrado. Se registró también el commit/push ya autorizado y realizado: 1998c00. Estos apuntes documentales quedan sin un nuevo commit.
+
+
+### STAGE y cobertura de cosechas avanzadas
+
+STAGE es etapa del programa de selección, no etapa de crecimiento ni número de cosecha. Se añadió una sección descriptiva reproducible al notebook 02. En el ETL deduplicado, CROP 4 contiene 84 filas, todas en STAGE 5 y GLENWOOD durante 2019–2021 (27, 27 y 30 filas). HOCP14-885 aparece con CROP 0 desde 2018, CROP 1 desde 2019, CROP 2 desde 2020 y CROP 3 desde 2021; es compatible con truncamiento por el fin del archivo, sin demostrar continuidad de parcela ni duración exacta. L01-299 tiene historia desde 2010, pero CROP 4 solo aparece desde 2019, por lo que la juventud de las variedades no explica todo el desbalance. No se consultaron fuentes externas ni se ajustó una nueva regresión.
+
+Propuesta pendiente de decidir: estudiar aporte operativo por CROP, ajustando por variedad/año/localidad y separando el costo único de renovación. Empezar con efectos por categoría antes de imponer una caída constante; tratar pendientes como asociaciones y extrapolaciones como escenarios. La existencia de menos filas no prueba inviabilidad de una soca.
+
+
+### Ausencia de CROP 5 y renovación no identificable
+
+Auditoría adicional en notebook 02, sección 7: el CSV original solo contiene CROP 0–4; el ETL no limita ni reinicia CROP. CROP 4 suma 28 combinaciones clon/etapa/localidad/año (84 filas), 18 anteriores al cierre 2021. En 8 de esas 18 aparece CROP 0 al año siguiente; en 25 de las 28 ya aparecen otros cortes el mismo año. Es presencia de variedades en plantaciones de distintas edades, sin una llave que permita afirmar una transición 4→0 de la misma parcela. No se pudo identificar renovación deliberada ni atribuir toda ausencia de CROP 5 al cierre temporal. CROP 5 sería sexta cosecha y no tiene observaciones para contrastar una extrapolación. La regresión económica propuesta sigue sin ajustarse. Conservar distinción entre aporte positivo de la próxima cosecha y mejora del aporte anual de la rotación; únicamente lo segundo justifica prolongarla frente a la política comparada, bajo los supuestos del modelo. No hubo búsqueda externa ni nuevo commit.
+
+
+### Gráficas económicas solicitadas
+
+Por solicitud explícita se delegó a un agente GPT-6-Luna la elaboración de gráficas. El enunciado pide evidencia y presentación ejecutiva, pero no exige reservar estas visualizaciones para otro apartado; podrán reutilizarse después. El notebook 03 incorpora una celda con dos figuras: ranking de siete mejores aportes ajustados (tres recomendaciones resaltadas y rangos P05–P95 del remuestreo ya existente) y aporte medio anual por duración (extensiones de menor cobertura discontinuas, conteos de años/localidades y plantía negativa visible).
+
+Archivos locales: outputs/serie1_economia_ranking.png y outputs/serie1_economia_duracion.png, ignorados por Git; las figuras quedan embebidas y su código versionable en el notebook. Se inspeccionaron ambas imágenes y se corrigieron centrado de intervalos, visibilidad del aporte negativo y eje de cosechas hasta cinco; no se añaden supuestos ni una nueva regresión. La nota del ranking conserva la sensibilidad del tercer puesto a L01-283 sin ajuste; la figura de duración no afirma un óptimo económico demostrado. La revisión principal corrigió la ruta de exportación para derivarla de la raíz del ETL incluso si outputs aún no existe. Se ejecutaron las seis celdas del notebook 03 con kernel prueba-santa-ana, sin errores. Esta comprobación es de ejecución y presentación, no la validación económica independiente pendiente. Sin nuevo commit/push.
+
+
+### Claridad de las gráficas económicas y cierre en Git
+
+A petición del usuario se sustituyó la frase genérica sobre superioridad estadística por hechos concretos: L01-299 y HO12-615 tienen estimaciones muy próximas y rangos de remuestreo que se solapan; el tercer puesto cambia sin ajuste ambiental. No se realizó una prueba de diferencias ni se interpreta el solapamiento como una prueba formal.
+
+La figura de duración reemplaza anotaciones flotantes por un panel lateral identificado con nombre y color de cada variedad. Informa el número de cosecha, su CROP y los años/localidades en que se midió ese último corte: HOCP14-885, cosecha 4/CROP3, 1 año y 7 localidades; L01-299, cosecha 5/CROP4, 3 años y 1 localidad; HO12-615, cosecha 5/CROP4, 2 años y 1 localidad. El pie define las líneas continuas y discontinuas. Estos conteos describen la diversidad temporal/geográfica de las mediciones, no la duración de la rotación.
+
+Notebook 03 ejecutado de nuevo (seis celdas, cero errores) y ambas figuras inspeccionadas. Se conserva pendiente la validación económica independiente. El usuario autorizó guardar el avance acumulado de explicación, cobertura y gráficas con el commit «Documenta cobertura de cortes y mejora gráficas económicas». Esta autorización no solicita un nuevo push; comprobar el hash y estado actual con git log/status.

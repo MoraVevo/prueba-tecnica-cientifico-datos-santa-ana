@@ -5,7 +5,7 @@ Actualización: 2026-10-19, America/Guatemala.
 ## Alcance vigente
 
 - Desarrollar las cuatro respuestas de Serie I con el dataset entregado y los supuestos del PDF. La última corrección del usuario prevalece sobre interpretaciones anteriores: las limitaciones deben modificar certeza y supuestos, sin impedir dar tres variedades, renovación, modelo, segmentos y propuesta de ensayos.
-- Por ahora no buscar ni descargar datos externos adicionales. Las búsquedas previas de metadatos/unidades forman parte del historial; liberación comercial o adaptación a Santa Ana no son condiciones para resolver este ejercicio.
+- Por ahora no buscar ni descargar datos externos adicionales. Las búsquedas previas de metadatos/unidades forman parte del historial. El usuario pidió centrar las conclusiones en los datos y supuestos del ejercicio, sin repetir advertencias sobre adaptación a Santa Ana.
 - Cálculos/métricas reproducibles pero pendientes de revisión independiente con tiempo específico. Ejecutar sin errores no es validar fórmula ni negocio.
 - Español en comentarios, docstrings y explicaciones; parsimonia en código, archivos y análisis. Guardar exclusiones con motivos. Sugerir Git en hitos; ejecutar commit/push cuando se autorice.
 - Plazo informado: 48 horas; falta confirmar inicio y vencimiento absolutos. PDF exige ZIP con `.git`, sin datasets y enlace GitHub/GitLab. No convertir “lunes siguiente 8:00” en fecha sin referencia.
@@ -62,7 +62,7 @@ Actualización: 2026-10-19, America/Guatemala.
 ## Git y privacidad
 
 - Repositorio privado: https://github.com/MoraVevo/prueba-tecnica-cientifico-datos-santa-ana ; rama `main`, remoto `origin`.
-- Último commit observado `e1adc18`, “Excluye copias exactas del dataset analítico”. Nuevos análisis, simplificación ETL y documentación sin commit ni push. No hay autorización nueva para publicarlos o invitar evaluadores.
+- Último commit observado `1998c00`, “Completa borrador analítico de Serie I”, realizado y enviado a `origin/main` por petición del usuario. Las revisiones posteriores de cobertura y gráficas se cierran con un commit local autorizado; consultar git log para su hash. El último push confirmado corresponde a 1998c00. El repositorio sigue privado.
 - `AGENTS.md` privado e ignorado; historial main reescrito anteriormente. La skill conserva advertencia de SHA antiguos aún consultables en GitHub y respaldo fuera del proyecto. No afirmar borrado universal del historial anterior.
 - PDF, datasets y entornos ignorados. Revisar ZIP/acceso antes de entrega.
 
@@ -70,5 +70,42 @@ Actualización: 2026-10-19, America/Guatemala.
 
 1. Revisión independiente de unidades, fórmula de rotación, ajuste de ambientes, cobertura, remuestreo, ausencia de fuga temporal, métricas y segmentación. El usuario pidió dedicarle una sesión; no bloquear la construcción del borrador por esa revisión futura.
 2. Revisar certeza del tercer puesto y duración por frontera de cobertura; conservar sensibilidad y alternativas.
-3. Guardar un commit coherente cuando el usuario lo autorice; no fabricar historial retroactivo.
+3. El borrador completo de Serie I ya tiene commit y push (`1998c00`). Sugerir un nuevo commit cuando se cierre la revisión metodológica; no fabricar historial retroactivo.
 4. Series II–V, API y presentación siguen pendientes; solo hubo inspecciones remotas iniciales de otros datasets. No se afirman realizadas.
+
+## Aclaraciones para defender la decisión económica
+
+- No se asignó superficie a las variedades: acre es la unidad de comparación. Una cosecha anual y escala proporcional son supuestos, no una medición de superficie asignada.
+- Se evaluaron 17 variedades elegibles de 40 presentes en la base económica de etapa 5; 23 quedaron fuera del ranking por la cobertura mínima declarada. Para cada elegible, el código sí compara duraciones de una cosecha hasta el último corte admitido, no solo tres o cuatro.
+- L01-299 se eligió como referencia con amplia cobertura (393 celdas clon/corte/año/localidad; 12 años y 15 localidades en total); no es la variedad con más celdas. El ajuste aditivo es una decisión metodológica, no una exigencia del PDF ni una corrección causal demostrada.
+- Dos años y dos localidades por corte y exigir plantía/dos socas son filtros propuestos por el análisis. No son garantías estadísticas ni reglas del enunciado.
+- En las tres recomendaciones, la mejor duración coincide con el último corte admitido por cobertura. Las extensiones observadas con menor cobertura aumentan el aporte calculado: HOCP14-885 pasa de 727.58 (3 cosechas) a 753.75 (4); L01-299 de 632.66 (4) a 667.14 (5); HO12-615 de 629.21 (4) a 631.78 (5). No se identificó una caída del aporte que establezca un máximo económico interior. Explicar la renovación como política provisional respaldada hasta ese corte y revisar este criterio antes de afirmar una duración óptima.
+- El ranking económico procede de medias por ambiente y enumeración de políticas; no de las predicciones Ridge ni del agrupamiento. Los escenarios de precio verificaron duración dentro de cada variedad; no equivalen a una optimización robusta de una cartera de tres variedades.
+
+
+### STAGE y cobertura de cosechas avanzadas
+
+STAGE es etapa del programa de selección, no etapa de crecimiento ni número de cosecha. Se añadió una sección descriptiva reproducible al notebook 02. En el ETL deduplicado, CROP 4 contiene 84 filas, todas en STAGE 5 y GLENWOOD durante 2019–2021 (27, 27 y 30 filas). HOCP14-885 aparece con CROP 0 desde 2018, CROP 1 desde 2019, CROP 2 desde 2020 y CROP 3 desde 2021; es compatible con truncamiento por el fin del archivo, sin demostrar continuidad de parcela ni duración exacta. L01-299 tiene historia desde 2010, pero CROP 4 solo aparece desde 2019, por lo que la juventud de las variedades no explica todo el desbalance. No se consultaron fuentes externas ni se ajustó una nueva regresión.
+
+Propuesta pendiente de decidir: estudiar aporte operativo por CROP, ajustando por variedad/año/localidad y separando el costo único de renovación. Empezar con efectos por categoría antes de imponer una caída constante; tratar pendientes como asociaciones y extrapolaciones como escenarios. La existencia de menos filas no prueba inviabilidad de una soca.
+
+
+### Ausencia de CROP 5 y renovación no identificable
+
+Auditoría adicional en notebook 02, sección 7: el CSV original solo contiene CROP 0–4; el ETL no limita ni reinicia CROP. CROP 4 suma 28 combinaciones clon/etapa/localidad/año (84 filas), 18 anteriores al cierre 2021. En 8 de esas 18 aparece CROP 0 al año siguiente; en 25 de las 28 ya aparecen otros cortes el mismo año. Es presencia de variedades en plantaciones de distintas edades, sin una llave que permita afirmar una transición 4→0 de la misma parcela. No se pudo identificar renovación deliberada ni atribuir toda ausencia de CROP 5 al cierre temporal. CROP 5 sería sexta cosecha y no tiene observaciones para contrastar una extrapolación. La regresión económica propuesta sigue sin ajustarse. Conservar distinción entre aporte positivo de la próxima cosecha y mejora del aporte anual de la rotación; únicamente lo segundo justifica prolongarla frente a la política comparada, bajo los supuestos del modelo. No hubo búsqueda externa ni nuevo commit.
+
+
+### Gráficas económicas solicitadas
+
+Por solicitud explícita se delegó a un agente GPT-6-Luna la elaboración de gráficas. El enunciado pide evidencia y presentación ejecutiva, pero no exige reservar estas visualizaciones para otro apartado; podrán reutilizarse después. El notebook 03 incorpora una celda con dos figuras: ranking de siete mejores aportes ajustados (tres recomendaciones resaltadas y rangos P05–P95 del remuestreo ya existente) y aporte medio anual por duración (extensiones de menor cobertura discontinuas, conteos de años/localidades y plantía negativa visible).
+
+Archivos locales: outputs/serie1_economia_ranking.png y outputs/serie1_economia_duracion.png, ignorados por Git; las figuras quedan embebidas y su código versionable en el notebook. Se inspeccionaron ambas imágenes y se corrigieron centrado de intervalos, visibilidad del aporte negativo y eje de cosechas hasta cinco; no se añaden supuestos ni una nueva regresión. La nota del ranking conserva la sensibilidad del tercer puesto a L01-283 sin ajuste; la figura de duración no afirma un óptimo económico demostrado. La revisión principal corrigió la ruta de exportación para derivarla de la raíz del ETL incluso si outputs aún no existe. Se ejecutaron las seis celdas del notebook 03 con kernel prueba-santa-ana, sin errores. Esta comprobación es de ejecución y presentación, no la validación económica independiente pendiente. Sin nuevo commit/push.
+
+
+### Claridad de las gráficas económicas y cierre en Git
+
+A petición del usuario se sustituyó la frase genérica sobre superioridad estadística por hechos concretos: L01-299 y HO12-615 tienen estimaciones muy próximas y rangos de remuestreo que se solapan; el tercer puesto cambia sin ajuste ambiental. No se realizó una prueba de diferencias ni se interpreta el solapamiento como una prueba formal.
+
+La figura de duración reemplaza anotaciones flotantes por un panel lateral identificado con nombre y color de cada variedad. Informa el número de cosecha, su CROP y los años/localidades en que se midió ese último corte: HOCP14-885, cosecha 4/CROP3, 1 año y 7 localidades; L01-299, cosecha 5/CROP4, 3 años y 1 localidad; HO12-615, cosecha 5/CROP4, 2 años y 1 localidad. El pie define las líneas continuas y discontinuas. Estos conteos describen la diversidad temporal/geográfica de las mediciones, no la duración de la rotación.
+
+Notebook 03 ejecutado de nuevo (seis celdas, cero errores) y ambas figuras inspeccionadas. Se conserva pendiente la validación económica independiente. El usuario autorizó guardar el avance acumulado de explicación, cobertura y gráficas con el commit «Documenta cobertura de cortes y mejora gráficas económicas». Esta autorización no solicita un nuevo push; comprobar el hash y estado actual con git log/status.
