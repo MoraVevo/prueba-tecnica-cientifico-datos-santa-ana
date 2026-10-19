@@ -74,24 +74,26 @@ Evidencia: `notebooks/04_modelo_supervisado_serie1.ipynb`; comparación temporal
 
 ## 3. Segmentación y significado gerencial
 
-Se segmentan 17 variedades con cobertura de plantía y dos socas, dos años y dos localidades por corte. Las restantes de etapa 5 se conservan en una lista sin segmento por falta de evidencia. Las cuatro dimensiones son productividad de azúcar, TRS, conservación segunda soca/plantía y variabilidad relativa entre localidades/años centrada por clon/corte. No se completa fibra ausente para forzar su uso.
+Se segmentan 17 variedades de etapa 5 con cobertura de plantía y dos socas, dos años y dos localidades por corte. Las otras 23 quedan en una lista con el motivo de cobertura insuficiente. Cada variedad se representa por productividad de azúcar, calidad TRS, conservación segunda soca/plantía y variabilidad relativa entre localidades/años, centrada por variedad/corte. Productividad y calidad dan igual peso a los tres cortes; la fibra no se completa para forzar su uso.
 
-Se comparan K-means con 2, 3 y 4 grupos sobre variables estandarizadas. Se elige la mayor silueta entre soluciones con al menos tres variedades por grupo: dos segmentos, silueta aproximada de 0.30. Es una separación moderada, útil como perfil inicial y no como clasificación biológica definitiva.
+La conservación se compara dentro de los mismos años y localidades de cada variedad: media de segunda soca dividida entre media de plantía en esos ambientes comunes. Se usan 840 comparaciones, con 18–110 ambientes por variedad, 2–12 años y 11–13 localidades. Los 678 ambientes sin ambos cortes se conservan aparte y siguen aportando a las otras dimensiones. Esto reduce diferencias de composición entre cortes, sin identificar la misma parcela ni demostrar una pérdida causal por edad.
 
-Una reconstrucción independiente desde el ETL reprodujo las 17 pertenencias. K=4 obtiene una silueta apenas mayor (0.302 frente a 0.300), pero deja un grupo de una sola variedad; K=3 tiene silueta 0.269 y un grupo de dos. Por la regla explícita de al menos tres variedades por grupo se mantiene K=2, no porque se haya demostrado que existan dos clases naturales.
+Se mantienen cuatro dimensiones estandarizadas y K-means con **dos perfiles elegidos por parsimonia y lectura gerencial**. Las alternativas K=3 y K=4 dejan una variedad sola; se prefiere revisarla individualmente antes de añadir otro segmento. La silueta queda como diagnóstico secundario (0.254 en K=2, frente a 0.265 en K=4), sin determinar la elección ni demostrar clases naturales.
 
-La partición también depende de las dimensiones incluidas. Al quitar productividad se conservan las mismas asignaciones (ARI=1.000); al quitar calidad, conservación en segunda soca o inestabilidad relativa, el ARI frente a la solución completa cae a 0.492, 0.387 y 0.130, respectivamente. Por eso los grupos se interpretan como perfiles conjuntos sensibles a cómo se representa calidad, longevidad y estabilidad; no como segmentos definitivos. La tabla reproducible está en el notebook 05.
-
-| Perfil | Variedades | Azúcar medio, lb/acre | TRS, lb/ton | Conservación en segunda soca | Variabilidad relativa |
+| Perfil | Variedades | Azúcar medio, lb/acre | TRS, lb/ton | Conservación en segunda soca | Variabilidad del índice relativo |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 1: más TRS, más caída y variación | 4 | 7,940 | 290 | 74 % | 0.126 |
-| 2: más productividad y conservación | 13 | 8,365 | 278 | 82 % | 0.099 |
+| 1: mayor caída y variabilidad medias | 5 | 7,997 | 290 | 75.4 % | 12.1 puntos porcentuales |
+| 2: mayor productividad y conservación medias | 12 | 8,376 | 277 | 82.6 % | 9.8 puntos porcentuales |
 
-Perfil 1: HO07-613, HOCP00-950, HOCP96-540 y L03-371. Su calidad más alta no compensa automáticamente la menor productividad/conservación; conviene revisar económicamente cada soca con mayor cautela. Perfil 2: las otras trece variedades elegibles, incluidas las tres recomendadas. Permite explorar permanencia de socas y ampliación según su aporte, evitando tratar a todos sus miembros como igualmente buenos.
+Perfil 1: HO05-961, HO07-613, HOCP00-950, HOCP96-540 y L03-371. Conviene vigilar el aporte de cada soca y revisar su continuidad individual antes de ampliar. El TRS más alto es una media del grupo: HOCP96-540 tiene aproximadamente 267 lb/ton y la mayor variabilidad relativa de las 17 variedades.
 
-El cociente de conservación usa medias de muestras por corte, no seguimiento causal de una misma parcela. La composición de ensayos, poca muestra de variedades y ausencia de causas de descarte afectan los perfiles. La segmentación complementa el ranking económico y el modelo supervisado; no sustituye esas decisiones.
+Perfil 2: las otras doce variedades elegibles, incluidas las tres recomendadas económicamente. Respalda evaluar continuidad de socas dentro del horizonte observado y comparar aportes individuales. Las propiedades no son uniformes: HOCP14-885 tiene alrededor de 75 % de conservación en ambientes comunes, pese a la mayor conservación media del grupo. Los perfiles se determinan con las cuatro dimensiones y no fijan un umbral de renovación.
 
-Evidencia: `notebooks/05_segmentacion_variedades_serie1.ipynb`; miembros, perfiles y alternativas de K en `data/processed/`.
+La construcción de las entradas importa más que una mejora de la métrica interna. HO05-961 pasa de 83.6 % de conservación sin emparejar a 76.0 % en ambientes comunes y cambia del Perfil 2 al 1 respecto a la versión anterior; esa comparación tiene solo dos años. Al usar agrupamiento jerárquico Ward, L99-226 cambia de perfil. Ambos casos requieren revisión individual. La omisión de variabilidad es la que más modifica las pertenencias (seis variedades); representa un cambio en la pregunta de negocio y no justifica retirar una dimensión solicitada.
+
+La reconstrucción independiente desde el ETL reprodujo las cuatro entradas y las 17 pertenencias actuales. La certeza sigue siendo exploratoria: productividad y TRS describen coberturas distintas entre variedades; la referencia ambiental de variabilidad también cambia de composición y las dimensiones están parcialmente correlacionadas. El cociente de conservación no sigue cohortes ni observa causas de retiro. La segmentación orienta seguimiento; la ampliación y renovación se resuelven con el análisis económico y la evidencia individual, cuyas tres recomendaciones se mantienen.
+
+Evidencia: `notebooks/05_segmentacion_variedades_serie1.ipynb`; tabla individual con unidades y cobertura, gráfica de las cuatro dimensiones, comparación de alternativas y sensibilidad. Salidas y exclusiones trazables en `data/processed/`.
 
 ## 4. Datos propios y diseño de ensayos propuesto
 

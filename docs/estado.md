@@ -8,6 +8,7 @@ Actualización: 2026-10-19, America/Guatemala.
 - Por ahora no buscar ni descargar datos externos adicionales. Las búsquedas previas de metadatos/unidades forman parte del historial. El usuario pidió centrar las conclusiones en los datos y supuestos del ejercicio, sin repetir advertencias sobre adaptación a Santa Ana.
 - La fórmula económica y sus 198 políticas se reprodujeron en una revisión independiente el 2026-10-19; no se encontró discrepancia aritmética. En el modelo supervisado se añadió una lectura cauta de coeficientes Ridge; la auditoría integral de métricas/fugas sigue pendiente. En la segmentación se reprodujeron las 17 pertenencias desde el ETL y se añadió sensibilidad a dimensiones, que muestra dependencia de las variables seleccionadas.
 - Español en comentarios, docstrings y explicaciones; parsimonia en código, archivos y análisis. Guardar exclusiones con motivos. Sugerir Git en hitos; ejecutar commit/push cuando se autorice.
+- Preferencia explícita del usuario: en modelos no supervisados priorizar interpretabilidad y utilidad gerencial. Silueta, Davies–Bouldin e inercia son diagnósticos secundarios; no elegir grupos ni quitar dimensiones para optimizarlos.
 - Plazo informado: 48 horas; falta confirmar inicio y vencimiento absolutos. PDF exige ZIP con `.git`, sin datasets y enlace GitHub/GitLab. No convertir “lunes siguiente 8:00” en fecha sin referencia.
 
 ## Fuente y preparación
@@ -53,11 +54,14 @@ Actualización: 2026-10-19, America/Guatemala.
 
 ### 3. Segmentos — notebook 05
 
-- 17 variedades de etapa 5 con plantía/dos socas y dos años/localidades por corte. Resto conservado sin segmento por cobertura. Cuatro variables estandarizadas: azúcar, TRS, conservación segunda soca/plantía, variación ambiental relativa centrada por clon/corte.
-- Comparar K-means 2/3/4; mayor silueta con al menos tres variedades/grupo: dos grupos, silueta≈0.30.
-- Perfil 1, cuatro clones: mayor TRS≈290, menor azúcar≈7,940, conservación≈74 %, más variabilidad≈0.126. HO07-613, HOCP00-950, HOCP96-540, L03-371.
-- Perfil 2, trece clones: azúcar≈8,365, TRS≈278, conservación≈82 %, menor variación≈0.099. Incluye las tres recomendadas. Segmentos complementan economía, no son ranking.
-- Se reconstruyeron las 17 asignaciones desde el ETL. K=2 da silueta 0.300 y tamaños 4/13; K=4 da 0.302 pero crea un singleton. Al quitar productividad, ARI=1.000; quitar calidad, conservación o inestabilidad baja ARI a 0.492, 0.387 y 0.130. Los perfiles son sensibles a las dimensiones y no clases naturales demostradas.
+- Versión vigente: 17 variedades de etapa 5, plantía/dos socas, dos años/localidades por corte; otras 23 conservadas con motivo. Cuatro entradas estandarizadas: azúcar, TRS, conservación y variabilidad ambiental relativa centrada por variedad/corte. Conteos de cobertura y códigos no entran a la distancia.
+- Mejora de conservación: CROP 2/CROP 0 usando exactamente los mismos años/localidades de cada variedad. Hay 840 ambientes comparables (18–110 por variedad, 2–12 años y 11–13 localidades); 678 ambientes incompletos quedan en archivo con motivo, sin retirarlos de otras dimensiones. Sigue siendo comparación de plantaciones distintas, sin causalidad ni vida útil máxima.
+- K=2 se elige explícitamente por parsimonia y lectura gerencial, con métricas secundarias. K=3/4 generan un grupo unitario. Silueta K=2: 0.254; K=3: 0.229; K=4: 0.265. Se eliminó la selección automática de máxima silueta y la regla rígida de al menos tres variedades por grupo.
+- Perfil 1: cinco variedades, azúcar≈7,997, TRS≈290, conservación≈75.4 %, variabilidad del índice≈12.1 pp. HO05-961, HO07-613, HOCP00-950, HOCP96-540 y L03-371. Mayor vigilancia de continuidad de socas, con excepciones individuales visibles.
+- Perfil 2: doce variedades, azúcar≈8,376, TRS≈277, conservación≈82.6 %, variabilidad≈9.8 pp. Incluye las tres recomendadas económicamente. No todas presentan la misma conservación ni son igualmente rentables.
+- HO05-961 cambia desde la versión anterior: conservación 83.6 % sin emparejar → 76.0 % en ambientes comunes, y Perfil 2 → 1; solo dos años comparables. Ward cambia L99-226 de perfil. Sensibilidad por omisión: ARI≈0.560/0.339/0.560/0.026 al retirar productividad/calidad/conservación/variabilidad, con 2/3/2/6 cambios; omitir una dimensión cambia la pregunta, no es motivo para descartarla.
+- Reconstrucción independiente desde el ETL de las cuatro entradas y 17 asignaciones actuales: coincidencia numérica (diferencia máxima <1e-12). Entradas, perfiles y métricas sin NaN/inf. Faltantes estructurales en el archivo de ambientes sin ambos cortes son intencionales. Se muestran unidades originales y soporte individual; gráfica de cuatro dimensiones en el notebook y `outputs/serie1_segmentos_perfiles.png` inspeccionada visualmente.
+- Certeza exploratoria: productividad/TRS con coberturas diferentes, referencia ambiental variable, dimensiones parcialmente correlacionadas y ausencia de parcelas/cohortes. Los segmentos complementan la comparación económica; las tres recomendaciones no cambian.
 
 ### 4. Datos propios — documento de conclusiones
 
@@ -69,7 +73,7 @@ Actualización: 2026-10-19, America/Guatemala.
 - `scripts/descargar_serie1.py`; `scripts/etl_serie1.py`; notebooks 01–05 en orden; requisitos e instrucciones en README.
 - Notebooks 01/02: fuente/unidades, calidad y cobertura. 03: decisión económica. 04: comparación/modelo. 05: segmentos.
 - Salidas y exclusiones por análisis en `data/processed/`, ignoradas por Git. Bitácora conserva decisiones, uso de IA, sugerencias descartadas y corrección metodológica.
-- Ejecución final: notebooks 01–05 completos; tras añadir sensibilidad hay 29 celdas de código y cero salidas de error guardadas. JSON/esquema de notebooks comprobados. `py_compile`, `pip check` y `git diff --check` sin errores; skill `quick_validate.py`: válida. Figura de segmentos inspeccionada visualmente. Estas comprobaciones no sustituyen la revisión independiente de fórmulas, diseño y métricas.
+- Ejecución final: notebooks 01–05 completos; tras la revisión de segmentación hay 30 celdas de código y cero salidas de error guardadas. JSON/esquema de notebooks comprobados. `py_compile`, `pip check` y `git diff --check` sin errores; skill `quick_validate.py`: válida. Figura de segmentos inspeccionada visualmente. Estas comprobaciones no sustituyen la revisión independiente de fórmulas, diseño y métricas.
 
 ## Git y privacidad
 
@@ -147,3 +151,8 @@ Regresión económica por CROP: propuesta, todavía no ajustada. Solo es necesar
 - La pregunta 2 pide tres algoritmos y uno interpretable. Se agregó a conclusiones/notebook la lectura condicional de Ridge (`CROP` ≈ −802 lb/acre por unidad; `YEAR` ≈ −25 lb/acre por año); no son efectos causales. La auditoría completa de validación/métricas queda pendiente.
 - La reconstrucción independiente del clustering desde el ETL coincide en las 17 asignaciones. La selección de K=2 y su sensibilidad a las dimensiones quedaron explicadas; los grupos no deben presentarse como clases naturales ni como ranking de variedades.
 - Notebook 05 reejecutado con cero errores tras añadir la tabla de sensibilidad. Este hito debe quedar reflejado en `origin/main`; consultar `git log` y `git status` para el hash y sincronización actuales.
+
+### Hito de Git y revisión no supervisada — 2026-10-19
+
+- Commit de Ridge solicitado por el usuario: `cdddb7e`, «Explica sesgo temporal del modelo Ridge», subido a `origin/main` (push confirmado). La revisión no supervisada posterior queda sin un segundo commit: README, bitácora, conclusiones, estado y notebook 05. Mensaje sugerido: «Mejora interpretación y comparación ambiental de segmentos».
+- Se priorizó interpretación por instrucción expresa: entradas comparables, dos perfiles sencillos, unidades/soporte y excepciones visibles. Se mantienen cuatro dimensiones y K-means; la nueva silueta menor no se trata como un retroceso por sí sola. La sección 3 de este archivo y las conclusiones contienen los resultados vigentes, que sustituyen las cifras 4/13 y conservación no emparejada de notas históricas anteriores.

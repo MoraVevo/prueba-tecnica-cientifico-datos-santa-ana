@@ -8,13 +8,13 @@ El CSV oficial y la copia Kaggle del enunciado se verificaron como idénticos. E
 
 ## Serie I: cuatro respuestas
 
-Se presenta un **primer borrador completo**. La fórmula económica se reprodujo de forma independiente sin detectar discrepancias aritméticas; siguen pendientes la revisión independiente del modelo supervisado y la segmentación. Las limitaciones de cobertura, ajuste ambiental y costos se reflejan en la certeza de las conclusiones. Se utiliza el dataset entregado y escenarios económicos explícitos.
+Se presenta un **primer borrador completo**. La fórmula económica se reprodujo de forma independiente sin detectar discrepancias aritméticas; la segmentación también se reconstruyó y revisó priorizando interpretación. Sigue pendiente la revisión integral del modelo supervisado. Las limitaciones de cobertura, ajuste ambiental y costos se reflejan en la certeza de las conclusiones. Se utiliza el dataset entregado y escenarios económicos explícitos.
 
 | Pregunta | Respuesta del borrador | Evidencia |
 | --- | --- | --- |
 | Variedades y renovación | HOCP14-885, L01-299 y HO12-615 encabezan el aporte parcial anual estimado entre las 17 variedades que cumplen la cobertura propuesta. Duraciones iniciales: tres, cuatro y cuatro cosechas. La recomendación de HO12-615 como tercera opción está condicionada al ajuste ambiental aditivo; con promedios directos, L01-283 queda por encima. Prolongar podría elevar el aporte, aunque los cortes adicionales tienen menor respaldo; no se ha demostrado un máximo económico. | Notebook 03 |
 | Modelo supervisado | Ridge, árbol y bosque; selección por validación temporal 2019–2020 y evaluación reservada 2021. Ridge elegido: MAE 2,145 lb/acre, R² 0.25; utilidad moderada y errores visibles. | Notebook 04 |
-| Segmentación | Dos perfiles sobre productividad, TRS, conservación en soca y estabilidad; 17 variedades segmentadas y restantes con razón de cobertura insuficiente. | Notebook 05 |
+| Segmentación | Dos perfiles de 5 y 12 variedades, elegidos por interpretación y parsimonia. Productividad, TRS, conservación en ambientes comunes y variabilidad relativa; cobertura y excepciones individuales visibles. Otras 23 variedades quedan sin segmento por cobertura insuficiente. | Notebook 05 |
 | Datos y ensayos propios | Seguimiento de parcela/cohorte, mediciones y costos; variedades aleatorizadas por bloques/sitios y seguimiento de socas; fase para contrastar políticas de renovación. | Documento de conclusiones |
 
 El detalle de recomendaciones, certeza, impacto y riesgos está en [conclusiones de Serie I](docs/conclusiones-serie-I.md). Tres cosechas significan plantía + dos socas; cuatro significan plantía + tres socas.
@@ -67,4 +67,4 @@ El ETL guarda 29,403 filas analíticas y separa 126 copias exactas adicionales, 
 
 ## Pendientes
 
-Completar la auditoría independiente del modelo supervisado y la consistencia final de las cuatro respuestas. Las asignaciones y sensibilidad de la segmentación ya se reconstruyeron; sus perfiles siguen siendo exploratorios. Después priorizar las demás series, API y presentación. La ejecución sin errores solo acredita ejecución. Series II–V no se presentan como completadas. No se incorporaron datasets externos al modelado; las fuentes de contexto temporal están citadas arriba.
+Completar la auditoría independiente del modelo supervisado y la consistencia final de las cuatro respuestas. Las cuatro entradas y las 17 asignaciones de la segmentación se reconstruyeron tras mejorar la comparación de cortes en ambientes comunes; sus perfiles siguen siendo exploratorios. Después priorizar las demás series, API y presentación. La ejecución sin errores solo acredita ejecución. Series II–V no se presentan como completadas. No se incorporaron datasets externos al modelado; las fuentes de contexto temporal están citadas arriba.
