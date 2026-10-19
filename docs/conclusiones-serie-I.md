@@ -1,6 +1,6 @@
 # Serie I: respuestas a Gerencia
 
-Estado: primer borrador completo de los cuatro apartados, con cálculos y métricas reproducibles. Sigue pendiente la revisión independiente de fórmulas, supuestos y resultados acordada. Ejecutar un notebook no equivale a validar el análisis.
+Estado: primer borrador completo de los cuatro apartados. La fórmula económica se reprodujo independientemente sin discrepancias aritméticas; aún falta revisar de forma independiente el modelo supervisado y la segmentación. Ejecutar un notebook no equivale a validar el análisis.
 
 ## 1. Tres variedades, renovación y certeza
 
@@ -10,11 +10,13 @@ Recomendaría ampliar las siguientes variedades dentro del ejercicio:
 | --- | --- | ---: | --- |
 | HoCP14-885 | Después de 3 cosechas: plantía + 2 socas | US$727.58 | Media-baja para duración: fuerte desempeño, pero solo dos años en el último corte admitido; la tercera soca tiene un año y queda como sensibilidad. |
 | L01-299 | Después de 4 cosechas: plantía + 3 socas | US$632.66 | Media: cada corte recomendado tiene al menos diez años y doce localidades; el horizonte de cinco cosechas tiene datos de una localidad y merece seguimiento. |
-| Ho12-615 | Después de 4 cosechas: plantía + 3 socas | US$629.21 | Media-baja: al menos tres años y once localidades por corte; el tercer puesto cambia frente a L01-283 al omitir el ajuste ambiental. |
+| Ho12-615 | Después de 4 cosechas: plantía + 3 socas | US$629.21 | Media-baja: queda tercera si se aplica el ajuste ambiental aditivo; con promedios directos, L01-283 la supera. |
 
 La duración maximiza el aporte promedio anual de repetir una rotación: sumar ingresos y costos esperados de sus cortes, descontar renovación una sola vez y dividir por el número de cosechas. Se supone una cosecha por año, renovación inmediata, costos constantes y sin descuento ni año de descanso. El aporte incluye US$14/ton de caña, US$350/acre/año y US$1,100/acre por renovación; no es una utilidad neta completa.
 
-Se utiliza etapa 5. Se promedian repeticiones por clon/corte/año/localidad y se ajusta cada variedad por su diferencia respecto a L01-299 en ambientes compartidos. Se exige plantía y dos socas con al menos dos años y dos localidades por corte; la tercera soca se admite si alcanza esa cobertura. La falta de llave de cohorte limita la interpretación como flujo realizado, pero permite comparar políticas esperadas bajo estos supuestos. No se atribuye causalidad a la edad por esta comparación.
+Para la recomendación económica se utilizan los ensayos outfield, correspondientes a `STAGE=5`, porque su diseño documentado tiene parcelas más largas, tres repeticiones y evaluación en múltiples localidades. Así se evita mezclar directamente etapas con distintos diseños y procedimientos de medición. Esta delimitación no convierte las etapas anteriores en datos incorrectos: se conservan y el modelo supervisado las utiliza. [Fuente: Shahi et al., sección 2.1](https://acsess.onlinelibrary.wiley.com/doi/10.1002/tpg2.20545).
+
+Se promedian repeticiones por clon/corte/año/localidad y se ajusta cada variedad por su diferencia respecto a L01-299 en ambientes compartidos. Se exige plantía y dos socas con al menos dos años y dos localidades por corte; la tercera soca se admite si alcanza esa cobertura. La falta de llave de cohorte limita la interpretación como flujo realizado, pero permite comparar políticas esperadas bajo estos supuestos. No se atribuye causalidad a la edad por esta comparación.
 
 ### Precio volátil
 
@@ -26,13 +28,19 @@ Se utiliza etapa 5. Se promedian repeticiones por clon/corte/año/localidad y se
 
 Son escenarios ilustrativos de caída/subida de 25 % alrededor del precio del PDF, sin probabilidades ni datos de mercado añadidos. Las duraciones recomendadas se mantienen en esos escenarios, mientras el aporte cambia sustancialmente. Precios fuera del rango y otros costos pueden cambiar la política.
 
-Con 500 remuestras de años, el rango central del 90 % del aporte de la política elegida es aproximadamente US$652–834 para HoCP14-885, US$572–700 para L01-299 y US$570–684 para Ho12-615. La misma duración reaparece en 100 %, 100 % y 98.6 % de remuestras; eso mide estabilidad dentro de esta muestra y modelo de decisión, no la probabilidad de superioridad real. La incertidumbre del tercer puesto es mayor que la pequeña diferencia entre L01-299 y Ho12-615.
+En 500 remuestras por año, los percentiles 5 y 95 del aporte de la política elegida son aproximadamente US$652–834 para HoCP14-885, US$572–700 para L01-299 y US$570–684 para Ho12-615. La misma duración reaparece en 100 %, 100 % y 98.6 % de las remuestras válidas; esto describe estabilidad dentro de esta muestra y método, no la probabilidad de superioridad real. Hay solo 12 años y no se remuestreó el ranking completo.
 
-La comparación sin ajuste produce US$637.01, US$632.66 y US$601.45 por acre/año para esas mismas políticas; allí L01-283 (US$605.10) ocupa el tercer puesto. Mantendría Ho12-615 como tercera elección condicional al ajuste por ambiente, con L01-283 como alternativa cercana. No asignaría porcentajes de área sin datos de superficie, disponibilidad y restricciones del ejercicio.
+La comparación sin ajuste produce US$637.01, US$632.66 y US$601.45 por acre/año para esas mismas políticas; allí L01-283 (US$605.10) ocupa el tercer puesto. Por tanto, recomiendo HO12-615 como tercera opción solo bajo el ajuste ambiental aditivo aplicado; con promedios directos, L01-283 queda por encima y es la alternativa cercana. No asignaría porcentajes de área sin datos de superficie, disponibilidad y restricciones del ejercicio.
 
-Revisaría la decisión después de cada cosecha: mantener la siguiente soca mientras su aporte esperado supere el promedio anual de reiniciar la rotación. Las duraciones adicionales observadas con cobertura reducida se muestran en el notebook; no se afirma que sean inferiores por falta de datos. El seguimiento evita convertir la recomendación inicial en una regla rígida.
+Seleccionamos **HOCP14-885, L01-299 y HO12-615** porque presentan los mayores aportes parciales anuales estimados entre las variedades que cumplen el criterio de cobertura definido, bajo los supuestos económicos del ejercicio. Las duraciones propuestas son tres, cuatro y cuatro cosechas totales, respectivamente, como políticas iniciales dentro del horizonte con mayor respaldo. La selección de HO12-615 en tercer lugar está condicionada al ajuste ambiental aditivo; con promedios directos, L01-283 la supera.
 
-Evidencia: `notebooks/03_analisis_economico_serie1.ipynb`; salidas locales de políticas, sensibilidad y remuestreo en `data/processed/`. El notebook incluye gráficas del ranking frente a otras alternativas y del aporte anual por duración, distinguiendo las extensiones con menor cobertura. Los intervalos y la sensibilidad del tercer puesto impiden interpretar el orden como superioridad estadística demostrada.
+Las observaciones disponibles de cosechas posteriores sugieren que prolongar la plantación podría aumentar el aporte anual, aunque su cobertura es menor. Por ello, no interpretamos esas duraciones como un máximo económico demostrado ni la falta de cortes posteriores como evidencia de pérdida de rentabilidad.
+
+El archivo no permite distinguir si la ausencia de una sexta cosecha responde a renovación deliberada, al diseño del seguimiento o a registros no incluidos. La evaluación de extensiones debe conservar esa incertidumbre y comparar su aporte anual con el de renovar, considerando también cambios en el precio del azúcar.
+
+La media de L01-299 y la de Ho12-615 son cercanas y sus rangos P05–P95 del remuestreo se solapan. Al omitir el ajuste ambiental, L01-283 desplaza a Ho12-615 del tercer puesto. No se hizo una prueba formal de diferencias ni se estimó la probabilidad de que cada variedad ocupe el top 3.
+
+Evidencia: `notebooks/03_analisis_economico_serie1.ipynb`; salidas locales de políticas, sensibilidad y remuestreo en `data/processed/`. El notebook incluye gráficas del ranking frente a otras alternativas y del aporte anual por duración, distinguiendo las extensiones con menor cobertura.
 
 ### Aclaración sobre cortes no observados y renovación
 

@@ -6,7 +6,7 @@ Actualización: 2026-10-19, America/Guatemala.
 
 - Desarrollar las cuatro respuestas de Serie I con el dataset entregado y los supuestos del PDF. La última corrección del usuario prevalece sobre interpretaciones anteriores: las limitaciones deben modificar certeza y supuestos, sin impedir dar tres variedades, renovación, modelo, segmentos y propuesta de ensayos.
 - Por ahora no buscar ni descargar datos externos adicionales. Las búsquedas previas de metadatos/unidades forman parte del historial. El usuario pidió centrar las conclusiones en los datos y supuestos del ejercicio, sin repetir advertencias sobre adaptación a Santa Ana.
-- Cálculos/métricas reproducibles pero pendientes de revisión independiente con tiempo específico. Ejecutar sin errores no es validar fórmula ni negocio.
+- La fórmula económica y sus 198 políticas se reprodujeron en una revisión independiente el 2026-10-19; no se encontró discrepancia aritmética. Esto verifica la implementación frente al método elegido, no demuestra que todos sus supuestos sean los únicos correctos. La revisión independiente del modelo supervisado y de la segmentación sigue pendiente.
 - Español en comentarios, docstrings y explicaciones; parsimonia en código, archivos y análisis. Guardar exclusiones con motivos. Sugerir Git en hitos; ejecutar commit/push cuando se autorice.
 - Plazo informado: 48 horas; falta confirmar inicio y vencimiento absolutos. PDF exige ZIP con `.git`, sin datasets y enlace GitHub/GitLab. No convertir “lunes siguiente 8:00” en fecha sin referencia.
 
@@ -31,6 +31,15 @@ Actualización: 2026-10-19, America/Guatemala.
 - Tres recomendaciones del modelo de decisión a US$0.20/lb: HOCP14-885, tres cosechas totales, US$727.58/acre/año; L01-299, cuatro, US$632.66; HO12-615, cuatro, US$629.21.
 - Precios ilustrativos 0.15/0.20/0.25 USD/lb: se mantienen esas duraciones. Sin ajuste, L01-283 desplaza ligeramente a HO12-615 del tercer puesto. Certidumbre media para L01-299 y media-baja para HoCP14-885/duración y tercer puesto. No afirmar óptimo fuera del horizonte evaluado.
 - Remuestreo por año (500): rangos centrales 90 % del aporte de la política elegida ≈652–834, 572–700 y 570–684 USD/acre/año. Frecuencias misma duración: 100 %, 100 %, 98.6 %. No son probabilidades de superioridad real.
+
+### Revisión económica independiente — 2026-10-19
+
+- Se reconstruyeron las celdas elegibles desde el ETL y se recalcularon por separado coberturas, ajuste aditivo frente a L01-299, cosechas consecutivas y aporte anual. Las 198 políticas coincidieron con `serie1_politicas_renovacion.csv`; máxima diferencia por redondeo: menos de 0.000001 USD/acre/año. No se detectó error aritmético en la fórmula implementada.
+- Con precios de US$0.15, US$0.20 y US$0.25/lb se conservan las tres variedades y las duraciones seleccionadas; sus aportes cambian sustancialmente. Incluir las cuatro filas Stage 5 marcadas por revisión dimensional no cambia resultados a centavos. Sin el ajuste ambiental, L01-283 desplaza a HO12-615 del tercer puesto: esa elección depende del método de ajuste.
+- Un segundo remuestreo independiente por bloques de año da rangos P05–P95 próximos a los publicados y conserva las mismas duraciones en la gran mayoría de las remuestras válidas. El remuestreo usa solo 12 años, no evalúa la probabilidad de que cada variedad ocupe el top 3 y no es una prueba formal de diferencias.
+- Límites del supuesto económico: el cálculo trata cada CROP como una cosecha/año, cobra mantenimiento en cada año/cosecha y resta renovación una vez por rotación. Se usan TCA (toneladas de caña/acre) y el costo de US$14/ton con tonelada compatible, como indica el supuesto operativo, aunque el enunciado no especifica el tipo de tonelada. Se denomina aporte parcial, pues faltan otros costos e ingresos.
+- El ajuste ambiental es aditivo y toma a L01-299 como referencia en celdas compartidas. Es una forma de estandarización escogida, no una corrección causal o exigida por el enunciado; la sensibilidad sin ajuste cambia el tercer lugar. El filtro de dos años/dos localidades por corte también es una regla analítica, no una garantía estadística.
+- Resultado para defensa: no hay un error de cálculo identificado; la recomendación está condicionada a cobertura, ajuste aditivo y costos referenciales. Las duraciones 3/4/4 son políticas iniciales dentro de la cobertura establecida, no máximos económicos demostrados. No estimar certeza de ranking a partir de las frecuencias de duración.
 
 ### 2. Predicción — notebook 04
 
@@ -109,3 +118,24 @@ A petición del usuario se sustituyó la frase genérica sobre superioridad esta
 La figura de duración reemplaza anotaciones flotantes por un panel lateral identificado con nombre y color de cada variedad. Informa el número de cosecha, su CROP y los años/localidades en que se midió ese último corte: HOCP14-885, cosecha 4/CROP3, 1 año y 7 localidades; L01-299, cosecha 5/CROP4, 3 años y 1 localidad; HO12-615, cosecha 5/CROP4, 2 años y 1 localidad. El pie define las líneas continuas y discontinuas. Estos conteos describen la diversidad temporal/geográfica de las mediciones, no la duración de la rotación.
 
 Notebook 03 ejecutado de nuevo (seis celdas, cero errores) y ambas figuras inspeccionadas. Se conserva pendiente la validación económica independiente. El usuario autorizó guardar el avance acumulado de explicación, cobertura y gráficas con el commit «Documenta cobertura de cortes y mejora gráficas económicas». Esta autorización no solicita un nuevo push; comprobar el hash y estado actual con git log/status.
+
+
+### Verificación externa de STAGE solicitada por el usuario
+
+Se consultaron la ficha oficial USDA/Data.gov y Shahi et al. (DOI 10.1002/tpg2.20545), sección 2.1 y declaración de datos. El artículo enlaza explícitamente al dataset 27248787 y confirma STAGE 2 second line, 3 nursery, 4 infield y 5 outfield. La justificación y fuentes están en docs/interpretacion-serie-I.md. Mantener STAGE 5 para economía/segmentación por diseño y comparabilidad; no tratar otras etapas como errores. El modelo supervisado sigue usando todas las etapas. Se corrigió el texto anterior que decía que la correspondencia exacta no estaba documentada. Solo cambió markdown/documentación; no se ejecutaron modelos ni se alteraron datos o resultados. Sin nuevos datasets, commit ni push.
+
+Git al iniciar esta verificación: commit local 7f0f2d0, último push confirmado 1998c00. Estos cambios de documentación posteriores quedan pendientes de commit.
+
+
+## Criterio para cerrar Serie I
+
+Las cuatro respuestas están construidas como borrador. La justificación de STAGE 5 ya se incorpora a README, conclusiones y notebook 03 con fuente primaria. Pendiente para cierre:
+
+1. Revisión económica independiente completada en cuanto a reproducción aritmética, escenarios de precio, inclusión de filas marcadas y remuestreo descriptivo. No se encontró error aritmético. Los supuestos de tonelada compatible, mantenimiento anual, ajuste aditivo, cobertura y alcance del remuestreo quedaron explícitos arriba; son límites del análisis y no se resuelven con otra ejecución. La conclusión ya presenta las duraciones como políticas iniciales y no como máximos demostrados.
+2. Auditar predicción: historia estrictamente anterior al año predicho, separación temporal, ajuste de transformaciones en entrenamiento, selección de algoritmo y métricas/referencias. Ya existen tres algoritmos y train/validaciones/test temporal; no falta construirlos.
+3. Revisar segmentación: definiciones y unidades de cuatro dimensiones, escalado/elección de grupos y correspondencia entre perfiles y lectura gerencial. Ya existe propuesta de captura y ensayos; comprobar coherencia con limitaciones detectadas.
+4. Consolidar conclusiones/notebooks/README: retirar formulaciones categóricas de renovación que contradigan la cobertura, referencias históricas superadas y lenguaje confuso; comprobar reproducción ordenada y cerrar con commit/push autorizado.
+
+Regresión económica por CROP: propuesta, todavía no ajustada. Solo es necesaria para incluir resultados b/R de esa regresión en la conclusión; no es una exigencia explícita adicional de Serie I. No extrapolar una cifra sin ajustar/evaluar el modelo. No exigir API (Serie IV), presentación (Serie V), nuevos datasets o programación lineal para dar por cerrado el análisis de Serie I.
+
+La revisión de STAGE y la auditoría económica se guardan en el commit de este hito; último push confirmado: 1998c00. Consultar `git log` para el hash local más reciente. La revisión aritmética económica se completó y no cambió resultados numéricos; siguen pendientes las revisiones independientes de los puntos 2 y 3 y la consolidación final.

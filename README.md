@@ -8,16 +8,18 @@ El CSV oficial y la copia Kaggle del enunciado se verificaron como idénticos. E
 
 ## Serie I: cuatro respuestas
 
-Se presenta un **primer borrador completo, pendiente de revisión independiente de cálculos y supuestos**. Las limitaciones se incorporan a la certeza de las conclusiones. Se utiliza el dataset entregado y escenarios económicos explícitos; no se requieren datos externos adicionales para resolver esta serie.
+Se presenta un **primer borrador completo**. La fórmula económica se reprodujo de forma independiente sin detectar discrepancias aritméticas; siguen pendientes la revisión independiente del modelo supervisado y la segmentación. Las limitaciones de cobertura, ajuste ambiental y costos se reflejan en la certeza de las conclusiones. Se utiliza el dataset entregado y escenarios económicos explícitos.
 
 | Pregunta | Respuesta del borrador | Evidencia |
 | --- | --- | --- |
-| Variedades y renovación | HoCP14-885: tres cosechas; L01-299 y Ho12-615: cuatro. Aportes anuales esperados aproximados de US$728, US$633 y US$629/acre al precio del PDF. Tercer puesto sensible frente a L01-283. | Notebook 03 |
+| Variedades y renovación | HOCP14-885, L01-299 y HO12-615 encabezan el aporte parcial anual estimado entre las 17 variedades que cumplen la cobertura propuesta. Duraciones iniciales: tres, cuatro y cuatro cosechas. La recomendación de HO12-615 como tercera opción está condicionada al ajuste ambiental aditivo; con promedios directos, L01-283 queda por encima. Prolongar podría elevar el aporte, aunque los cortes adicionales tienen menor respaldo; no se ha demostrado un máximo económico. | Notebook 03 |
 | Modelo supervisado | Ridge, árbol y bosque; selección por validación temporal 2019–2020 y evaluación reservada 2021. Ridge elegido: MAE 2,145 lb/acre, R² 0.25; utilidad moderada y errores visibles. | Notebook 04 |
 | Segmentación | Dos perfiles sobre productividad, TRS, conservación en soca y estabilidad; 17 variedades segmentadas y restantes con razón de cobertura insuficiente. | Notebook 05 |
 | Datos y ensayos propios | Seguimiento de parcela/cohorte, mediciones y costos; variedades aleatorizadas por bloques/sitios y seguimiento de socas; fase para contrastar políticas de renovación. | Documento de conclusiones |
 
 El detalle de recomendaciones, certeza, impacto y riesgos está en [conclusiones de Serie I](docs/conclusiones-serie-I.md). Tres cosechas significan plantía + dos socas; cuatro significan plantía + tres socas.
+
+Para la recomendación económica se utilizan los ensayos outfield, correspondientes a `STAGE=5`, porque su diseño documentado tiene parcelas más largas, tres repeticiones y evaluación en múltiples localidades. Así se evita mezclar directamente etapas con distintos diseños y procedimientos de medición. Esta delimitación no convierte las etapas anteriores en datos incorrectos: se conservan y el modelo supervisado las utiliza. [Fuente: Shahi et al., sección 2.1](https://acsess.onlinelibrary.wiley.com/doi/10.1002/tpg2.20545).
 
 ## Reproducción
 
@@ -50,7 +52,7 @@ El ETL guarda 29,403 filas analíticas y separa 126 copias exactas adicionales, 
 
 ## Supuestos y límites que afectan la decisión
 
-- Se adopta la tonelada de `TCA` como unidad del costo US$14/ton del ejercicio. La revisión independiente comprobará la compatibilidad y todas las fórmulas.
+- Se aplica el costo de US$14/ton a `TCA` (toneladas de caña/acre), suponiendo compatibilidad entre las unidades de tonelada del dataset y el supuesto económico; el PDF no especifica el tipo. La fórmula se reprodujo independientemente sin discrepancia aritmética.
 - La rotación supone una cosecha anual, renovación inmediata, costos constantes y sin descuento ni descanso. Se comparan aportes **esperados**, no flujos observados de la misma parcela.
 - Los precios de US$0.15, 0.20 y 0.25/lb son escenarios ilustrativos de ±25 %; no son una distribución de mercado estimada.
 - La recomendación exige cobertura temporal/geográfica por corte y muestra duraciones adicionales de menor certeza. El escenario sin ajuste ambiental cambia el tercer puesto.
@@ -63,4 +65,4 @@ El ETL guarda 29,403 filas analíticas y separa 126 copias exactas adicionales, 
 
 ## Pendientes
 
-Revisar de manera independiente cálculos económicos, agregaciones, remuestreo, métricas y diseño de validación; revisar redacción final de certeza; y preparar las demás series, API y presentación según priorización. La ejecución sin errores solo acredita ejecución. Series II–V no se presentan como completadas. No se han descargado fuentes adicionales durante este desarrollo de las cuatro respuestas de Serie I.
+Revisar independientemente el modelo supervisado, la segmentación y la consistencia final de las cuatro respuestas; después priorizar las demás series, API y presentación. La ejecución sin errores solo acredita ejecución. Series II–V no se presentan como completadas. No se han descargado fuentes adicionales durante este desarrollo de las cuatro respuestas de Serie I.

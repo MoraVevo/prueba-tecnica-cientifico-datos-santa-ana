@@ -175,3 +175,28 @@ A petición del usuario se sustituyó la frase genérica sobre superioridad esta
 La figura de duración reemplaza anotaciones flotantes por un panel lateral identificado con nombre y color de cada variedad. Informa el número de cosecha, su CROP y los años/localidades en que se midió ese último corte: HOCP14-885, cosecha 4/CROP3, 1 año y 7 localidades; L01-299, cosecha 5/CROP4, 3 años y 1 localidad; HO12-615, cosecha 5/CROP4, 2 años y 1 localidad. El pie define las líneas continuas y discontinuas. Estos conteos describen la diversidad temporal/geográfica de las mediciones, no la duración de la rotación.
 
 Notebook 03 ejecutado de nuevo (seis celdas, cero errores) y ambas figuras inspeccionadas. Se conserva pendiente la validación económica independiente. El usuario autorizó guardar el avance acumulado de explicación, cobertura y gráficas con el commit «Documenta cobertura de cortes y mejora gráficas económicas». Esta autorización no solicita un nuevo push; comprobar el hash y estado actual con git log/status.
+
+
+### Verificación externa de STAGE solicitada por el usuario
+
+Se consultaron la ficha oficial USDA/Data.gov y Shahi et al. (DOI 10.1002/tpg2.20545), sección 2.1 y declaración de datos. El artículo enlaza explícitamente al dataset 27248787 y confirma STAGE 2 second line, 3 nursery, 4 infield y 5 outfield. La justificación y fuentes están en docs/interpretacion-serie-I.md. Mantener STAGE 5 para economía/segmentación por diseño y comparabilidad; no tratar otras etapas como errores. El modelo supervisado sigue usando todas las etapas. Se corrigió el texto anterior que decía que la correspondencia exacta no estaba documentada. Solo cambió markdown/documentación; no se ejecutaron modelos ni se alteraron datos o resultados. Sin nuevos datasets, commit ni push.
+
+Git al iniciar esta verificación: commit local 7f0f2d0, último push confirmado 1998c00. Estos cambios de documentación posteriores quedan pendientes de commit.
+
+
+### Justificación integrada y pendientes de cierre de Serie I
+
+Se incorporó la justificación de usar outfield/STAGE 5 en README, conclusiones y notebook económico. Se diferenció la construcción completa de las cuatro respuestas de su revisión independiente pendiente. Se registraron los criterios de cierre en docs/estado.md: economía/renovación e incertidumbre, ausencia de fuga y evaluación supervisada, coherencia de segmentos/propuesta de ensayos, consistencia documental y reproducción. La regresión económica por CROP sigue siendo una propuesta opcional, necesaria únicamente si se quieren afirmar sus coeficientes o extrapolaciones. No se ajustaron modelos, no se validaron cálculos ni se realizó nuevo commit/push.
+
+
+### Revisión independiente del punto económico — 2026-10-19
+
+Se recalculó la tabla de decisión desde el ETL, con una reconstrucción aparte de celdas clon/CROP/año/localidad, comparaciones emparejadas frente a L01-299, medias ajustadas por CROP, filtros de cobertura y enumeración de duraciones. Las 198 políticas reconstruidas coincidieron con la salida guardada; la diferencia numérica máxima fue menor a 0.000001 USD/acre/año, atribuible a precisión/redondeo. No se encontró discrepancia aritmética en el cálculo actual.
+
+También se recalcularon los tres escenarios de precio, se incluyeron las cuatro filas Stage 5 marcadas por revisión dimensional y se contrastó un remuestreo independiente por año. Los tres clones/duraciones recomendados se mantienen en los precios ilustrativos; las filas marcadas no mueven las cifras a centavos. La recomendación de tercer lugar sí es sensible al ajuste aditivo: sin él, L01-283 queda por encima de HO12-615. El remuestreo alternativo da conclusiones de duración similares, pero usa solo 12 años y no prueba rangos ni superioridad entre variedades.
+
+La auditoría valida que el código aplica de forma consistente la fórmula declarada; no valida como hechos observados sus supuestos. Se documentaron: una cosecha por año y mantenimiento por cosecha/año, un único costo de renovación por rotación, compatibilidad de la unidad “ton” de TCA con US$14/ton, ajuste aditivo respecto a L01-299, filtro de cobertura elegido por el análisis y carácter descriptivo del remuestreo. El resultado es “sin error aritmético detectado”, no “decisión económica demostrada sin incertidumbre”. Las conclusiones conservan la redacción acordada sobre duraciones iniciales y falta de evidencia para probar un máximo económico.
+
+La revisión quedó inicialmente sin commit ni push.
+
+El usuario pidió dejar explícito que HO12-615 ocupa el tercer puesto solo bajo el ajuste ambiental aditivo; con promedios directos, L01-283 queda por encima. Se aclaró en README, conclusiones y respuesta gerencial del notebook económico antes de guardar este hito.
