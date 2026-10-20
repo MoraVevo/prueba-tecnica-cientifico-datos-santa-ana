@@ -81,3 +81,67 @@ def test_anomalias_reproducen_pasado_reglas_y_todas_las_filas():
         assert (guardado.fin-guardado.fin_lectura).eq(pd.Timedelta(seconds=5)).all()
     for ruta, huella in v["huellas_protegidas"].items():
         assert hashlib.sha256((RAIZ/ruta).read_bytes()).hexdigest() == huella
+
+
+def test_extremos_individuales_reconstruyen_referencias_y_no_pierden_picos():
+    """NumPy reproduce medianas/MAD y se contrastan marcas, estados y episodios."""
+    datos = pd.read_csv(RAIZ / "data/raw/serie2/data.csv", parse_dates=["date"])
+    f = pd.read_csv(SALIDA / "extremos_individuales.csv", parse_dates=["date"])
+    referencias = pd.read_csv(SALIDA / "referencias_robustas.csv")
+    episodios = pd.read_csv(SALIDA / "episodios_extremos.csv", parse_dates=["inicio", "fin_lectura"])
+    sensibilidad = pd.read_csv(SALIDA / "sensibilidad_extremos.csv")
+    assert len(f) == len(datos) == 86400
+    pd.testing.assert_series_equal(f.date, datos.date)
+    np.testing.assert_array_equal(f.fila_fuente, np.arange(len(datos)))
+    perfil = f.regimen_cerrado.to_numpy()
+    train = np.arange(len(datos)) < 69120
+    tags = ["YFJ3_AI.AV_0#", "FT_8306A.AV_0#", "FT_8306B.AV_0#"]
+    for tag in tags:
+        valores = datos[tag].to_numpy()
+        z = np.empty(len(datos))
+        for contexto in [0, 1, 2]:
+            muestra = valores[train if contexto == 0 else train & (perfil == contexto)]
+            mediana = np.nanmedian(muestra)
+            mad = np.nanmedian(np.abs(muestra-mediana))
+            r = referencias[referencias.tag.eq(tag) & referencias.regimen_cerrado.eq(contexto)].iloc[0]
+            assert np.isclose(r.mediana, mediana) and np.isclose(r.mad, mad)
+            assert r.lecturas_referencia == np.isfinite(muestra).sum()
+            z[perfil == contexto] = (valores[perfil == contexto]-mediana)/(1.4826*mad)
+        np.testing.assert_allclose(f[f"z::{tag}"], z, rtol=0, atol=1e-10)
+        for limite in [4, 6, 8]:
+            marca = np.abs(z) > limite
+            cuenta = np.convolve(marca.astype(int), np.ones(6, dtype=int), mode="full")[:len(marca)]
+            activa = np.zeros(len(marca), dtype=bool)
+            disparo = marca & (cuenta >= 3)
+            disparo[:5] = False
+            estado, limpias = False, 0
+            for i in range(len(marca)):
+                if estado:
+                    limpias = 0 if marca[i] else limpias+1
+                    if limpias == 12:
+                        estado = False
+                elif disparo[i]:
+                    estado, limpias = True, 0
+                activa[i] = estado
+            inicios = marca & ~np.r_[False, marca[:-1]]
+            inicios_activa = activa & ~np.r_[False, activa[:-1]]
+            s = sensibilidad[sensibilidad.tag.eq(tag) & sensibilidad.limite_robusto.eq(limite)].iloc[0]
+            assert s.lecturas_marcadas == marca.sum()
+            assert s.episodios_instantaneos == inicios.sum()
+            assert s.inicios_sostenidos == inicios_activa.sum()
+            if limite == 6:
+                np.testing.assert_array_equal(f[f"marca::{tag}"], marca)
+                np.testing.assert_array_equal(f[f"sostenido::{tag}"], activa)
+                for tipo, bandera in [("instantaneo", marca), ("sostenido", activa)]:
+                    inicio = np.flatnonzero(bandera & ~np.r_[False, bandera[:-1]])
+                    fin = np.flatnonzero(bandera & ~np.r_[bandera[1:], False])
+                    e = episodios[episodios.tag.eq(tag) & episodios.tipo.eq(tipo)]
+                    np.testing.assert_array_equal(e.inicio.to_numpy(), datos.date.iloc[inicio].to_numpy())
+                    np.testing.assert_array_equal(e.fin_lectura.to_numpy(), datos.date.iloc[fin].to_numpy())
+                    np.testing.assert_array_equal(e.cobertura_s, (fin-inicio+1)*5)
+    # Captura retrospectiva, no validación con tres fallas etiquetadas.
+    revision = pd.read_csv(SALIDA / "revision_extremos.csv")
+    assert len(revision) == 3 and revision.marca_instantanea.all()
+    assert not revision.candidata_IF.any()
+    assert np.isnan(revision.demora_desde_extremo_s.iloc[0])
+    np.testing.assert_array_equal(revision.demora_desde_extremo_s.iloc[1:], [5., 10.])

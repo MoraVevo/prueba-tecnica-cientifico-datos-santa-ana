@@ -3,7 +3,8 @@
 import numpy as np
 import pandas as pd
 
-from scripts.anomalias_serie2 import crear_detector, contexto_cerrado, simular_aviso, episodios_marcados
+from scripts.anomalias_serie2 import (crear_detector, contexto_cerrado, simular_aviso,
+                                    episodios_marcados, referencias_robustas, puntajes_robustos)
 
 
 def test_regimen_no_se_utiliza_antes_de_cerrar_el_minuto():
@@ -43,3 +44,21 @@ def test_imputacion_del_detector_no_aprende_de_las_lecturas_evaluadas():
     detector.score_samples(pd.DataFrame({"A": [np.nan, 1e6], "B": [1e6, 0], "C": [-1e6, 0]}))
     np.testing.assert_allclose(medianas, train.median())
     np.testing.assert_array_equal(medianas, detector[0].statistics_)
+
+
+def test_referencia_robusta_y_extremo_aislado_sin_confundirlo_con_aviso():
+    train = pd.DataFrame({"A": [0., 1., 2., 10., 12., 14.]})
+    perfiles = pd.Series([1, 1, 1, 2, 2, 2])
+    referencias = referencias_robustas(train, perfiles)
+    r = referencias.set_index("regimen_cerrado")
+    assert r.loc[1, "mediana"] == 1 and r.loc[1, "mad"] == 1
+    assert r.loc[2, "mediana"] == 12 and r.loc[2, "mad"] == 2
+    assert r.loc[0, "mediana"] == 6 and r.loc[0, "lecturas_referencia"] == 6
+    futuro = pd.DataFrame({"A": [12., 1000., 12., np.nan, 12., 12.]})
+    resultado = puntajes_robustos(futuro, pd.Series([2]*6), referencias)
+    assert resultado.A.iloc[0] == 0 and np.isnan(resultado.A.iloc[3])
+    assert np.isclose(resultado.A.iloc[1], (1000-12)/(1.4826*2))
+    marca = resultado.A.abs().gt(6)
+    assert marca.sum() == 1 and not simular_aviso(marca).activo.any()
+    # Puntuar lecturas futuras no modifica centros ni escalas ya fijados.
+    pd.testing.assert_frame_equal(referencias, referencias_robustas(train, perfiles))

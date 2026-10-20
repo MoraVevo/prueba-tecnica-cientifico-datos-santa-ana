@@ -40,6 +40,38 @@ def umbrales_por_contexto(puntajes, perfiles, cuantil=.99):
     return umbrales
 
 
+def referencias_robustas(datos, perfiles):
+    """Mediana/MAD por contexto del ajuste; cero representa referencia global.
+
+    El llamador entrega únicamente las filas de ajuste. No se imputan faltantes.
+    La escala 1.4826*MAD es una referencia robusta, no una distribución normal probada.
+    """
+    referencias = []
+    for perfil in [0] + sorted(set(perfiles) - {0}):
+        base = datos if perfil == 0 else datos.loc[perfiles.eq(perfil)]
+        centro = base.median()
+        mad = (base-centro).abs().median()
+        assert (mad > 0).all(), "Revisar escala nula antes de definir límites."
+        for tag in datos.columns:
+            referencias.append({"regimen_cerrado": perfil, "tag": tag,
+                                "mediana": centro[tag], "mad": mad[tag],
+                                "escala_robusta": 1.4826*mad[tag],
+                                "lecturas_referencia": int(base[tag].notna().sum())})
+    return pd.DataFrame(referencias)
+
+
+def puntajes_robustos(datos, perfiles, referencias):
+    """Distancia firmada a la mediana del contexto; ausencias permanecen NaN."""
+    puntajes = pd.DataFrame(index=datos.index, columns=datos.columns, dtype=float)
+    for tag in datos.columns:
+        referencia = referencias.loc[referencias.tag.eq(tag)].set_index("regimen_cerrado")
+        centro = perfiles.map(referencia.mediana)
+        escala = perfiles.map(referencia.escala_robusta)
+        assert centro.notna().all() and escala.notna().all()
+        puntajes[tag] = (datos[tag]-centro)/escala
+    return puntajes
+
+
 def simular_aviso(candidatas, requeridas=3, ventana=6, despeje=12):
     """Mayoría reciente para activar, recuperación consecutiva para cerrar; sin notificaciones.
 
