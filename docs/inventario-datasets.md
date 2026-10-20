@@ -1,6 +1,6 @@
 # Inventario inicial de datasets
 
-Consulta: 2026-10-19. Fuentes: PDF, metadatos públicos y listado de archivos de Kaggle, más lectura HTTP parcial de encabezados y primeras filas de seis CSV. No se descargaron los datasets completos ni se verificaron todavía sus dimensiones reales, duplicados, cobertura total o integridad. Cada muestra leyó como máximo 4096 bytes mediante HTTP Range. En la carpeta local no había datasets al iniciar esta revisión.
+Inventario iniciado el 2026-10-19 con el PDF y muestras HTTP de Kaggle (máximo 4096 bytes por CSV). Posteriormente se descargaron y revisaron completos los archivos de campo y caldera, como se documenta en sus apartados. Los apartados FAOSTAT y futuros siguen siendo inspecciones de metadatos/primeras filas; sus dimensiones y cobertura completa aún no se verifican.
 
 ## Fuentes y estructura
 
@@ -21,12 +21,16 @@ Consulta: 2026-10-19. Fuentes: PDF, metadatos públicos y listado de archivos de
 
 - [Kaggle](https://www.kaggle.com/datasets/nikitamanaenkov/time-series-of-industrial-boiler-operations).
 - Archivos listados: `data.csv`, `data_AutoReg.csv`, `columns.csv` y `41597_2025_5096_Fig3_HTML.png`.
-- Los dos archivos data tienen encabezados con `date` y 30 columnas de sensores. Primeras fechas observadas: 2022-03-27 14:28:54, 14:28:59 y 14:29:04. Confirmado el paso de cinco segundos en esa muestra, no todavía en todo el archivo.
-- Tipo: serie temporal multivariante de alta frecuencia de una instalación; cada fila es un instante con varias señales. No equivale a un panel de 30 plantas o 30 filas independientes de sensores.
-- Los primeros registros de los dos data coinciden. Aún no se conoce si son duplicados, versiones corregidas o archivos con otra relación; no concatenarlos ni unirlos sin comparar cobertura, claves y valores completos.
-- `columns.csv` es un diccionario de variables, no otra serie de mediciones. Su encabezado es `Variant,Attribute name,Description`; las primeras líneas muestran códigos sin el sufijo `#` que sí aparece en data. Revisar separadores, campos y correspondencias antes de mapear los nombres; no afirmar todavía que está bien formado.
-- Objetivo de vapor observado: `ZZQBCHLL.AV_0#`, código completo que corresponde al nombre abreviado del PDF.
-- Los metadatos indican caldera de carbón de una planta química en Zhejiang, China. La aplicación a bagazo en Santa Ana es una transferencia de contexto; no afirmar que los sensores son de una caldera de bagazo.
+- Dataset descargado el 2026-10-19 desde la fuente indicada por el PDF. Archivos y hashes SHA-256 quedan registrados en `data/raw/serie2/fuente.json` (carpeta local ignorada por Git).
+- Ambos CSV tienen 86,400 filas, las mismas 31 columnas (`date` y 30 sensores), y la misma secuencia ordenada de marcas de tiempo desde 2022-03-27 14:28:54 hasta 2022-04-01 14:28:49, cada cinco segundos. No hay timestamps duplicados ni intervalos faltantes.
+- Comparación celda por celda: difieren en exactamente 30 celdas, todas en `YJJWSLL.AV_0#` (flujo de agua de atemperación primaria). `data.csv` tiene 30 faltantes; `data_AutoReg.csv` tiene valores en esos 30 momentos y conserva idénticas las 86,370 observaciones originalmente presentes. No cambia ningún otro campo.
+- Esos 30 valores faltantes forman dos tramos: 28 mediciones entre 2022-03-28 06:22:24 y 06:24:39, y 2 mediciones entre 2022-03-30 05:54:44 y 05:54:49. La versión AutoReg se entiende como una imputación, no como nuevas observaciones del sensor. Para el análisis principal se parte del archivo sin completar; la versión completada sirve para una sensibilidad cuando sea pertinente. No concatenar los archivos.
+- `columns.csv` tiene 30 filas de sensores. Su campo `Variant` omite el sufijo `#`, que sí aparece en el encabezado de los CSV; al añadirlo, las 30 etiquetas corresponden con las columnas de sensores. El campo `Description` está vacío; los nombres descriptivos en inglés están en `Attribute name`.
+- Objetivo de vapor observado: `ZZQBCHLL.AV_0#`, flujo de vapor principal compensado después del punto de medición; es la columna asociada al nombre abreviado del PDF.
+- Kaggle describe una caldera de carbón de una planta química en Zhejiang, China y licencia CC BY 4.0. El ejercicio usa esta instalación como caso analítico; no se debe presentar como una caldera de bagazo ni trasladar directamente sus conclusiones a otra planta.
+- Comparación reproducible: `notebooks/06_eda_caldera_serie2.ipynb`. El artículo fuente describe la versión completada como resultado de imputación AutoReg: [Hu et al. (2025)](https://doi.org/10.1038/s41597-025-05096-4).
+
+El contraste posterior con [los archivos de los autores](https://doi.org/10.6084/m9.figshare.28868849.v1) confirma que ambas versiones Kaggle son idénticas byte por byte. El [artículo fuente](https://pmc.ncbi.nlm.nih.gov/articles/PMC12052967/) identifica °C y el rango operativo 530–545 para `TE_8332A`. Su aplicación al CSV da 8.14 % fuera del rango inclusivo, frente a 8.6 % publicado; esta diferencia no convierte los valores en errores de medición. Cinco señales (`SXLTCYZ`, `SXLTCYY`, `ZCLCCY`, `YCLCCY`, `ZZQBCHLL`) repiten exactamente las lecturas en 43,200 pares, compatible con actualización más lenta que la cadencia del archivo. El notebook conserva los extremos como casos de revisión, sin exclusiones.
 
 ### FAOSTAT: producción agrícola
 

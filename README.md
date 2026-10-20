@@ -21,6 +21,22 @@ El detalle de recomendaciones, certeza, impacto y riesgos está en [conclusiones
 
 `STAGE` identifica la fase de evaluación dentro del programa de mejoramiento varietal; `CROP` identifica la cosecha del ensayo. Para la recomendación económica se utilizan los ensayos outfield, correspondientes a `STAGE=5`, la etapa final de prueba de variedades para su posible uso comercial. Su diseño documentado tiene parcelas más largas, tres repeticiones y evaluación en múltiples localidades. Así se evita mezclar directamente etapas con distintos diseños y procedimientos de medición. Esta delimitación no convierte las etapas anteriores en datos incorrectos: se conservan y el modelo supervisado las utiliza. [Fuente: ficha USDA-ARS](https://catalog.data.gov/dataset/louisiana-sugarcane-yield-data-2010-2021-collected-for-the-louisiana-variety-development-program), [Shahi et al., sección 2.1](https://acsess.onlinelibrary.wiley.com/doi/10.1002/tpg2.20545).
 
+## Serie II en curso: calidad y contexto de sensores
+
+La [revisión de significado físico y disponibilidad](docs/serie2-significado-disponibilidad.md) explica las familias de señales, las unidades sin confirmar y las condiciones del sensor virtual. El [notebook 07](notebooks/07_sensor_virtual_serie2.ipynb) compara Ridge, bosque y HistGradientBoosting para estimar el caudal contemporáneo con otras señales recibidas, sin usar el propio caudal ni sus rezagos. La implementación vigente utiliza solo señales actuales: 29 frente a 15 seleccionadas mediante eliminación recursiva con Ridge dentro de cada entrenamiento.
+
+Tres validaciones consecutivas de 24 horas seleccionaron **Ridge con 15 señales actuales**: MAE medio **0.4573**, frente a **0.4622** con 29 señales. La mejora es pequeña (1.06 %), con 14 sensores menos. Con quince entradas, HistGradientBoosting obtuvo MAE 0.7640 y el bosque 0.9430. La comprobación del último día da MAE **0.3378**, RMSE **0.4234**, R² **0.9625**, WAPE **0.5564 %** y sesgo **−0.0901**; la mediana de entrenamiento obtuvo MAE 1.8936. Caudal en unidades originales sin unidad física confirmada. Como ese último día ya se había observado antes de esta revisión, sus resultados son una **comprobación reutilizada exploratoria**, no un test independiente intacto.
+
+Se modela cada diez segundos por las parejas repetidas del objetivo, con separación de cinco minutos entre entrenamiento/evaluación y transformaciones ajustadas solo en entrenamiento. Las 43,200 filas fuera de la rejilla se conservan con motivo en `outputs/serie2_filas_fuera_modelado.csv`; no se declaran inválidas. No hay exclusión por arranque de historia. La ingeniería de memoria se retiró del código por decisión del usuario; el estudio riguroso de rezagos sigue pendiente para completar ese requisito del PDF. Las métricas no certifican el instrumento ni demuestran ahorro.
+
+Se utiliza `data.csv` como base original. El [notebook 06](notebooks/06_eda_caldera_serie2.ipynb) compara versiones y examina faltantes, repetidos, extremos y episodios conjuntos. Ambos CSV de Kaggle coinciden byte por byte con los publicados por los autores. No se han confirmado mediciones físicamente imposibles: se conservan los extremos con banderas de revisión.
+
+Cinco señales, incluido el flujo de vapor objetivo, repiten exactamente cada par de lecturas; debe considerarse al estudiar rezagos y validar. La fuente define 530–545 °C como rango operativo normal de temperatura de salida. Estar fuera de ese rango indica una condición anómala según los autores, sin demostrar que el sensor mida mal. La regla aplicada al archivo da 8.14 %, frente al 8.6 % publicado; se conserva esta discrepancia.
+
+El tramo de válvula idéntica durante 63.58 minutos forma parte de 226.5 minutos entre 11.60 y 11.62. Hay otros tramos largos y cambios concordantes de la señal de agua al entrar y salir del nivel estable. Se conserva como señal mantenida por tramos; sin orden y posición real independientes no se confirma bloqueo ni error del sensor.
+
+Para ejecutar los notebooks de Serie II, descargar `data.csv`, `data_AutoReg.csv` y `columns.csv` del [dataset indicado en el PDF](https://www.kaggle.com/datasets/nikitamanaenkov/time-series-of-industrial-boiler-operations) y guardarlos en `data/raw/serie2/`. La auditoría remite al [artículo original y sus archivos](https://pmc.ncbi.nlm.nih.gov/articles/PMC12052967/). Siguen pendientes regímenes, método no supervisado de anomalías y eficiencia; estos resultados aún no cierran la Serie II.
+
 ## Reproducción
 
 Entorno preparado con Python 3.13.14. En Windows PowerShell:
@@ -31,6 +47,7 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 python scripts/descargar_serie1.py
 python scripts/etl_serie1.py
+python -m ipykernel install --user --name prueba-santa-ana --display-name "Python (prueba-santa-ana)"
 jupyter lab
 ```
 
@@ -41,6 +58,8 @@ Ejecutar los notebooks en orden:
 3. `03_analisis_economico_serie1.ipynb`: aporte, políticas de renovación, precio y certeza.
 4. `04_modelo_supervisado_serie1.ipynb`: tres algoritmos, referencias, evaluación temporal y ejemplo de siguiente zafra.
 5. `05_segmentacion_variedades_serie1.ipynb`: variables por clon, elección de segmentos y lectura gerencial.
+6. `06_eda_caldera_serie2.ipynb`: comparación de archivos, calidad, correlaciones y disponibilidad de sensores.
+7. `07_sensor_virtual_serie2.ipynb`: tres algoritmos, comparación de 29/15 señales actuales, validación temporal y comprobación reutilizada. Requiere los archivos de Serie II; genera resultados y modelo en `outputs/`, ignorado por Git.
 
 También se pueden ejecutar sin interfaz, por ejemplo:
 
@@ -59,15 +78,15 @@ python -m pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
-Este comando ejecuta 13 pruebas unitarias con datos pequeños y resultados conocidos; no necesita descargar datasets. Comprueba separación del prefijo TRS, conservación de datos crudos y ceros, deduplicación trazable, historia estrictamente anterior a la zafra, respaldos de la referencia y preprocesamiento ajustado solo con entrenamiento, incluidas categorías desconocidas.
+Este comando ejecuta 19 pruebas unitarias con datos pequeños y resultados conocidos; no necesita descargar datasets. Comprueba separación del prefijo TRS, conservación de datos crudos y ceros, deduplicación trazable, historia estrictamente anterior a la zafra, respaldos de la referencia y preprocesamiento ajustado solo con entrenamiento, incluidas categorías desconocidas. Para Serie II verifica selección de quince, invariancia a unidades, conservación posible de parejas correlacionadas útiles, imputación aislada y fórmulas de error.
 
-Después del ETL y de ejecutar los notebooks 01–05:
+Después del ETL y de ejecutar los notebooks 01–07:
 
 ```powershell
 python -m pytest tests/integracion -q
 ```
 
-Las 8 pruebas de integración requieren los datos y resultados locales. Fallan con un mensaje si falta un archivo; no omiten la comprobación. Reconstruyen exclusiones del ETL, métricas de 2019/2020/2021 desde predicciones por fila, elección por validación, predicciones Ridge, errores por ambiente, políticas económicas y las cuatro dimensiones y pertenencias de los segmentos. Para ejecutar ambas suites juntas: `python -m pytest tests/unitarias tests/integracion -q`.
+Las 10 pruebas de integración requieren los datos y resultados locales. Fallan si falta un archivo; no omiten la comprobación. Reconstruyen exclusiones del ETL, métricas de 2019/2020/2021 desde predicciones por fila, elección por validación, predicciones Ridge, errores por ambiente, políticas económicas y las cuatro dimensiones y pertenencias de los segmentos. Para Serie II contrastan las métricas del test con predicciones, entradas sin objetivo, rejilla, separación temporal y correspondencia de la decisión con validación. Para ejecutar ambas suites juntas: `python -m pytest tests/unitarias tests/integracion -q` (29 pruebas).
 
 El notebook 04 y las pruebas comparten `scripts/modelado_serie1.py`. Las predicciones de todos los métodos quedan en `serie1_predicciones_validacion.csv` y `serie1_predicciones_modelos_2021.csv`, dentro de `data/processed/`. Las pruebas revisan implementación y consistencia; la evaluación temporal mide el desempeño predictivo y no demuestra causalidad ni precisión futura garantizada.
 
@@ -88,4 +107,4 @@ El notebook 04 y las pruebas comparten `scripts/modelado_serie1.py`. Las predicc
 
 ## Pendientes de la prueba completa
 
-La Serie I puede darse por cerrada como análisis del ejercicio, conservando sus supuestos y limitaciones explícitos. Series II–V, API, presentación y preparación final del ZIP siguen pendientes. Sus modelos y entregables no se presentan como completados. No se incorporaron datasets externos al modelado; las fuentes de contexto temporal están citadas arriba.
+La Serie I puede darse por cerrada como análisis del ejercicio, conservando sus supuestos y limitaciones explícitos. La Serie II tiene EDA y primera versión del sensor virtual; siguen pendientes el estudio riguroso de rezagos, regímenes, anomalías no supervisadas y eficiencia, junto con Series III–V, API, presentación y ZIP. La prueba completa aún no está terminada. No se incorporaron datasets externos al modelado; las fuentes de contexto están citadas arriba.
