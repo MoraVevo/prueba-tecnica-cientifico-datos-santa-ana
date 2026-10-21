@@ -1,6 +1,6 @@
 # Respuestas directas a la prueba técnica
 
-Reúno aquí las respuestas de cada serie para leerlas sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III desarrolla sus cuatro incisos, con continuidad de precios parcialmente verificada, respuesta de oferta comparada entre Guatemala y cinco pares —World como contexto— y sin identificación causal. Las Series IV–V permanecen pendientes.
+Reúno aquí las respuestas de cada serie para leerlas sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III desarrolla sus cuatro incisos, con continuidad de precios parcialmente verificada, respuesta de oferta comparada entre Guatemala y cinco pares —World como contexto— y sin identificación causal. La Serie IV se desarrolla como extensión opcional: API, OpenAPI, Docker Compose y pruebas. La Serie V permanece pendiente.
 
 ## Estado general
 
@@ -9,7 +9,7 @@ Reúno aquí las respuestas de cada serie para leerlas sin rastrearlas entre REA
 | I. Campo, variedades y renovación | Cuatro preguntas de Gerencia Agrícola respondidas con datos, modelos y límites. | Análisis completado. |
 | II. Fábrica, caldera | Cinco preguntas respondidas con la serie de sensores externa del enunciado. | Análisis completado; para decisiones de planta se requieren comprobaciones adicionales. |
 | III. Mercado, producción y precio | Países, pares, riesgo, pronósticos y relación de oferta/precio con rezagos. | Desarrollo analítico de cuatro incisos; continuidad parcialmente verificada y oferta contrastada entre Guatemala y cinco pares, sin efecto causal identificado. |
-| IV. Modelo en producción | API, empaquetado Docker y pruebas de API. | Pendiente; no desarrollada. |
+| IV. Modelo en producción | API, empaquetado Docker y pruebas de API. | Extensión opcional desarrollada; Docker pendiente de ejecución local. |
 | V. Presentación ejecutiva | Síntesis para las gerencias y defensa del análisis. | Pendiente; no elaborada. |
 
 ## Serie I: campo, variedades y renovación
@@ -155,9 +155,47 @@ La comparación de Guatemala con sus cinco pares estructurales utiliza los mismo
 
 **Interpretación y decisión:** los datos respaldan parcialmente el mecanismo económico de oferta que se ajusta con retraso a los incentivos. Conviene evaluar expansión con márgenes de varias zafras e incluir respuesta futura de competidores, sin extrapolar indefinidamente un repunte de precio. Para Guatemala, falta de señal local estable no equivale a ausencia de incentivos; el margen recibido y las restricciones pueden diferir del futuro internacional. Los coeficientes mundiales no fijan superficie óptima ni beneficio local. **Desarrollo:** [apartado 4 de conclusiones](conclusiones-serie-III.md#4-respuesta-de-superficie-y-producción-al-precio), [notebook 17](../notebooks/17_oferta_precio_serie3.ipynb) y [método reproducible](../scripts/analizar_oferta_serie3.py).
 
-## Series IV y V: pendientes
+## Serie IV: modelo en producción
 
-- **Serie IV, producción:** pendiente la API para exponer un modelo, con validación de entradas, OpenAPI, Docker Compose y pruebas. La prueba condiciona estos entregables a que se desarrolle la serie.
-- **Serie V, presentación:** pendiente la presentación ejecutiva de 15–20 minutos para las tres gerencias y la demostración de API, solo si se desarrolla la Serie IV.
+La prueba señala esta serie como opcional. La desarrollo como extensión de la Serie II para demostrar el contrato de servicio, no como una validación nueva del modelo ni como certificación de producción.
+
+### 1. ¿Qué modelo expongo y con qué contrato?
+
+Expongo la campeona Ridge de Serie II, que estima `ZZQBCHLL.AV_0#` con **17 entradas**: 15 señales actuales y las presiones `PTCA_8322A` y `PTCA_8324` treinta segundos antes. La API recibe las 17 columnas ya preparadas; no calcula el rezago ni imputa faltantes. El artefacto `models/serie2_sensor_virtual.json` conserva coeficientes, medias, escalas, medianas, rangos, métricas, límites y el SHA-256 del `joblib` original. La inferencia es Python puro y no requiere scikit-learn en tiempo de ejecución.
+
+La validación Pydantic exige las 17 entradas, rechaza campos extra, cadenas, booleanos, `null`, `NaN`, infinitos y valores fuera del mínimo/máximo observado. Los rangos son empíricos, no límites de seguridad. El ajuste usó 34,464 filas y 15 faltantes imputados en `YJJWSLL.AV_0#`; la API no replica esa imputación: una solicitud incompleta devuelve 422.
+
+### 2. ¿Qué endpoints y documentación ofrece?
+
+- `GET /health`: estado del proceso y versión del modelo.
+- `GET /model`: ficha, 17 entradas, coeficientes, métricas, hash y limitaciones.
+- `POST /predict`: estimación puntual, modelo, versión, objetivo, unidad no certificada y advertencia.
+- `GET /docs`: Swagger UI.
+- `GET /openapi.json`: contrato OpenAPI 3.1.
+
+Con las medianas del ajuste, `POST /predict` devuelve `59.33003888712712`. La API no publica intervalos de incertidumbre porque el ejercicio no los validó.
+
+### 3. ¿Cómo se ejecuta y empaqueta?
+
+Localmente:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-api.txt
+.\.venv\Scripts\python.exe -m uvicorn api.main:app --host 127.0.0.1 --port 8000
+```
+
+Incluyo `Dockerfile`, `docker-compose.yml` y `.dockerignore`; la imagen instala solo `requirements-api.txt`, copia `api/` y `models/`, ejecuta sin privilegios y define un `HEALTHCHECK` contra `/health`. El comando previsto es `docker compose up --build`. **No ejecuté la construcción ni el arranque del contenedor** porque este equipo no tiene Docker CLI ni distribución WSL instalada. La sintaxis YAML se validó y la API se probó en un entorno virtual limpio; la verificación de extremo a extremo con Docker queda pendiente.
+
+### 4. ¿Qué pruebas cubren la API?
+
+`tests/api/test_api.py` contiene 13 pruebas: salud, ficha, predicción válida y reproducible, límites, entradas faltantes/extra, tipos incorrectos, booleanos, fuera de rango, OpenAPI, Swagger y fallo al cargar un modelo inválido. `tests/integracion/test_api_modelo_serie2.py` contiene 4 pruebas que reconstruyen el ajuste desde el CSV y comparan la ecuación JSON con el pipeline `joblib` en 500 filas completas, las 15 filas imputadas y la reproducibilidad del archivo exportado. Las 13 pruebas de API también pasan en un entorno virtual limpio con `requirements-api.txt`, `pytest` y `httpx2`.
+
+### 5. ¿Qué límites conserva?
+
+La validación del modelo es histórica y reutilizada; el quinto día no se evaluó en esta versión. La unidad del caudal y de las entradas no está certificada, el linaje del caudal compensado y las latencias no están confirmados, y la API no demuestra independencia instrumental ni funcionamiento ante falla del caudalímetro. Tampoco incluye autenticación, límites de tasa, auditoría ni integración con planta. Es una demostración técnica, no un servicio para control automático o decisiones contractuales. El detalle está en [Serie IV: API del sensor virtual](serie-IV-api.md).
+
+## Serie V: pendiente
+
+- **Presentación ejecutiva:** pendiente la exposición de 15–20 minutos para las tres gerencias y la demostración de la API de Serie IV.
 
 Concentro las respuestas disponibles en este documento. Los informes temáticos y notebooks contienen el detalle técnico, las limitaciones y la reproducción de sus resultados.

@@ -40,6 +40,15 @@ Registro de decisiones técnicas, supuestos e hipótesis descartadas. La cronolo
 - **Pronóstico.** La comparación usa 19 configuraciones con hasta 24 rasgos OHLCV/históricos. La propuesta de entrega usa Extra Trees a un mes y Ridge histórico a tres meses. Extra Trees reduce el MAE de evaluación de 0.694164 a 0.651709 (6.12 %) y el WAPE de 3.945331 % a 3.704038 %. Ridge histórico reduce el MAE a tres meses de 1.652727 a 1.630385 (1.35 %). El ingenuo del último cierre gana la comparación de selección y permanece como baseline. La elección es exploratoria porque la evaluación no es un periodo ciego; no hay test ciego reservado.
 - **Oferta.** Guatemala y cinco pares estructurales comparten veinte años (2004–2023), con ecuaciones separadas; World queda como contexto. Viet Nam conserva la señal positiva más estable de los dos rezagos. En la retrospectiva propia+precio, mejora frente a la media en ese país y empeora en los otros cinco. El contraste describe heterogeneidad; no identifica causalidad ni un plazo agrícola exacto. FAOSTAT usa versiones finales y no acredita fechas de publicación históricas.
 
+## 2026-10-21 — Serie IV: API y empaquetado
+
+- **Modelo expuesto.** Expongo la campeona Ridge de Serie II, no la de Serie I. El artefacto `models/serie2_sensor_virtual.json` contiene 17 entradas, coeficientes, medias, escalas, medianas, rangos, percentiles, métricas y el SHA-256 del `joblib`. La inferencia es Python puro; la API no carga scikit-learn ni los datos crudos.
+- **Contrato de entrada.** La API recibe las 17 columnas ya preparadas, incluidas las dos presiones treinta segundos antes. No calcula el rezago, no imputa y no acepta faltantes: una solicitud incompleta devuelve 422. Los rangos son mínimo/máximo observados, no límites de seguridad. La mediana de `YJJWSLL.AV_0#` se publica para trazabilidad, pero no se aplica en tiempo de ejecución.
+- **Endpoints.** `GET /health`, `GET /model`, `POST /predict`, Swagger en `/docs` y OpenAPI en `/openapi.json`. La respuesta incluye modelo, versión, objetivo, unidad no certificada y advertencia. No invento intervalos de incertidumbre.
+- **Dependencias y pruebas.** Fijo FastAPI 0.156.4, Pydantic 2.14.1 y Uvicorn 0.54.0 en `requirements-api.txt`; pytest 8.4.2 y httpx2 2.15.1 en `requirements-dev.txt`. Las 13 pruebas de API y las 4 de integración comparan la ecuación JSON con el pipeline original, incluidas las 15 filas imputadas. La API también pasa en un entorno virtual limpio con solo `requirements-api.txt`, pytest y httpx2.
+- **Docker.** Incluyo `Dockerfile`, `docker-compose.yml` y `.dockerignore`. La imagen usa solo `requirements-api.txt`, copia `api/` y `models/`, ejecuta sin privilegios y define un `HEALTHCHECK`. La sintaxis YAML se validó. **No ejecuté `docker compose up --build`** porque este equipo no tiene Docker CLI ni distribución WSL instalada; la verificación de extremo a extremo queda pendiente en una máquina con Docker.
+- **Alcance.** La Serie IV es opcional según el PDF. La presento como demostración técnica con contrato, pruebas y empaquetado, no como certificación de producción, independencia instrumental o uso en control automático.
+
 ## 2026-10-20 — Criterio editorial
 
 - **Resultados actuales.** README, conclusiones e informes describen el resultado actual, el método, la evidencia y los límites. Son documentos de resultado, no de incidencias.
@@ -49,12 +58,12 @@ Registro de decisiones técnicas, supuestos e hipótesis descartadas. La cronolo
 
 ## 2026-10-20 — Verificación
 
-- La suite completa contiene 107 pruebas: 57 unitarias y 50 de integración. La ejecución completa aprueba las 107.
+- La suite completa contiene 124 pruebas: 57 unitarias, 54 de integración y 13 de API. La ejecución completa aprueba las 124.
 - La comprobación de enlaces locales no encuentra destinos faltantes.
 - El notebook 22 tiene 11 celdas, 6 de código y ejecución sin errores.
 - Las pruebas verifican implementación, conservación y trazabilidad; no certifican instrumentación, continuidad contractual, causalidad ni generalización futura.
 - Actualicé las huellas protegidas de los notebooks 07, 09 y 10 después de cambios exclusivamente markdown; código, ejecución y outputs no cambiaron.
-- Git: rama `main`, HEAD `e5fffca`, veinte commits por delante de `origin/main`. Las cuatro unidades nuevas y su integración documental están sin commit. No he hecho push ni he consultado el servidor remoto.
+- Git: rama `main`; el historial local incluye las unidades de Serie I–IV y se publica en `origin/main` como parte de esta entrega. El PDF confidencial, los datasets, `outputs/` y las notas internas quedan fuera de Git. El estado exacto de HEAD se consulta con `git log -1`.
 
 ## Hipótesis descartadas
 

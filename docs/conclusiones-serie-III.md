@@ -432,7 +432,7 @@ La precedencia temporal no identifica causa: el futuro puede anticipar oferta es
 
 Para una decisión propia se necesitan fechas de siembra/renovación/cosecha por parcela, precio esperado al decidir y precio neto recibido, costos/márgenes alternativos, clima/agua y capacidad. Esa captura permitiría contrastar un mecanismo y buscar variación exógena; añadir controles por sí solo no asegura causalidad. La continuidad de contratos está pendiente de certificación.
 
-Certeza alta sobre trazabilidad y orientación computacional comprobadas; moderada y condicionada para la asociación mundial, insuficiente para una regla local o un efecto causal. El inciso está respondido con esos límites; los cuatro incisos de Serie III tienen desarrollo analítico. Series IV y V están pendientes.
+Certeza alta sobre trazabilidad y orientación computacional comprobadas; moderada y condicionada para la asociación mundial, insuficiente para una regla local o un efecto causal. El inciso está respondido con esos límites; los cuatro incisos de Serie III tienen desarrollo analítico. La Serie IV se desarrolla como extensión opcional; la Serie V está pendiente.
 
 ### Evidencia y reproducción
 
