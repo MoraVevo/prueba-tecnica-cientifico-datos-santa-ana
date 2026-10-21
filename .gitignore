@@ -16,6 +16,12 @@ __pycache__/
 # Instrucciones locales de la carpeta
 AGENTS.md
 
+# Revisiones y contexto de trabajo locales
+/docs/estado.md
+/docs/auditoria*.md
+/docs/revision-*.md
+/docs/memoria-interna*.md
+
 # Entornos locales y credenciales
 .env
 .env.*

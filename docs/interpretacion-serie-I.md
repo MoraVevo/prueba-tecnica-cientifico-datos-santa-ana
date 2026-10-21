@@ -99,4 +99,4 @@ Decisión: mantener STAGE 5 como base principal de la recomendación económica 
 - [Artículo técnico del programa de desarrollo varietal de Louisiana (2025): diseño por etapas, réplicas y mediciones agronómicas](https://acsess.onlinelibrary.wiley.com/doi/10.1002/tpg2.20545).
 - [LSU AgCenter: panel de avance de variedades; distingue rendimiento de azúcar, calidad TRS, caña, ciclo y localidad, y documenta datos modelados y fiabilidad de ensayos](https://www.lsuagcenter.com/topics/crops/sugarcane/blanchard-sugarcane-lab/variety-advancement-dashboard).
 - [LSU AgCenter: actividades del programa por año, con ejemplos de etapas de selección](https://www.lsuagcenter.com/~/media/system/4/8/1/d/481d121dd5056e4db20afb50b8d8750a/03%20variety%20section%202023pdf.pdf).
-- [PDF de la prueba](../Prueba%20de%20conocimientos%20t%C3%A9cnicos%20Cient%C3%ADfico%20de%20Datos.pdf), páginas 2–3.
+- PDF confidencial de la prueba, páginas 2–3; fuente local excluida del repositorio y de los datasets de entrega.

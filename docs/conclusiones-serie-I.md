@@ -1,5 +1,7 @@
 # Serie I: respuestas a Gerencia
 
+Para consultar las conclusiones breves de todas las series desde un solo lugar, ve a [respuestas directas a la prueba](respuestas-prueba.md).
+
 Estado: los cuatro apartados de Serie I están completos y revisados en su alcance analítico. Se reconstruyeron las políticas económicas, las métricas y particiones supervisadas y las cuatro dimensiones y 17 pertenencias de la segmentación. Las 13 pruebas unitarias y 8 de integración verifican implementación y trazabilidad; la validación temporal informa desempeño. Las limitaciones y supuestos que siguen se conservan al interpretar y defender las decisiones.
 
 ## 1. Tres variedades, renovación y certeza
@@ -72,7 +74,7 @@ El error global no describe por igual cada ambiente: en MAGNOLIA, etapa 5, el MA
 
 En 2019 todos los algoritmos tienen R² negativo, señal de que las entradas no explican bien esa zafra. El sesgo de Ridge (`predicción − observado`) es +2,148 lb/acre en 2019 —sobreestimación media— y −1,078 en 2020 —subestimación media—. Una explicación plausible es el cambio de nivel entre años: el promedio del objetivo cayó entre 21 % y 27 % por etapa de 2018 a 2019, y subió entre 30 % y 41 % de 2019 a 2020; al usar años anteriores, Ridge puede quedar alto ante una caída y tardar en reflejar un rebote. Esto describe un mecanismo compatible con la validación, no demuestra por qué cambió el rendimiento. Como contexto, se ha relacionado 2019 con la cosecha muy húmeda de 2018 y condiciones meteorológicas adversas; en 2020 se documentaron cambios operativos por COVID y mayores rendimientos estatales de caña frente a 2019. La fuente no permite aislar clima, operación, manejo, cobertura o medición, y las claves coincidentes entre años no identifican parcelas pareadas. La sensibilidad incluyendo alertas de calidad en entrenamiento e historia da MAE cercano a 2,135.10 en las mismas filas limpias de 2021; se conserva el escenario principal más conservador. Las predicciones deben acompañarse de errores por corte/ambiente y monitoreo de sesgo; se requiere calibración específica antes de ofrecer intervalos de predicción.
 
-Evidencia: `notebooks/04_modelo_supervisado_serie1.ipynb`, funciones y pipelines compartidos en `scripts/modelado_serie1.py`, y pruebas en `tests/`. Se guardan predicciones por fila de los cinco métodos en las tres particiones, métricas y errores por localidad/etapa en `data/processed/`. La reorganización para probar el código conservó exactamente las predicciones previas de 2021.
+Evidencia: `notebooks/04_modelo_supervisado_serie1.ipynb`, funciones y pipelines compartidos en `scripts/modelado_serie1.py`, y pruebas en `tests/`. Se guardan predicciones por fila de los cinco métodos en las tres particiones, métricas y errores por localidad/etapa en `data/processed/`.
 
 ## 3. Segmentación y significado gerencial
 
@@ -91,7 +93,7 @@ Perfil 1: HO05-961, HO07-613, HOCP00-950, HOCP96-540 y L03-371. Conviene vigilar
 
 Perfil 2: las otras doce variedades elegibles, incluidas las tres recomendadas económicamente. Respalda evaluar continuidad de socas dentro del horizonte observado y comparar aportes individuales. Las propiedades no son uniformes: HOCP14-885 tiene alrededor de 75 % de conservación en ambientes comunes, pese a la mayor conservación media del grupo. Los perfiles se determinan con las cuatro dimensiones y no fijan un umbral de renovación.
 
-La construcción de las entradas importa más que una mejora de la métrica interna. HO05-961 pasa de 83.6 % de conservación sin emparejar a 76.0 % en ambientes comunes y cambia del Perfil 2 al 1 respecto a la versión anterior; esa comparación tiene solo dos años. Al usar agrupamiento jerárquico Ward, L99-226 cambia de perfil. Ambos casos requieren revisión individual. La omisión de variabilidad es la que más modifica las pertenencias (seis variedades); representa un cambio en la pregunta de negocio y no justifica retirar una dimensión solicitada.
+La construcción de las entradas importa más que una mejora de la métrica interna. HO05-961 pasa de 83.6 % de conservación sin emparejar a 76.0 % en ambientes comunes; la definición en ambientes comunes la sitúa en el Perfil 1; esa comparación tiene solo dos años. Al usar agrupamiento jerárquico Ward, L99-226 cambia de perfil. Ambos casos requieren revisión individual. La omisión de variabilidad es la que más modifica las pertenencias (seis variedades); representa un cambio en la pregunta de negocio y no justifica retirar una dimensión solicitada.
 
 La reconstrucción independiente desde el ETL reprodujo las cuatro entradas y las 17 pertenencias actuales. La certeza sigue siendo exploratoria: productividad y TRS describen coberturas distintas entre variedades; la referencia ambiental de variabilidad también cambia de composición y las dimensiones están parcialmente correlacionadas. El cociente de conservación no sigue cohortes ni observa causas de retiro. La segmentación orienta seguimiento; la ampliación y renovación se resuelven con el análisis económico y la evidencia individual, cuyas tres recomendaciones se mantienen.
 

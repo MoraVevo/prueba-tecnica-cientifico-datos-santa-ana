@@ -1,6 +1,6 @@
 # Serie II: significado físico y disponibilidad de las señales
 
-Esta revisión interpreta el diccionario y la documentación de la fuente; no selecciona todavía variables ni calcula retardos. El catálogo por sensor, los faltantes y los patrones de actualización se reproducen en el notebook 06. Las relaciones de proceso son explicaciones físicas plausibles, no efectos causales estimados con estos datos.
+Este documento interpreta el diccionario y la documentación de la fuente; la selección del modelo se desarrolla en el notebook 12. El catálogo por sensor, los faltantes y los patrones de actualización se reproducen en el notebook 06. Las relaciones de proceso son explicaciones físicas plausibles, no efectos causales estimados con estos datos.
 
 ## Qué proceso representan
 
@@ -23,33 +23,27 @@ Las unidades de temperatura de otros tags podrían ser °C, pero no se extiende 
 
 ## Disponibilidad para el sensor virtual
 
-**Uso propuesto para el ejercicio:** estimar el caudal de vapor del instante `t` con otras señales de proceso recibidas hasta ese momento. Es una estimación contemporánea, no un pronóstico de la siguiente hora. El PDF pide un sensor virtual sin imponer un horizonte futuro. Este alcance es una propuesta técnica pendiente del desarrollo del modelo.
+**Uso del modelo:** estimar el caudal de vapor del instante `t` con otras señales de proceso recibidas hasta ese momento. Es una estimación contemporánea, no un pronóstico de la siguiente hora. El PDF pide un sensor virtual sin imponer un horizonte futuro.
 
 La publicación describe adquisición mediante un DCS, con acondicionamiento de señales y archivo de marcas temporales. Esto respalda su origen operativo; no prueba latencia cero, relojes perfectamente sincronizados ni disponibilidad independiente de cada tag durante una falla.
 
 | Comprobación | Evidencia y decisión |
 | --- | --- |
 | Existencia histórica | Hay 29 señales candidatas además del objetivo, en 86,400 filas. Son candidatas disponibles en el archivo, no 29 entradas garantizadas en producción. |
-| Cobertura | 28 predictoras no tienen faltantes; `YJJWSLL` tiene 30/86,400 = 0.03472 % faltantes, en dos episodios. Se conserva y se decidirá después cómo manejar su ausencia usando solo información permitida en entrenamiento/operación. |
+| Cobertura | 28 predictoras no tienen faltantes; `YJJWSLL` tiene 30/86,400 = 0.03472 % faltantes, en dos episodios. La imputación usa medianas ajustadas solo con entrenamiento; la ausencia original queda registrada. |
 | Actualización | El archivo tiene pasos de cinco segundos. `SXLTCYZ`, `SXLTCYY`, `ZCLCCY`, `YCLCCY` y el objetivo repiten todos los pares consecutivos: compatible con actualización efectiva cada diez segundos o retención, sin mecanismo probado. No equivalen a una medición independiente nueva cada cinco segundos. |
 | Estabilidad de válvula | Los niveles mantenidos no implican falta de disponibilidad ni falla; se conserva. Su disponibilidad física real sigue dependiendo de qué representa el tag. |
 | Disponibilidad de tiempo real | No hay fecha de recepción, calidad, edad de lectura, latencia por canal ni modo manual/automático. Para usar `x(t)` se deberá declarar el supuesto de que ya se recibió al emitir la estimación; si no, usar la última lectura recibida y su edad. Desplazar una fila por sí solo no verifica ese supuesto. |
-| Independencia del objetivo | `ZZQBCHLL(t)` se excluye de las entradas. Para evaluar un reemplazo durante indisponibilidad del caudalímetro, la propuesta inicial tampoco depende de sus rezagos: podrían dejar de existir o congelarse. Otro escenario con historial del objetivo requeriría evaluación separada. |
+| Independencia del objetivo | `ZZQBCHLL(t)` se excluye de las entradas. Para evaluar un reemplazo durante indisponibilidad del caudalímetro, el modelo tampoco depende de sus rezagos: podrían dejar de existir o congelarse. Otro escenario con historial del objetivo requeriría evaluación separada. |
 | Caudal compensado | Presión/temperatura pueden intervenir en compensación de densidad de un caudal de vapor, pero no conocemos la fórmula de este equipo ni qué tags usa. Compartir una variable de compensación no demuestra por sí solo fuga; sí obliga a revisar si el predictor depende del caudalímetro averiado o de su misma cadena de adquisición. No se demuestra independencia instrumental con el CSV. |
 | Transformaciones | No usar valores futuros ni interpolación apoyada en el futuro. Ajustar imputación, escalado y selección solo dentro de entrenamiento. Estimar vapor con señales contemporáneas permitidas no las convierte en causas ni permite simular qué pasaría al manipularlas. |
 | Falla compartida | Tener sensores en columnas diferentes no asegura supervivencia ante una pérdida común de DCS/comunicación. La evaluación histórica del sensor virtual no certifica continuidad ante todos los tipos de falla. |
 
-**Resultado vigente (2026-10-20):** las 29 candidatas se mantienen en la fuente; el campeón del notebook 07 utiliza quince señales actuales elegidas por eliminación recursiva con Ridge. MAE medio de validación 0.4573 frente a 0.4622 del Ridge completo. El último día se reutilizó tras haber sido observado en el experimento anterior: MAE 0.3378 y R² 0.9625, de carácter exploratorio. La ingeniería temporal se retiró del código por decisión del usuario y los rezagos quedan pendientes. La bitácora conserva los experimentos descartados; no cambia la falta de confirmación instrumental.
+## Modelo seleccionado y disponibilidad
 
-## Selección vigente: 29 frente a quince señales actuales
+Ridge utiliza diecisiete entradas de quince sensores: quince señales actuales y las presiones PTCA_8322A/PTCA_8324 a treinta segundos. MAE medio 0.356026 y WAPE agregado 0.598068 % en tres validaciones temporales. La selección de señales, imputación y escalado se ajustan dentro del entrenamiento. La relación temporal no certifica un tiempo de respuesta físico.
 
-El usuario corrigió la reducción inicial por ser demasiado agresiva y pidió quince señales y retirar memoria incluso del código. Se usa RFE con Ridge alpha=100, estandarización y eliminación de una señal por paso, dentro de cada entrenamiento. No se usa importancia del bosque para decidir entradas de Ridge. La correlación sirve para interpretar redundancias, sin borrar automáticamente parejas que puedan aportar mediante su contraste. La comparación de modelos reentrenados es el criterio para aceptar la reducción. Se conservan las dos presiones PTCA_8322A/PTCA_8324 entre las quince del ajuste final.
-
-Las quince pueden variar entre particiones porque el conjunto se aprende solo con el pasado; se vuelven a elegir al ajustar en desarrollo. Las tres validaciones usan exactamente quince en cada caso. Sin características históricas, hay 43,200 filas de modelado y no hace falta eliminar los primeros cinco minutos por arranque. Se conserva separación de cinco minutos entre etiquetas de entrenamiento y evaluación por cautela temporal.
-
-La evaluación del último día está marcada como reutilizada: el usuario decidió esta revisión tras ver el resultado anterior. El código selecciona con validación, pero se necesita otro periodo no observado para una evaluación independiente posterior. Las historias y cadenas temporales podrán trabajarse en una etapa separada; no se atribuyen tiempos de respuesta ni causalidad con la versión actual.
-
-Referencia: [eliminación recursiva de variables, scikit-learn](https://scikit-learn.org/1.6/modules/generated/sklearn.feature_selection.RFE.html).
+El ajuste final usa 34,464 filas de los primeros cuatro días, con recorte inicial común de 660 s y separación final de cinco minutos. Las validaciones son reutilizadas; se necesita un periodo nuevo para evaluar generalización. El artefacto y sus columnas están en outputs/campeona_serie2/. Detalle en el [informe de rezagos](rezagos-serie-II.md).
 
 ## Información que resolvería las ambigüedades
 
