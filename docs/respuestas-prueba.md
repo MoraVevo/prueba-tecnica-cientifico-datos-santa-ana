@@ -1,6 +1,6 @@
 # Respuestas directas a la prueba técnica
 
-Este es el punto de entrada para leer las respuestas de cada serie sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III tiene respuestas a sus tres primeros incisos, con verificación parcial de continuidad de precios; su cuarto inciso y las Series IV–V permanecen pendientes.
+Este es el punto de entrada para leer las respuestas de cada serie sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III tiene respuestas a sus cuatro incisos, con verificación parcial de continuidad de precios y sin identificación causal de oferta. Las Series IV–V permanecen pendientes.
 
 ## Estado general
 
@@ -8,7 +8,7 @@ Este es el punto de entrada para leer las respuestas de cada serie sin rastrearl
 |---|---|---|
 | I. Campo, variedades y renovación | Cuatro peticiones a Gerencia Agrícola respondidas con datos, modelos y límites. | Análisis completado. |
 | II. Fábrica, caldera | Cinco peticiones respondidas con la serie de sensores externa del enunciado. | Análisis completado; para decisiones de planta se requieren comprobaciones adicionales. |
-| III. Mercado, producción y precio | Perfiles de países, pares de Guatemala, riesgo y pronósticos de precio. | Incisos 1–3 respondidos con límites; continuidad de precios parcialmente verificada. Respuesta de oferta pendiente. |
+| III. Mercado, producción y precio | Países, pares, riesgo, pronósticos y relación de oferta/precio con rezagos. | Cuatro incisos respondidos como análisis, con continuidad parcialmente verificada y sin efecto causal identificado. |
 | IV. Modelo en producción | API, empaquetado Docker y pruebas de API. | Pendiente; no desarrollada. |
 | V. Presentación ejecutiva | Síntesis para las gerencias y defensa del análisis. | Pendiente; no elaborada. |
 
@@ -125,9 +125,15 @@ Todos los valores en centavos de USD/libra. Las bandas se calibran con errores d
 
 **Decisión:** conservar el ingenuo como referencia transparente de presupuesto y escenarios. La continuidad no certificada y la diferencia respecto del precio físico/contrato negociable limitan el uso comercial; no se demuestra ahorro ni rentabilidad de cobertura. **Desarrollo:** [apartado 3 de conclusiones](conclusiones-serie-III.md#3-pronóstico-a-uno-y-tres-meses-con-incertidumbre), [notebook 16](../notebooks/16_pronostico_azucar_serie3.ipynb) y [método reproducible](../scripts/pronosticar_azucar_serie3.py).
 
-### 4. Respuesta de oferta al precio
+### 4. ¿La superficie o producción responde al precio y con qué rezago?
 
-Pendiente: examinar relaciones entre precio y superficie/producción con rezagos, distinguiendo asociación de causalidad. La continuidad completamente certificada de los precios requiere evidencia adicional y condiciona la interpretación.
+**En el agregado mundial aparece una asociación positiva con el cambio de precio de dos años antes; en Guatemala la evidencia es débil.** Para 2004–2023, las correlaciones de crecimientos anuales a dos años son 0.718/0.776 en superficie/producción mundial, frente a 0.310/0.001 en Guatemala. La correlación de niveles de superficie de Guatemala es 0.845, pero no se conserva con esa magnitud al comparar cambios: no basta para defender respuesta local.
+
+Con diez evaluaciones temporales retrospectivas de 2014–2023, los dos rezagos de precio reducen el MAE mundial frente a media histórica de 2.241 a 1.874 en superficie y de 3.201 a 1.425 en producción (**16.36 % y 55.46 %**). Son puntos logarítmicos de error del crecimiento, no porcentajes del volumen ni ahorro. En Guatemala el mismo modelo empeora la referencia: 4.249 → 4.540 y 9.838 → 10.339. El contraste adicional con crecimiento propio y las sensibilidades no justifican una regla local de expansión.
+
+**Dos años es una señal asociativa entre los rezagos examinados, no un tiempo físico ni una elasticidad causal demostrados.** Solo hay veinte ecuaciones anuales por ámbito; se usan versiones finales de FAOSTAT y no se comprobó disponibilidad histórica. El futuro puede anticipar cosechas y compartir causas con ellas; faltan calendario de decisiones, precio físico esperado/neto, costos, moneda, clima y variación exógena identificada. La continuidad contractual sigue parcialmente verificada.
+
+**Decisión:** usar la relación mundial para contexto de escenarios, sin ordenar ampliación de superficie de Guatemala ni prometer producción o beneficio por una subida del precio. **Desarrollo:** [apartado 4 de conclusiones](conclusiones-serie-III.md#4-respuesta-de-superficie-y-producción-al-precio), [notebook 17](../notebooks/17_oferta_precio_serie3.ipynb) y [método reproducible](../scripts/analizar_oferta_serie3.py).
 
 ## Series IV y V: pendientes
 

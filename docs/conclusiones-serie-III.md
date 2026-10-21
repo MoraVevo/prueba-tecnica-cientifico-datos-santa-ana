@@ -4,7 +4,7 @@
 
 **Guatemala pertenece al perfil de mayor escala y rendimiento entre las áreas comparables de la muestra. Indonesia, Bolivia y Vietnam forman el núcleo de referencias más persistente por estructura de superficie; Nepal y Kenia son referencias secundarias.** La productividad publicada de Guatemala por hectárea es alta frente a esas referencias, pero no demuestra ventaja comparativa económica ni eficiencia de todos los recursos.
 
-Este apartado responde al primer inciso del PDF: evolución de rendimiento, superficie y producción en 1961–2023, ubicación de Guatemala, pares, diferencias y calidad. Los apartados 2–3 desarrollan riesgo y pronósticos de precio con continuidad parcialmente verificada; la respuesta de oferta al precio permanece pendiente.
+Este apartado responde al primer inciso del PDF: evolución de rendimiento, superficie y producción en 1961–2023, ubicación de Guatemala, pares, diferencias y calidad. Los apartados 2–4 desarrollan riesgo, pronósticos y asociación entre precio y oferta con rezagos. Los cuatro incisos tienen respuesta analítica, condicionada a calidad, continuidad de precios parcialmente verificada y límites de identificación causal.
 
 ### Perfiles productivos
 
@@ -270,7 +270,7 @@ Recomiendo conservar el ingenuo como referencia transparente de presupuesto y es
 
 Para uso comercial faltan linaje por contrato, liquidaciones y método de enlace/ajuste, además del diferencial físico, moneda, volumen y calendario de exposición de Santa Ana. La agregación mensual puede suavizar algunos extremos diarios, pero no resuelve la mezcla de vencimientos. Los resultados no aseguran comportamiento posterior ni constituyen una recomendación para operar hoy.
 
-La certeza es alta respecto de reproducción y separación computacional comprobada; limitada respecto del precio negociable representado, precisión futura y cobertura de nuevos regímenes. El inciso 3 tiene respuesta analítica condicionada a esas limitaciones; el inciso 4 permanece pendiente.
+La certeza es alta respecto de reproducción y separación computacional comprobada; limitada respecto del precio negociable representado, precisión futura y cobertura de nuevos regímenes. El inciso 3 tiene respuesta analítica condicionada a esas limitaciones; el apartado siguiente examina la relación de precio y oferta anual.
 
 ### Evidencia y reproducción
 
@@ -282,3 +282,84 @@ python -m pytest tests/unitarias/test_pronostico_serie3.py tests/integracion/tes
 ```
 
 Seis pruebas específicas reconstruyen agregación, pronósticos por solución matricial, etiquetas maduras, elección, cuantiles, cobertura y Winkler. Las pruebas de perturbación futura y de selección separada protegen contra usar información posterior; no certifican los precios ni una cobertura probabilística futura.
+
+## 4. Respuesta de superficie y producción al precio
+
+**El agregado mundial presenta una asociación positiva entre cambios de precio de dos años antes y cambios de superficie/producción. En Guatemala la evidencia es mucho más débil y añadir precio no supera la referencia más sencilla. No se demuestra causalidad ni un rezago agronómico exacto.**
+
+### Datos y alcance temporal
+
+El promedio anual de cierres diarios del No. 11 se cruza con superficie cosechada, producción de caña y rendimiento FAOSTAT de **Guatemala y World**, por año calendario. World es el agregado publicado; no una suma de países con cobertura seleccionada ni un segundo país independiente. El precio es nominal en centavos USD/libra, el área en ha, la producción en toneladas de caña y el rendimiento en kg/ha. No se estima producción de azúcar comercial.
+
+Hay **23 años completos de precios, 2001–2023**, con presencia de doce meses; no certifica que estén todas las sesiones esperadas. De 6,097 días se incluyen 5,766 y se conservan aparte 331 de 2000 parcial/2024 parcial y fuera del ámbito del PDF, con datos originales y motivo. Las 138 celdas FAOSTAT seleccionadas forman 46 años-ámbito. Las otras 27,510 celdas permanecen con motivos geográficos/temporales. No se declaran errores.
+
+Se calculan cambios logarítmicos `gX_t = ln(X_t/X_{t−1})` y luego rezagos, antes de seleccionar. Exigir la misma historia para todos deja **20 ecuaciones por ámbito, 2004–2023**; los seis años-ámbito iniciales se conservan aparte. No se imputan valores ni se eliminan extremos. Los flags permanecen: Guatemala tiene A en los tres indicadores en 14 de estos veinte años; seis incluyen estimación/imputación. Un A del agregado World no certifica calidad oficial homogénea de sus componentes.
+
+Producción ≈ área × rendimiento / 1,000; el residuo máximo en log de esa identidad es 0.000002482 en el panel. Rendimiento permite examinar el componente de producción distinto de superficie; no es una tercera causa independiente.
+
+### Relación contemporánea y rezagos
+
+Se examinan los rezagos predefinidos 0, 1 y 2 sobre las mismas veinte filas, tanto en log de niveles como en cambios. El contemporáneo es descriptivo; no se usa para anticipar una decisión que ocurre antes de conocer todo el precio del año.
+
+| Ámbito/objetivo | Correlación de cambios, mismo año | Un año antes | Dos años antes | Correlación de niveles log, dos años antes |
+|---|---:|---:|---:|---:|
+| Guatemala, superficie | −0.391 | 0.223 | 0.310 | 0.845 |
+| Guatemala, producción | −0.391 | −0.211 | 0.001 | 0.664 |
+| Mundo, superficie | −0.181 | 0.063 | 0.718 | 0.871 |
+| Mundo, producción | −0.207 | 0.097 | 0.776 | 0.839 |
+
+La correlación alta de niveles de Guatemala no se conserva al comparar crecimientos. En el mundo sí aparece una asociación diferida en cambios, más clara a dos años entre los rezagos probados. No se amplía la búsqueda para maximizar la correlación. Diferenciar reduce el riesgo de tendencias compartidas, pero no prueba estacionariedad ni descarta cointegración o una relación de largo plazo. Las advertencias sobre tendencias, rezagos y causalidad se apoyan en [Hyndman y Athanasopoulos, capítulo 7](https://otexts.com/fpp3/regression.html), secciones 7.3, 7.4 y 7.8; el diseño concreto es propio.
+
+### Ecuación y estabilidad
+
+Se contrastan cuatro especificaciones fijas: media histórica del cambio; crecimiento propio anterior; dos crecimientos previos del precio; y ambos conjuntos. La última es:
+
+`gX_t = α + φ·gX_{t−1} + β1·gP_{t−1} + β2·gP_{t−2} + error_t`.
+
+Son cuatro parámetros para veinte años. Sus coeficientes son asociaciones condicionales entre cambios logarítmicos, sin interpretación de elasticidad causal o de largo plazo. R² es ajuste interno. No se reportan p-valores que supongan ecuaciones independientes.
+
+En el mundo, β2 es **0.0986 para superficie y 0.1318 para producción**. Al omitir una ecuación anual cada vez, sus rangos son **0.0863–0.1061 y 0.1188–0.1387**. Sigue positivo en ambos bloques: superficie 0.1231/0.0641 y producción 0.1421/0.1312 en 2004–2013/2014–2023. Son sensibilidades de muestra pequeña, no intervalos de confianza; retirar una ecuación conserva ese año como antecedente de las otras.
+
+En Guatemala, superficie tiene β1/β2 = 0.0609/0.0496 en el conjunto. Ambos siguen positivos al omitir una ecuación, pero β1 cambia de +0.0690 a −0.0337 entre bloques. Producción tiene −0.1186/−0.0064 y β2 cambia de signo al omitir años. La falta de señal productiva local no prueba ausencia de incentivos económicos; puede reflejar variables omitidas, medición, agregación o una respuesta diferente.
+
+Promediar primero por mes y luego equiponderar meses da coeficientes próximos. Apartar únicamente los 99 días completos con OHLC inconsistente o volumen cero tampoco cambia la lectura; sus observaciones y motivos permanecen en archivo separado. Se conserva el análisis principal con todos los cierres. Ninguna sensibilidad certifica continuidad ni corrige contractualmente los precios.
+
+### Comprobación temporal y magnitud de utilidad
+
+Se entrena en 2004–2013 para estimar 2014; después se añade cada año anterior y se repite hasta 2023. Hay **diez evaluaciones por serie y método**. Los predictores de precio terminan en t−1 y las etiquetas de ajuste también; no se utiliza precio contemporáneo ni futuro. No se elige un nuevo candidato a partir de estos errores.
+
+| Ámbito/objetivo | Media histórica | Crecimiento propio | Precio, dos rezagos | Propio + precio |
+|---|---:|---:|---:|---:|
+| Guatemala, superficie | 4.249 | 4.760 | 4.540 | 4.654 |
+| Guatemala, producción | 9.838 | 9.939 | 10.339 | 11.225 |
+| Mundo, superficie | 2.241 | 1.882 | 1.874 | 1.767 |
+| Mundo, producción | 3.201 | 3.035 | 1.425 | 1.685 |
+
+MAE en **puntos logarítmicos**, `100 × media(|g observado − g estimado|)`; menor es mejor. No es WAPE ni porcentaje del volumen en toneladas. Un punto log aproxima un punto porcentual de crecimiento solo para variaciones pequeñas.
+
+En el mundo, precio solo reduce el MAE frente a la media **16.36 % en superficie y 55.46 % en producción**. Al añadirlo al crecimiento propio, la reducción es 6.10 % y 44.50 %, respectivamente. En Guatemala, precio solo empeora la media 6.86 %/5.10 %; añadirlo al crecimiento propio mejora apenas 2.21 % superficie, aún peor que la media, y empeora 12.94 % producción. No justifica una regla local de expansión.
+
+La evaluación utiliza las **versiones finales publicadas**, sin reconstruir revisiones o fechas de disponibilidad de FAOSTAT. No se comprobó que la cosecha t−1 se conociera al inicio de t. Es un diagnóstico temporal retrospectivo condicional, no un backtest operativo ni una evaluación nueva ciega. Los diez errores pueden depender entre sí. Las mejoras mundiales no garantizan precisión futura.
+
+### Causalidad, decisión y evaluación gerencial
+
+Un incentivo de precio podría acompañar siembra, renovación, insumos o ampliación de capacidad, con cosecha posterior. El [caso histórico de Tailandia descrito por FAO](https://www.fao.org/4/x0513e/x0513e24.htm), apartado Production, muestra que calendario, socas, políticas, capacidad y clima acompañan esos ajustes. Motiva examinar rezagos; no demuestra que Guatemala responda a dos años.
+
+La precedencia temporal no identifica causa: el futuro puede anticipar oferta esperada, la oferta puede afectar precio y factores persistentes pueden relacionarse con ambos. No hay shock exógeno identificado, experimento, instrumento validado ni contrafactual que separe esos canales. No se presenta una prueba Granger como prueba causal. El área es cosechada, no nueva siembra; el año publicado no fija cuándo se tomó la decisión. El futuro nominal no es el precio neto recibido por el productor, y faltan inflación/moneda, costos, márgenes de cultivos alternativos y expectativas. La agregación mundial puede ocultar respuestas nacionales opuestas.
+
+**Recomendación:** conservar el rezago mundial de dos años como contexto para escenarios de oferta y seguimiento, con carácter exploratorio. Para Guatemala no recomendar ampliar superficie ni presupuestar un incremento específico de producción a partir de estos coeficientes. La utilidad cuantificada es reducción retrospectiva de error agregado; **no hay ahorro, ingreso ni beneficio causal de Santa Ana estimado**.
+
+Para una decisión propia se necesitan fechas de siembra/renovación/cosecha por parcela, precio esperado al decidir y precio neto recibido, costos/márgenes alternativos, clima/agua y capacidad. Esa captura permitiría contrastar un mecanismo y buscar variación exógena; añadir controles por sí solo no asegura causalidad. La continuidad de contratos sigue pendiente de certificación.
+
+Certeza alta sobre trazabilidad y orientación computacional comprobadas; moderada y condicionada para la asociación mundial, insuficiente para una regla local o un efecto causal. El inciso queda respondido con esos límites; los cuatro incisos de Serie III tienen desarrollo analítico. Series IV y V siguen pendientes.
+
+### Evidencia y reproducción
+
+[Notebook 17](../notebooks/17_oferta_precio_serie3.ipynb), [módulo](../scripts/analizar_oferta_serie3.py), [pruebas unitarias](../tests/unitarias/test_oferta_serie3.py), [contraste independiente](../tests/integracion/test_oferta_serie3_resultados.py) y [fuentes](fuentes-precios/indice.md). Requiere la vista auditada del notebook 13 y `Sugar_data.csv`. En `outputs/serie3_oferta/` quedan promedios, panel/flags, exclusiones con motivos, todas las correlaciones, ajustes, omisiones, predicciones, métricas y figuras; fuera de Git. Las huellas de entrada se conservan.
+
+```powershell
+python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 notebooks/17_oferta_precio_serie3.ipynb
+python -m pytest tests/unitarias/test_oferta_serie3.py tests/integracion/test_oferta_serie3_resultados.py -q
+```
+
+Cinco pruebas específicas contrastan conservación, crudos, unidades y flags, orientación de rezagos, coeficientes conocidos, invariancia a objetivos futuros y reconstrucción QR de todos los ajustes/predicciones y errores. Verifican implementación, sin convertir asociación en identificación causal.

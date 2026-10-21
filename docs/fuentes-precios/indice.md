@@ -1,6 +1,6 @@
-# Fuentes: azúcar No. 11, continuidad y pronóstico
+# Fuentes: azúcar No. 11, continuidad, pronóstico y oferta
 
-Registro de evidencia para los incisos 2–3 de Serie III. Las fuentes respaldan especificaciones, procedencia, contrastes puntuales y criterios metodológicos; ninguna certifica por sí sola toda la serie de Kaggle.
+Registro de evidencia para los incisos 2–4 de Serie III. Las fuentes respaldan especificaciones, procedencia, contrastes puntuales y criterios metodológicos; ninguna certifica por sí sola toda la serie de Kaggle.
 
 | ID | Fuente y localización | Aporte | Límite |
 |---|---|---|---|
@@ -12,8 +12,10 @@ Registro de evidencia para los incisos 2–3 de Serie III. Las fuentes respaldan
 | f006 | [Reuters, 23-02-2016](https://www.brecorder.com/news/280393/sugar-soars-over-7pc-as-supply-concerns-take-hold), cotización a 1431 GMT | Respalda un repunte del azúcar y noticias de revisión del déficit ese día. | Es mayo e intradía: no certifica el cierre del CSV ni su variación exacta. |
 | f007 | [Bloomberg, publicación 13-11-2010 IST](https://economictimes.indiatimes.com/markets/commodities/white-sugar-drops-most-in-a-year-on-exports-from-europe/articleshow/6916921.cms), cotización del viernes en Nueva York | Marzo cotiza 27.98 tras caer 1.68: cierre anterior implícito 29.66, coincidente con 11-11-2010. | Cotejo indirecto de un cierre previo, mediante noticia contemporánea. |
 | f008 | [Hyndman y Athanasopoulos, FPP3, capítulo 5](https://otexts.com/fpp3/toolbox.html), secciones 5.2, 5.5, 5.9 y 5.10 | Referencia ingenua, orígenes móviles y evaluación de intervalos mediante cobertura, amplitud y Winkler. | El diseño mensual y la calibración empírica son decisiones del ejercicio. No establece garantía de cobertura bajo dependencia temporal. |
+| f009 | [Hyndman y Athanasopoulos, FPP3, capítulo 7](https://otexts.com/fpp3/regression.html), secciones 7.3, 7.4 y 7.8 | Tendencias compartidas, rezagos distribuidos y diferencia entre predicción y causalidad. | La diferenciación no prueba estacionariedad; no identifica respuesta causal con esta muestra. |
+| f010 | [FAO, Thailand](https://www.fao.org/4/x0513e/x0513e24.htm), Production | Caso histórico donde calendario, socas, precios, políticas, capacidad y clima acompañan expansión. | No establece calendario ni elasticidad de Guatemala; sin importar cifras al modelo. |
 
-El [registro JSONL](fuentes.jsonl) conserva URL, localización, cita breve, fecha de consulta, alcance y huella del PDF descargado. Reúne ocho fuentes para los incisos 2–3; un PDF descargado mediante el script seguro de la skill de recolección, con tabla FNB inspeccionada visualmente. No se observaron instrucciones hostiles en las fuentes revisadas.
+El [registro JSONL](fuentes.jsonl) conserva URL, localización, cita breve, fecha de consulta, alcance y huella del PDF descargado. Reúne diez fuentes para los incisos 2–4; un PDF descargado mediante el script seguro de la skill de recolección, con tabla FNB inspeccionada visualmente. No se observaron instrucciones hostiles en las fuentes revisadas.
 
 ## Evidencia pendiente para certificar continuidad
 
