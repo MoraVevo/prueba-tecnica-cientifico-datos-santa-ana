@@ -1,12 +1,66 @@
 # Serie II — aportes y respuesta a los cinco incisos
 
-Para encontrar la síntesis de Serie I, II y los pendientes de III–V sin buscar entre informes, ve a [respuestas directas a la prueba](respuestas-prueba.md).
+Para encontrar las respuestas de las series y sus pendientes sin buscar entre informes, ve a [respuestas directas a la prueba](respuestas-prueba.md).
 
 ## Alcance y criterio
 
 Analicé cinco días de operación, con 86,400 registros y treinta sensores cada cinco segundos. El dataset corresponde a una caldera de carbón de otra instalación; sus consignas y relaciones no se transfieren directamente a una caldera de bagazo de Santa Ana. Conservé el dato original y distinguí entre una lectura poco habitual, una desviación real del proceso y un error instrumental demostrado.
 
-Las oportunidades siguientes responden al inciso 5 como propuestas técnicas fundamentadas. No representan ahorros demostrados ni ajustes ya ejecutados. Cuando los datos no permiten estimar un impacto energético confiable, explicito qué información falta, conforme a la alternativa que permite el enunciado.
+Las oportunidades responden al inciso 5 con fundamento físico, hipótesis de trabajo, casos concretos y acciones propuestas. Se distingue el beneficio operativo buscado del ahorro que requeriría medición energética; esa diferencia acota la recomendación sin impedir formularla.
+
+## Interpretación física y decisiones
+
+**La lectura de trabajo es una operación con estados térmicos distintos y compensación de temperatura, junto con transitorios que merecen revisión integrada de proceso y control. La prioridad es estudiar coordinación térmica/atemperación; después, reparto de aire a carga comparable.** Regímenes, sensor virtual y anomalías aportan perspectivas complementarias para observar esa operación. La teoría permite ordenar hipótesis y recomendar esa secuencia, aunque no se haya identificado una avería ni calculado ahorro.
+
+| Inciso | Evidencia | Inferencia física y decisión |
+|---|---|---|
+| 1. Confiabilidad | Treinta faltantes de agua; cinco señales repiten parejas; extremos térmicos con continuidad y contexto. | El archivo es utilizable para este análisis con faltantes y cadencias explícitas. La repetición es compatible con retención/remuestreo: no constituye información independiente nueva cada cinco segundos. Conservar transitorios y priorizar trazabilidad de adquisición. |
+| 2. Regímenes | Dos perfiles con diferencias de gases, aire, caudal y atemperación, pero temperatura final semejante. | La compensación de una salida regulada es una explicación coherente. Comparar carga, estado térmico y señales de actuación conjuntamente; transición de perfil no equivale a falla. |
+| 3. Sensor virtual | La historia de dos presiones mejora las tres validaciones; Ridge de diecisiete entradas alcanza WAPE 0.5981 %. | Presión y trayectoria reciente pueden representar dinámica del circuito y regulación. Conservar el estimador parsimonioso como apoyo consultivo en paralelo y referencia de consistencia. |
+| 4. Anomalías | El detector general omite extremos individuales; hay episodios térmicos y excursiones de corriente/aire de retorno con contexto. | Separar rareza multivariable de relevancia física. Combinar régimen, persistencia y reglas específicas; priorizar episodios corroborados entre familias sin borrar excursiones breves. |
+| 5. Oportunidades | Cuatro transitorios térmicos concretos y diferencias de condiciones de aire/gases. | Primero reconstruir coordinación térmica/atemperación; después contrastar combustión a carga comparable. La mejora buscada es estabilidad y uso adecuado de aire/enfriamiento; combustible y dinero requieren un balance medido. |
+
+### Salida estable y compensación térmica
+
+Las medianas de `outputs/regimenes/perfiles_sensores_crudos.csv`, reproducidas por el notebook 09, muestran:
+
+| Señal | Perfil 1 | Perfil 2 |
+|---|---:|---:|
+| Aire secundario FT_8302 | 18,213.72 | 20,370.17 |
+| Caudal de vapor ZZQBCHLL | 58.37 | 60.77 |
+| Gases del economizador TE_8319A / B | 351.01 / 383.65 | 360.41 / 395.60 |
+| Señal de válvula TV_8329ZC | 14.01 | 17.56 |
+| Señal de agua YJJWSLL | 2.61 | 2.86 |
+| Temperatura final TE_8332A | 537.44 °C | 537.88 °C |
+| Oxígeno AIR_8301A / B | 2.12 / 2.23 | 2.02 / 2.16 |
+
+Salvo TE_8332A, son unidades originales no confirmadas: no se interpreta válvula como porcentaje, agua como t/h u oxígeno como porcentaje calibrado. El perfil con mayor caudal también tiene gases más calientes y señales de atemperación mayores, con temperatura final parecida. **Es compatible con regulación que compensa condiciones internas distintas.** Son medianas de grupos, no una secuencia causal ni una comparación a igual carga.
+
+La acción de control puede mantener una salida cerca de su objetivo y ocultar en ella cambios del proceso. Por eso, baja correlación de la temperatura final no demuestra irrelevancia física de los predictores. La atemperación directa enfría al evaporar agua y mezclarla con vapor; también añade masa. Menor agua no significa automáticamente mayor eficiencia ni mayor caudal significa más calor de combustión. El balance y sus condiciones se explican en [Spirax Sarco, Basic steam desuperheating](https://www.spiraxsarco.com/learn-about-steam/desuperheating/basic-desuperheating-theory?sc_lang=en-GB). La posición relativa del medidor y el atemperador del CSV no está confirmada; no se calcula ese balance para esta unidad.
+
+**Más aire secundario con oxígeno mediano algo menor no sostiene una conclusión de exceso de aire.** Puede acompañar más combustible/carga, redistribución o cambios de mezcla; calibración y punto de medida también importan. El compromiso entre combustión incompleta y pérdidas por mayor flujo de gases del [DOE, Steam Tip Sheet 4, p. 1](https://www.energy.gov/sites/prod/files/2014/05/f16/steam4_boiler_efficiency.pdf) fundamenta comparar aire/O2 y gases a carga semejante, sin reducir aire a partir de esas dos medianas.
+
+### Hipótesis priorizadas y cómo contrastarlas
+
+| Patrón | Interpretación de trabajo | Alternativa y contraste discriminante |
+|---|---|---|
+| Cuatro extremos térmicos graduales con cambios de otras temperaturas, presión y caudal | Transitorios del conjunto proceso–regulación tienen más respaldo que picos aislados de un termómetro. Conservarlos como casos de coordinación térmica. | Cambio deliberado de carga/consigna, sesgo seguido por el control o adquisición común. Contrastar consigna/modo y temperaturas independientes; ordenar estado térmico, mando, posición, agua y salida. |
+| Episodio 1: cae la señal térmica del hogar mientras válvula/agua permanecen elevadas durante parte de la caída final | Posible desajuste temporal entre condiciones térmicas y enfriamiento. | Cambio de carga/consigna o temperatura de entrada distinta. Revisar condiciones locales y mando/posición/caudal; coexistencia no prueba que el agua causara la caída. |
+| Episodio 4: sube el estado térmico, después aumenta agua y la salida termina descendiendo | Respuesta compensadora con dinámica térmica, compatible con regulación activa. | Acción manual, nueva consigna u otra perturbación. Verificar modo, consigna y tiempos locales antes de plantear cambios de sintonía o anticipación por carga. |
+| Excursión concordante de seis presiones del hogar | Cambio común de tiro/presión o adquisición compartida tiene mayor respaldo que seis averías independientes. | Referencia eléctrica o calidad común del DCS. Contrastar instrumento independiente y registros de mando/adquisición; seis señales correlacionadas no son seis testigos independientes. |
+| Corriente 51.28 acompañada por aumento de ambas vibraciones | Un transitorio electromecánico merece revisión y tiene más respaldo que descartar solo la corriente como dato aislado. | Cambio de velocidad/mando, adquisición común o pico de señal. Contrastar accionamiento, velocidad, amortiguadores y calidad; no identifica daño de cojinete, atasco o kWh. |
+
+Los episodios térmicos duran 950/1,270/790/470 s y sus pasos máximos cada cinco segundos son 0.38/0.22/0.23/0.35 °C. Las tablas y figuras de contexto 1/4 en `outputs/revision_termica/` sustentan la lectura cualitativa. En el pico de corriente, `outputs/anomalias/contrastes_senales.csv` registra vibraciones 8.26/11.89 frente a medianas previas 5.565/5.670, con unidades mecánicas sin confirmar. Esta evidencia ordena revisión, sin certificar causa raíz o salud instrumental.
+
+FT_8306A/B son **aire de cámaras de retorno**, no agua ni condensado. Su caída simultánea justifica revisar ese circuito, sin diagnosticar obstrucción, circulación de sólidos o un subtipo de caldera no confirmado. De las 384 marcas de corriente, 372 duran una lectura: su prioridad difiere de un episodio persistente, pero un evento breve también puede ser real y relevante.
+
+### Uso propuesto y transferencia
+
+Recomiendo revisar los cuatro casos térmicos con operación e instrumentación, para establecer si la evolución del enfriamiento acompaña el cambio térmico y de carga. Después, contrastar periodos estables de carga/presión similares para evaluar reparto de aire y asimetrías. Son pasos concretos para decidir una prueba operativa; no se modifican consignas con medianas de grupos.
+
+El sensor virtual puede usarse primero de forma consultiva, interpretando su discrepancia con el medidor junto con carga y calidad de adquisición. Presión reciente como memoria es coherente con almacenamiento de masa/energía y respuesta a demanda: [Spirax Sarco, Boiler design y Peak demands](https://www.spiraxsarco.com/learn-about-steam/the-boiler-house/steam-accumulators?sc_lang=en-GB). No se propone instalar un acumulador ni se identifica treinta segundos como constante física; filtrado, compensación o asincronía pueden aportar parte de esa señal.
+
+Se transfieren a bagazo los balances, la regulación térmica, el compromiso del aire y el diagnóstico contextual. Consignas, características del combustible, márgenes de O2, rangos y coeficientes corresponden a cada unidad. **El aporte gerencial es priorizar estabilidad y calidad de supervisión con casos específicos y orientar la evaluación de combustión; el porcentaje de ahorro permanece sin cuantificar.** Las [fuentes técnicas](fuentes-anomalias/indice.md) precisan alcance y límites.
 
 ## Aporte 1. Revisar el suministro y reparto del aire de combustión según la carga
 
@@ -14,7 +68,7 @@ Propongo revisar si la distribución de aire primario y secundario se ajusta ade
 
 La oportunidad tiene fundamento físico: el aire debe ser suficiente para completar la combustión; un suministro excesivo puede aumentar las pérdidas por los gases, mientras que uno insuficiente favorece combustión incompleta. Este principio está respaldado por el [DOE, Steam Tip Sheet 4](https://www.energy.gov/sites/prod/files/2014/05/f16/steam4_boiler_efficiency.pdf). No aplico a esta caldera de carbón las tablas y porcentajes del ejemplo de gas natural de esa referencia.
 
-**Evidencia disponible.** Los dos perfiles exploratorios presentan distintas medianas de aire secundario —18,213.72 y 20,370.17 en unidades originales— y de caudal de vapor —58.37 y 60.77—. Esto indica que las condiciones de operación cambian y que una comparación de eficiencia debe controlar la carga. No demuestra exceso de aire, desperdicio ni que uno de los perfiles sea más eficiente. Disponemos además de oxígeno A/B, aire primario, temperaturas de gases y corriente del ventilador para orientar esa comparación. Las temperaturas medidas corresponden a puntos del economizador, sin confirmar equivalencia con la temperatura final de chimenea.
+**Evidencia disponible.** Los dos perfiles exploratorios presentan distintas medianas de aire secundario —18,213.72 y 20,370.17 en unidades originales— y de caudal de vapor —58.37 y 60.77—. Junto con gases y atemperación, el patrón respalda comparar estados térmicos y respuesta de control según carga. El oxígeno mediano es algo menor en el perfil de más aire: no indica exceso de aire ni permite ordenar eficiencia sin controlar las condiciones. Disponemos además de oxígeno A/B, aire primario, temperaturas de gases y corriente del ventilador para orientar esa comparación. Las temperaturas medidas corresponden a puntos del economizador, sin confirmar equivalencia con la temperatura final de chimenea.
 
 **Acción recomendada.** Confirmar ubicación, unidades y calibración de las señales; después comparar periodos estables de carga y presión similares, contrastando aire y oxígeno de ambos lados con temperaturas de gases. Si se identifica un patrón consistente, plantear una prueba supervisada de ajuste con operación y mediciones de combustión. No se propone reducir aire automáticamente ni fijar un oxígeno óptimo con este archivo. La predicción de Ridge es asociativa y no se utiliza para simular causalmente el efecto de mover una válvula o un ventilador.
 
@@ -28,7 +82,7 @@ Propongo estudiar la coordinación entre carga, estado térmico, señal de válv
 
 **Evidencia disponible.** Hay 7,037 lecturas fuera de esa referencia: 4,144 por debajo y 2,893 por encima, equivalentes al 8.14 % del archivo. La magnitud cambia mucho: el 68.52 % de las lecturas fuera de banda se aleja como máximo 2 °C y el 97.54 % como máximo 5 °C. Los extremos son 517.05 y 550.49 °C, con distancias de 12.95 y 5.49 °C desde sus bordes respectivos. No se interpreta todo el porcentaje como una desviación de igual gravedad.
 
-La revisión de calidad identificó cuatro episodios completos que contienen las 173 lecturas a más de 5 °C de los bordes. Presentan evolución gradual y cambios simultáneos en otras temperaturas, presiones y caudal; se conservaron con marca por falta de error demostrado. En las figuras, las señales de agua y válvula también cambian en el contexto de los extremos. Esto justifica revisar la interacción térmica y de control, pero no demuestra que el controlador sea defectuoso ni que el agua haya causado el evento. La respuesta del controlador podría depender de la propia temperatura medida y las señales pueden compartir adquisición.
+La revisión de calidad identificó cuatro episodios completos que contienen las 173 lecturas a más de 5 °C de los bordes. Presentan evolución gradual y cambios simultáneos en otras temperaturas, presiones y caudal; se conservaron con marca. Las señales de agua y válvula también cambian en ese contexto. La hipótesis prioritaria es una dinámica térmica compartida cuya coordinación con la atemperación merece revisión; tiene más respaldo que tratar los cuatro episodios como picos aislados de temperatura. No identifica un controlador defectuoso ni al agua como causa única. La respuesta del controlador podría depender de una temperatura sesgada y las señales pueden compartir adquisición.
 
 **Acción recomendada.** Revisar los episodios junto con consigna, modo manual/automático, orden y posición real de válvula, temperaturas locales antes/después del atemperador, condiciones del agua y cambios de carga. Estudiar si la respuesta resulta adecuada para el estado de operación y, si se confirma una oportunidad, probar un ajuste supervisado. La función del agua es regular la temperatura: un menor caudal de atemperación no demuestra por sí mismo mayor eficiencia. [Fundamento de atemperación, Spirax Sarco](https://www.spiraxsarco.com/learn-about-steam/desuperheating/basic-desuperheating-theory?sc_lang=en-GB).
 
@@ -36,7 +90,7 @@ La revisión de calidad identificó cuatro episodios completos que contienen las
 
 Evidencia: [notebook 10](../notebooks/10_anomalias_serie2.ipynb), [notebook 11](../notebooks/11_revision_extremos_termicos_serie2.ipynb), tablas de magnitud y trazabilidad por fila en `outputs/anomalias/` y `outputs/revision_termica/`.
 
-**Prioridad propuesta.** Empezaría por estabilidad térmica porque contamos con episodios concretos y una línea base de magnitud/duración. El ajuste de aire mantiene interés energético, pero requiere más información para identificar y valorar una mejora. Las dos oportunidades quedan redactadas como recomendaciones a verificar; ninguna autoriza modificar consignas de planta.
+**Prioridad propuesta.** Empezaría por estabilidad térmica porque contamos con episodios concretos y una línea base de magnitud/duración. Después evaluaría reparto de aire a carga comparable. La secuencia permite iniciar por casos identificados y decidir pruebas de mejora con criterios físicos; los porcentajes de combustible y dinero no se deducen de los perfiles.
 
 ## Resumen de respuesta a cada petición
 

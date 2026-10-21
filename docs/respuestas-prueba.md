@@ -45,17 +45,21 @@ Como estructura inicial, evaluar las tres variedades recomendadas junto con la r
 
 ## Serie II: fábrica, caldera
 
-El análisis usa cinco días de una caldera de carbón de otra instalación. Las relaciones describen el archivo y no se transfieren sin validación a una caldera de bagazo de Santa Ana.
+El análisis usa cinco días de una caldera de carbón de otra instalación. **La interpretación prioritaria es una operación con compensación térmica y transitorios del conjunto proceso–control: conviene revisar primero coordinación térmica/atemperación y después reparto de aire a carga comparable.** Los balances y principios de control sí son transferibles a bagazo; consignas, márgenes y coeficientes corresponden a cada unidad. La [lectura física y decisiones por inciso](conclusiones-serie-II.md#interpretación-física-y-decisiones) reúne inferencias, alternativas y comprobaciones.
 
 ### 1. ¿Son confiables los treinta sensores y archivos?
 
 La auditoría encontró **30 celdas faltantes** en la señal de agua de atemperación, concentradas en dos episodios; cinco señales, incluido el objetivo, repiten cada par de lecturas. Se contrastaron archivos, tiempos, repeticiones, rangos, faltantes y señales mantenidas. Se conservaron los datos originales y los extremos revisados: la evidencia disponible no alcanzó para llamarlos errores instrumentales. Faltan rangos certificados, calibración, unidades y trazabilidad del sistema de adquisición para certificar la salud de cada instrumento.
+
+**Conclusión operativa:** el archivo es utilizable para este análisis con faltantes y cadencias explícitas. No deben contarse los pares retenidos como información independiente nueva cada cinco segundos. Los extremos térmicos graduales y concordantes merecen revisión de proceso y control, en lugar de borrarse como picos aislados.
 
 **Desarrollo:** [notebook 06](../notebooks/06_eda_caldera_serie2.ipynb), [revisión térmica del notebook 11](../notebooks/11_revision_extremos_termicos_serie2.ipynb).
 
 ### 2. ¿Qué regímenes de operación se distinguen?
 
 K-means identifica **dos perfiles amplios** usando siete familias de señales. Uno ocupa 37.60 % del tiempo y presenta menor estado térmico/aire secundario; el otro ocupa 62.40 % y muestra medianas mayores en esas señales. Ambos reaparecen en los cinco bloques analizados, con solapamiento y mezcla temporal cambiante. Son perfiles exploratorios, no estados eficientes/ineficientes certificados ni fallas.
+
+**Interpretación física:** el perfil con más caudal y gases más calientes también tiene mayores señales de válvula/agua, mientras la temperatura final es semejante: 537.44/537.88 °C. Es compatible con compensación de una salida regulada. Conviene comparar carga, estado térmico y señales de actuación conjuntamente; poca variación de la temperatura final no implica irrelevancia física de las otras variables. Son medianas agregadas, sin comparación a igual carga.
 
 **Desarrollo:** [notebook 09](../notebooks/09_regimenes_operacion_serie2.ipynb), con pruebas de persistencia y sensibilidad.
 
@@ -65,6 +69,8 @@ La campeona es **Ridge con diecisiete entradas procedentes de quince sensores**:
 
 Se eligió por sus resultados y parsimonia: incorpora solo dos lecturas históricas y conserva la interpretación aditiva de Ridge. Selección, imputación y escalado se ajustan dentro del entrenamiento, sin usar el propio caudal como entrada. Treinta segundos es el rezago elegido de la malla explorada; no demuestra un tiempo físico exacto. Las validaciones son históricas y reutilizadas; falta confirmación en un periodo nuevo y del linaje del caudal compensado y las latencias instrumentales.
 
+**Uso recomendado:** estimador consultivo en paralelo y referencia de consistencia con el medidor, interpretando discrepancias junto con carga, estado térmico y adquisición. La memoria de presión tiene sentido como representación de dinámica del circuito; no se requiere identificar su mecanismo exacto para aprovechar la mejora histórica. El respaldo independiente ante falla del caudalímetro sigue condicionado al linaje de las señales.
+
 **Desarrollo:** [informe y elección de la campeona](rezagos-serie-II.md), [notebook 12 con ajuste final](../notebooks/12_rezagos_serie2.ipynb), [comparación de algoritmos](../notebooks/07_sensor_virtual_serie2.ipynb) y [controles del procedimiento](../scripts/auditar_leakage_serie2.py). Artefacto vigente: `outputs/campeona_serie2/sensor_virtual.joblib`.
 
 ### 4. ¿Cómo detectar anomalías y proponer avisos al jefe de calderas?
@@ -73,14 +79,16 @@ Se aplicó Isolation Forest, complementado con reglas basadas en persistencia y 
 
 Para distinguir equipo, sensor y proceso, un aviso debe contrastarse con instrumentos independientes, señales de la misma familia, carga, mandos y bitácora/calibración. Una señal aislada no basta para atribuir causa. Las reglas son propuestas analíticas; requieren revisión y aprobación de operación antes de uso en planta.
 
+**Inferencia y prioridad:** una excursión concordante de seis presiones favorece revisar cambio común de tiro/proceso o adquisición antes que seis averías independientes. El pico de corriente 51.28 coincide con aumentos de ambas vibraciones: merece revisar un transitorio electromecánico, sin diagnosticar daño. FT_8306A/B son aire de cámaras de retorno, no condensado. Combinar rareza multivariable con persistencia y reglas específicas cubre perspectivas distintas; un evento breve no se elimina por su duración.
+
 **Desarrollo:** [notebook 10](../notebooks/10_anomalias_serie2.ipynb), episodios térmicos del [notebook 11](../notebooks/11_revision_extremos_termicos_serie2.ipynb).
 
 ### 5. ¿Qué dos oportunidades de mejora se identificaron?
 
-1. **Revisar el suministro y reparto del aire de combustión según carga**, comparando aire primario/secundario, oxígeno, gases y presión/caudal en condiciones comparables. El fundamento físico es claro; el archivo no demuestra exceso de aire, ineficiencia ni ahorro. Para estimar impacto faltan consumo y poder calorífico del combustible, CO/inquemados, calibración, temperatura real de chimenea y energía eléctrica.
-2. **Revisar la estabilidad de temperatura y su coordinación con la atemperación.** El 8.14 % de lecturas está fuera de una banda bibliográfica de referencia, no de un límite de seguridad. Se revisaron los cuatro episodios que contienen las desviaciones mayores; no se demostró error de sensor ni causa del control. Para estimar impacto hacen falta consigna/bandas autorizadas, modo de control, posición real de válvula, medidas locales y restricciones de turbina/proceso.
+1. **Revisar el suministro y reparto del aire de combustión según carga**, comparando aire primario/secundario, oxígeno, gases y presión/caudal en condiciones comparables. Aire suficiente favorece combustión completa; exceso de gases puede elevar pérdidas. Más aire secundario con oxígeno mediano algo menor en el perfil de más caudal no permite diagnosticar exceso de aire. La acción es contrastar periodos estables semejantes, no reducir aire por una correlación. Para valorar combustible/dinero faltan consumo y poder calorífico, CO/inquemados, calibración, temperatura real de chimenea y energía eléctrica.
+2. **Revisar la estabilidad de temperatura y su coordinación con la atemperación.** El 8.14 % de lecturas está fuera de una banda bibliográfica, no de un límite de seguridad. Los cuatro episodios mayores son graduales y coherentes entre familias: la hipótesis de transitorios del proceso y regulación tiene más respaldo que picos aislados de temperatura. En los casos revisados, la evolución del agua y del estado térmico justifica reconstruir consigna → mando/posición → agua → temperatura local/final. Así se puede decidir si conviene mejorar coordinación o respuesta; no se identifica aún un controlador defectuoso. Menor agua no equivale por sí sola a mayor eficiencia.
 
-Priorizaría la revisión térmica por contar con episodios directos y magnitud observada. Ninguna de las oportunidades se presenta como ahorro demostrado ni como cambio de consignas ya ejecutado.
+Priorizaría la revisión térmica con esos cuatro casos y después la comparación de aire a carga semejante. El beneficio buscado es mayor estabilidad y mejor supervisión; su magnitud evitable y el ahorro energético requieren contraste operativo. Esta secuencia es una recomendación concreta, sin presentar ajustes o ahorros como ya ejecutados.
 
 **Desarrollo:** [conclusiones de Serie II](conclusiones-serie-II.md), con evidencia enlazada a los notebooks 06, 09, 10 y 11.
 

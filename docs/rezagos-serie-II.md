@@ -72,6 +72,10 @@ No se identifica si el patrón procede de dinámica del proceso, regulación, co
 
 La certeza es moderada para utilidad predictiva histórica y baja para atribuir un tiempo físico o garantizar generalización. La campeona de diecisiete debe contrastarse congelada en un periodo nuevo, verificando instrumentación. Requiere treinta segundos de historia de dos señales y confirmar cómo manejar interrupciones y disponibilidad. El ajuste final usa 34,464 filas entre 2022-03-27 14:39:54 y 2022-03-31 14:23:44, con mismas quince señales actuales de la selección original y dos rezagos fijos; no se usa el quinto día. El ajuste y sus exclusiones se exportan mediante `scripts/entrenar_campeona_serie2.py`.
 
+## Uso operativo razonado
+
+Presión y evolución reciente son indicadores físicamente plausibles de la dinámica entre generación, demanda y regulación. La mejora histórica respalda conservar las dos lecturas anteriores, aunque treinta segundos sea una escala empírica y no un retardo físico identificado. Recomiendo utilizar primero la campeona como estimador consultivo en paralelo: su discrepancia con el medidor puede orientar revisión junto con carga, estado térmico y calidad de adquisición. Esa propuesta tiene utilidad antes de certificar respaldo independiente; no declara disponibilidad frente a fallas compartidas ni convierte el residuo en alarma de avería. La [interpretación física integrada](conclusiones-serie-II.md#interpretación-física-y-decisiones) amplía fundamento y prioridades.
+
 ## Trazabilidad y reproducción
 
 El crudo conserva sus 86,400 filas. El estudio usa 34,494 como elegibles; las 51,906 fuera se conservan en archivo separado con todas las mediciones y motivo: 34,560 de segunda fase dentro de los cuatro días, 17,280 del quinto día y 66 sin historia común. Son exclusiones del experimento, sin declaración de invalidez. La separación temporal y los papeles por pliegue se registran aparte; las cinco señales duplicadas no se cuentan como nueva información de cinco segundos.

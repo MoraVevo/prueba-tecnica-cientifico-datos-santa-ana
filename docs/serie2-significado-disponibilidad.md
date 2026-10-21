@@ -8,7 +8,7 @@ La fuente describe una caldera de carbón: el combustible y el aire producen cal
 
 | Familia y tags sin el sufijo `.AV_0#` | Lectura física y posible aporte | Qué no está confirmado |
 | --- | --- | --- |
-| Presión alta del hogar: `PT_8313A`–`F` | Seis puntos de presión en la zona de combustión. Describen distribución de presión, circulación y cambios comunes o asimetrías. | Referencia absoluta/manométrica, unidades y posición exacta de cada punto. Un valor negativo no demuestra imposibilidad. |
+| Presión en la parte superior del hogar: `PT_8313A`–`F` | Seis puntos de presión en la zona de combustión. Describen distribución de presión, circulación y cambios comunes o asimetrías. | Referencia absoluta/manométrica, unidades y posición exacta de cada punto. Un valor negativo no demuestra imposibilidad. |
 | Presión del recipiente y salida: `PTCA_8322A`, `PTCA_8324` | Condición de presión del circuito de agua/vapor; puede acompañar cambios de carga y demanda. Presión y caudal son magnitudes diferentes: no se deduce uno únicamente del otro. | `Pot` y `Container` no identifican inequívocamente el componente; no se asegura que sea presión del domo sin plano. |
 | Temperaturas de gases/hogar: `TE_8319A/B`, `TE_8313B` | Estado térmico de combustión y gases; lados izquierdo/derecho permiten observar asimetrías. La temperatura puede acompañar cambios de calor transferido y generación de vapor. | Unidades por tag y ubicación/tiempo de respuesta exactos. Temperatura alta no equivale automáticamente a mayor eficiencia. |
 | Aire: temperaturas `TE_8303/04`, caudales `FT_8301/02`, `FT_8306A/B` | Condiciones del aire primario, secundario y de la cámara de retorno. Describen suministro y reparto de aire; pueden reflejar el régimen de combustión. | Unidades, condiciones de referencia de caudales, recirculación y función exacta de la cámara de retorno. No se calcula masa ni exceso de aire con tags sin unidades. |
@@ -44,6 +44,12 @@ La publicación describe adquisición mediante un DCS, con acondicionamiento de 
 Ridge utiliza diecisiete entradas de quince sensores: quince señales actuales y las presiones PTCA_8322A/PTCA_8324 a treinta segundos. MAE medio 0.356026 y WAPE agregado 0.598068 % en tres validaciones temporales. La selección de señales, imputación y escalado se ajustan dentro del entrenamiento. La relación temporal no certifica un tiempo de respuesta físico.
 
 El ajuste final usa 34,464 filas de los primeros cuatro días, con recorte inicial común de 660 s y separación final de cinco minutos. Las validaciones son reutilizadas; se necesita un periodo nuevo para evaluar generalización. El artefacto y sus columnas están en outputs/campeona_serie2/. Detalle en el [informe de rezagos](rezagos-serie-II.md).
+
+## Lectura física para supervisión
+
+La constancia aproximada de una salida regulada no demuestra ausencia de perturbaciones: la actuación puede compensarlas. Los perfiles muestran gases, caudal y señales de atemperación mayores con temperatura final semejante. Es coherente con compensación, sin ser un ensayo a igual carga o una identificación del controlador. Conviene interpretar salidas junto con carga y señales de actuación; correlación o importancia predictiva baja no implica irrelevancia física.
+
+La memoria de presión puede representar parte de la evolución del circuito y su regulación; mantiene interés práctico aunque no se haya separado esa dinámica del filtrado o adquisición. El uso consultivo de Ridge y la revisión contextual de eventos aprovechan esa información sin exigir diagnóstico causal completo. La [síntesis física y decisiones](conclusiones-serie-II.md#interpretación-física-y-decisiones) ordena hipótesis y comprobaciones por inciso. Los balances y principios de control son transferibles; las consignas y parámetros de cada unidad deben corresponder a su diseño y combustible.
 
 ## Información que resolvería las ambigüedades
 

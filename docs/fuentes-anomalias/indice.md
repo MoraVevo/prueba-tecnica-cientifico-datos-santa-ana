@@ -1,6 +1,6 @@
-# Fuentes para evaluar la carga del complemento estadístico
+# Fuentes de interpretación física y avisos de Serie II
 
-Alcance: inciso 4 de Serie II. Cuatro fuentes primarias sustentan la evaluación de los 384 tramos de corriente como marcas estadísticas, sin interpretarlos como fallas confirmadas.
+Alcance: interpretación física de los cinco incisos de Serie II y criterio de avisos del inciso 4. Siete fuentes primarias sustentan mecanismos de combustión/control, dinámica del vapor y evaluación de las 384 marcas de corriente. La teoría ordena hipótesis y decisiones; no certifica sensores ni identifica por sí sola causa raíz o ahorro.
 
 | ID | Fuente | Aporte y localización |
 |---|---|---|
@@ -8,8 +8,11 @@ Alcance: inciso 4 de Serie II. Cuatro fuentes primarias sustentan la evaluación
 | f002 | [NIST/SEMATECH, Detection of Outliers](https://itl.nist.gov/div898/handbook/eda/section3/eda35h.htm) | Secciones de etiquetado, supuestos distributivos y modified Z-score. Distancia robusta no demuestra error de medición ni falla. |
 | f003 | [Scofield et al., ISA/InTech, 2021](https://www.isa.org/intech-home/2021/august-2021/features/from-alarm-floods-to-highly-protected-status) | Caso industrial Solvay, párrafo inicial sobre calidad/cantidad: una tasa baja no sustituye pertinencia. |
 | f004 | [HSE, Better alarm handling, CHIS6, 2000](https://www.hse.gov.uk/pubns/chis6.pdf) — [copia local pública](fuentes/f004_hse_better_alarm_handling.pdf) | Páginas 1–2: tasa media de referencia, acción necesaria, respuesta definida. Página 4: guía de buenas prácticas no obligatoria, marzo de 2000. |
+| f005 | [DOE, Improve Your Boiler’s Combustion Efficiency](https://www.energy.gov/sites/prod/files/2014/05/f16/steam4_boiler_efficiency.pdf), Steam Tip Sheet 4, pp. 1–2 | Compromiso aire suficiente/pérdidas por gases y papel de O2/temperatura. No se transfieren a carbón/bagazo tablas o reglas numéricas del ejemplo de gas natural. |
+| f006 | [Spirax Sarco, Basic Desuperheating Theory](https://www.spiraxsarco.com/learn-about-steam/desuperheating/basic-desuperheating-theory?sc_lang=en-GB), Basic steam desuperheating y calculations | Enfriamiento por evaporación/mezcla y masa añadida. No confirma diseño, ubicación de medidor/atemperador ni permite aplicar el balance cuantitativo al CSV. |
+| f007 | [Spirax Sarco, Steam Accumulators](https://www.spiraxsarco.com/learn-about-steam/the-boiler-house/steam-accumulators?sc_lang=en-GB), Boiler design y Peak demands | Fundamento de dinámica demanda–presión y almacenamiento de energía. No identifica tags PTCA, fija treinta segundos ni propone un acumulador para esta unidad; no transfiere ciclos específicos de quemador. |
 
-El registro `fuentes.jsonl` conserva URL, autores, localización, cita breve y límites. La ficha pública HSE tiene 72,320 bytes; no es el PDF confidencial de la prueba ni una norma actual de cumplimiento guatemalteco o cupo de alarmas por sensor. Los cálculos y la conclusión aplicada están en el notebook 10; el texto externo no valida estos sensores.
+El registro `fuentes.jsonl` conserva URL, autores, localización, cita breve y límites. La ficha pública HSE tiene 72,320 bytes; no es el PDF confidencial de la prueba ni una norma actual de cumplimiento guatemalteco o cupo de alarmas por sensor. Los cálculos de carga están en el notebook 10; la [interpretación física integrada](../conclusiones-serie-II.md#interpretación-física-y-decisiones) reúne las inferencias y decisiones. El texto externo no valida estos sensores. Las tres referencias de proceso se consultaron sin nuevas descargas; no se incorporan porcentajes de ahorro ni consignas ajenas.
 
 ## Información necesaria para aplicación operativa
 
