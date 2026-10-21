@@ -1,6 +1,6 @@
 # Respuestas directas a la prueba técnica
 
-Este es el punto de entrada para leer las respuestas de cada serie sin rastrearlas entre README, notebooks y resultados. Resume las decisiones y hallazgos confirmados, muestra el estado de cada petición y enlaza el análisis detallado. Las Series I y II tienen respuestas analíticas; las III, IV y V siguen pendientes y no se presentan como resueltas.
+Este es el punto de entrada para leer las respuestas de cada serie sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III tiene respondido su primer inciso; sus otros tres incisos y las Series IV–V permanecen pendientes.
 
 ## Estado general
 
@@ -8,7 +8,7 @@ Este es el punto de entrada para leer las respuestas de cada serie sin rastrearl
 |---|---|---|
 | I. Campo, variedades y renovación | Cuatro peticiones a Gerencia Agrícola respondidas con datos, modelos y límites. | Análisis completado. |
 | II. Fábrica, caldera | Cinco peticiones respondidas con la serie de sensores externa del enunciado. | Análisis completado; para decisiones de planta se requieren comprobaciones adicionales. |
-| III. Mercado, producción y precio | EDA de FAOSTAT revisado y verificado; fuente de precios descargada. | Lista la preparación para segmentación; cuatro respuestas finales pendientes. |
+| III. Mercado, producción y precio | Perfiles de países, pares de Guatemala y productividad territorial relativa. | Primer inciso respondido con límites; precios, pronósticos y respuesta de oferta pendientes. |
 | IV. Modelo en producción | API, empaquetado Docker y pruebas de API. | Pendiente; no desarrollada. |
 | V. Presentación ejecutiva | Síntesis para las gerencias y defensa del análisis. | Pendiente; no elaborada. |
 
@@ -84,9 +84,26 @@ Priorizaría la revisión térmica por contar con episodios directos y magnitud 
 
 **Desarrollo:** [conclusiones de Serie II](conclusiones-serie-II.md), con evidencia enlazada a los notebooks 06, 09, 10 y 11.
 
-## Series III, IV y V: pendientes
+## Serie III: mercado, producción mundial y precio
 
-- **Serie III, mercado:** el [EDA y comprobaciones](../notebooks/13_eda_faostat_serie3.ipynb) deja preparada una vista de 112 países/territorios en 1961–2023, con exclusiones trazadas y sin eliminar extremos como errores. Ya se puede avanzar a representación y segmentación para ubicar Guatemala; esa respuesta final aún no se ha construido. `Sugar_data.csv` está descargado, pero falta auditar construcción/ajustes de contratos y analizar volatilidad, pronósticos y respuesta de oferta al precio.
+### 1. ¿Qué perfiles aparecen, dónde está Guatemala y cuáles son sus pares?
+
+La segmentación de **74 países/territorios** con cobertura histórica suficiente identifica dos perfiles amplios de menor y mayor escala/rendimiento. Guatemala está en el segundo, de 56 áreas, y tiene rendimiento mediano 2019–2023 de **107.52 t/ha**, segundo entre las áreas elegibles. Los perfiles se solapan y dependen de la representación: no son categorías de eficiencia certificada.
+
+Una comparación separada por superficie, expansión y variabilidad —sin elegir por rendimiento— señala a **Indonesia, Bolivia y Vietnam como núcleo de pares estructurales** al variar los criterios manteniendo cinco vecinos. Nepal y Kenia son referencias secundarias que dependen de admitir diferencias amplias de superficie. Estos pares describen estructura territorial, sin equivalencia demostrada de agua, clima, suelo, capital o tecnología.
+
+Frente a cinco referencias y en años coincidentes, la mediana del cociente de rendimiento de Guatemala es **1.679**: aproximadamente **67.9 % superior** a la mediana de sus pares. Al variar criterios con cinco referencias, queda entre 1.642 y 1.679; usar tres u ocho vecinos modifica la magnitud a 1.964 y 1.624. Es productividad de la tierra publicada, no ventaja comparativa económica ni eficiencia total de recursos.
+
+La certeza está limitada por calidad y cobertura. El rendimiento de Guatemala de 2019–2021 es estimado y su superficie imputada; 2022–2023 tienen bandera oficial. El perfil de menor variabilidad incluye mayor proporción de estimaciones, que pueden suavizar trayectorias. Las 38 áreas sin cobertura suficiente permanecen fuera de la segmentación, conservadas con motivo. No se eliminan extremos o flags E/I/X como errores automáticos. Guatemala también registra un descenso de rendimiento de 7.63 % entre 2022 y 2023, sin causa identificada.
+
+**Decisión:** usar el núcleo de pares para orientar contraste agronómico y captura de recursos/costos; la comparación no justifica copiar prácticas, prometer aumentos de producción o asignar inversión. **Desarrollo:** [conclusiones de Serie III](conclusiones-serie-III.md), [notebook 14](../notebooks/14_segmentacion_paises_serie3.ipynb) y [EDA del notebook 13](../notebooks/13_eda_faostat_serie3.ipynb).
+
+### 2–4. Precios, pronósticos y respuesta de oferta
+
+Pendientes: auditar construcción/ajustes de contratos de `Sugar_data.csv`, analizar volatilidad/extremos, pronosticar a uno y tres meses con incertidumbre y examinar relaciones entre precio y superficie/producción con rezagos. La fuente de precios está descargada; no hay resultados de esos incisos.
+
+## Series IV y V: pendientes
+
 - **Serie IV, producción:** falta decidir si desarrollar API para exponer un modelo, validación de entradas, OpenAPI, Docker Compose y pruebas. La prueba condiciona estos entregables a que se desarrolle la serie.
 - **Serie V, presentación:** falta crear la presentación ejecutiva de 15–20 minutos para las tres gerencias y preparar la demostración de API solo si se desarrolla la Serie IV.
 
