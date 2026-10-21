@@ -1,0 +1,2 @@
+# Extra opcional de trazabilidad; no se instala con el entorno base ni con la API.
+mlflow==3.17.1
