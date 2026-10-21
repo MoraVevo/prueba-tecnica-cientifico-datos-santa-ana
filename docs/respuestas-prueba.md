@@ -86,6 +86,8 @@ Priorizaría la revisión térmica por contar con episodios directos y magnitud 
 
 ## Serie III: mercado, producción mundial y precio
 
+**Conclusión económica para gerencia:** Guatemala presenta una fortaleza de productividad territorial frente a sus referencias, en un mercado con riesgo de precio relevante y ajustes diferidos de oferta mundial. Recomiendo conservar esa base productiva, presupuestar escenarios adversos y evaluar crecimiento por margen esperado de varias zafras y costo de oportunidad. La teoría y los datos permiten recomendar esa disciplina sin haber identificado una elasticidad causal exacta. El [fundamento económico y las decisiones por inciso](conclusiones-serie-III.md#lectura-económica-y-decisiones) distinguen hallazgos, interpretación y supuestos.
+
 ### 1. ¿Qué perfiles aparecen, dónde está Guatemala y cuáles son sus pares?
 
 La segmentación de **74 países/territorios** con cobertura histórica suficiente identifica dos perfiles amplios de menor y mayor escala/rendimiento. Guatemala está en el segundo, de 56 áreas, y tiene rendimiento mediano 2019–2023 de **107.52 t/ha**, segundo entre las áreas elegibles. Los perfiles se solapan y dependen de la representación: no son categorías de eficiencia certificada.
@@ -96,7 +98,7 @@ Frente a cinco referencias y en años coincidentes, la mediana del cociente de r
 
 La certeza está limitada por calidad y cobertura. El rendimiento de Guatemala de 2019–2021 es estimado y su superficie imputada; 2022–2023 tienen bandera oficial. El perfil de menor variabilidad incluye mayor proporción de estimaciones, que pueden suavizar trayectorias. Las 38 áreas sin cobertura suficiente permanecen fuera de la segmentación, conservadas con motivo. No se eliminan extremos o flags E/I/X como errores automáticos. Guatemala también registra un descenso de rendimiento de 7.63 % entre 2022 y 2023, sin causa identificada.
 
-**Decisión:** usar el núcleo de pares para orientar contraste agronómico y captura de recursos/costos; la comparación no justifica copiar prácticas, prometer aumentos de producción o asignar inversión. **Desarrollo:** [conclusiones de Serie III](conclusiones-serie-III.md), [notebook 14](../notebooks/14_segmentacion_paises_serie3.ipynb) y [EDA del notebook 13](../notebooks/13_eda_faostat_serie3.ipynb).
+**Decisión:** conservar la productividad de la base existente, revisar su descenso reciente y comparar mejoras de rendimiento con expansión por margen incremental y recursos. Usar los pares para estructurar ese contraste; el rendimiento alto por sí solo no determina la inversión rentable. **Desarrollo:** [conclusiones de Serie III](conclusiones-serie-III.md), [notebook 14](../notebooks/14_segmentacion_paises_serie3.ipynb) y [EDA del notebook 13](../notebooks/13_eda_faostat_serie3.ipynb).
 
 ### 2. ¿Qué volatilidad, regímenes y extremos muestra el precio? ¿Son movimientos reales?
 
@@ -106,7 +108,7 @@ Hay **11 inconsistencias OHLC, todas en fronteras mensuales compatibles con camb
 
 Los estados descriptivos de volatilidad móvil a 63 sesiones son baja hasta **24.35 %**, intermedia hasta **34.35 %** y alta por encima. Son cuartiles históricos, con proporciones determinadas por el criterio; no tres clases naturales ni una señal predictiva evaluada. Los años 2008, 2010 y 2011 conservan volatilidades restringidas de **44.85 %, 49.02 % y 40.17 %**. La clasificación depende de ventana y tratamiento de continuidad; se reporta sensibilidad explícita.
 
-**Decisión:** usar esta historia para describir riesgo y escenarios, completando el linaje por contrato antes de calibrar límites comerciales o evaluar coberturas. La sensibilidad no es una serie certificada. **Desarrollo:** [apartado 2 de conclusiones de Serie III](conclusiones-serie-III.md#2-volatilidad-regímenes-y-extremos-del-azúcar-no-11), [notebook 15](../notebooks/15_precios_azucar_serie3.ipynb) y [fuentes y alcance del contraste](fuentes-precios/indice.md).
+**Decisión:** incorporar escenarios adversos de precio al presupuesto y revisar exposición de ventas frente a compromisos de costos. El riesgo persiste tras apartar observaciones sospechosas y justifica priorizar protección del margen. Fijar límites comerciales o evaluar una cobertura concreta requiere completar el linaje contractual. **Desarrollo:** [apartado 2 de conclusiones de Serie III](conclusiones-serie-III.md#2-volatilidad-regímenes-y-extremos-del-azúcar-no-11), [notebook 15](../notebooks/15_precios_azucar_serie3.ipynb) y [fuentes y alcance del contraste](fuentes-precios/indice.md).
 
 ### 3. ¿Qué pronóstico se obtiene a uno y tres meses y con qué incertidumbre?
 
@@ -123,7 +125,7 @@ El último ejercicio se emite **con información al cierre de mayo de 2024**, pa
 
 Todos los valores en centavos de USD/libra. Las bandas se calibran con errores de 2014–2018 y se congelan antes de evaluar. La nominal 80 % cubrió 81.25 % de casos a un mes y 96.77 % a tres: la segunda es amplia y conservadora, con incumplimientos en abril/mayo de 2020. No se interpreta esa cobertura como garantía futura ni como precisión alta.
 
-**Decisión:** conservar el ingenuo como referencia transparente de presupuesto y escenarios. La continuidad no certificada y la diferencia respecto del precio físico/contrato negociable limitan el uso comercial; no se demuestra ahorro ni rentabilidad de cobertura. **Desarrollo:** [apartado 3 de conclusiones](conclusiones-serie-III.md#3-pronóstico-a-uno-y-tres-meses-con-incertidumbre), [notebook 16](../notebooks/16_pronostico_azucar_serie3.ipynb) y [método reproducible](../scripts/pronosticar_azucar_serie3.py).
+**Decisión:** usar el ingenuo con bandas para presupuesto y evaluar decisiones resistentes a escenarios adversos. Con los rasgos probados, más complejidad no es prioritaria frente a comprender exposición y margen. La aplicación a un contrato o precio físico exige su correspondencia; no se estima rentabilidad de una cobertura concreta. **Desarrollo:** [apartado 3 de conclusiones](conclusiones-serie-III.md#3-pronóstico-a-uno-y-tres-meses-con-incertidumbre), [notebook 16](../notebooks/16_pronostico_azucar_serie3.ipynb) y [método reproducible](../scripts/pronosticar_azucar_serie3.py).
 
 ### 4. ¿La superficie o producción responde al precio y con qué rezago?
 
@@ -133,7 +135,7 @@ Con diez evaluaciones temporales retrospectivas de 2014–2023, los dos rezagos 
 
 **Dos años es una señal asociativa entre los rezagos examinados, no un tiempo físico ni una elasticidad causal demostrados.** Solo hay veinte ecuaciones anuales por ámbito; se usan versiones finales de FAOSTAT y no se comprobó disponibilidad histórica. El futuro puede anticipar cosechas y compartir causas con ellas; faltan calendario de decisiones, precio físico esperado/neto, costos, moneda, clima y variación exógena identificada. La continuidad contractual sigue parcialmente verificada.
 
-**Decisión:** usar la relación mundial para contexto de escenarios, sin ordenar ampliación de superficie de Guatemala ni prometer producción o beneficio por una subida del precio. **Desarrollo:** [apartado 4 de conclusiones](conclusiones-serie-III.md#4-respuesta-de-superficie-y-producción-al-precio), [notebook 17](../notebooks/17_oferta_precio_serie3.ipynb) y [método reproducible](../scripts/analizar_oferta_serie3.py).
+**Interpretación y decisión:** los datos respaldan parcialmente el mecanismo económico de oferta que se ajusta con retraso a los incentivos. Conviene evaluar expansión con márgenes de varias zafras e incluir respuesta futura de competidores, sin extrapolar indefinidamente un repunte de precio. Para Guatemala, falta de señal local estable no equivale a ausencia de incentivos; el margen recibido y las restricciones pueden diferir del futuro internacional. Los coeficientes mundiales no fijan superficie óptima ni beneficio local. **Desarrollo:** [apartado 4 de conclusiones](conclusiones-serie-III.md#4-respuesta-de-superficie-y-producción-al-precio), [notebook 17](../notebooks/17_oferta_precio_serie3.ipynb) y [método reproducible](../scripts/analizar_oferta_serie3.py).
 
 ## Series IV y V: pendientes
 
