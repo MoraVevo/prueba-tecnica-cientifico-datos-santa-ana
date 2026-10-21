@@ -1,0 +1,4 @@
+# Entorno de ejecución de la API de Serie IV.
+fastapi==0.156.4
+pydantic==2.14.1
+uvicorn==0.54.0
