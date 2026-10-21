@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Demostración local del sensor virtual de caudal de vapor de Serie II.">
+  <title>Escenario de caldera · Sensor virtual</title>
+  <style>
+    :root { color-scheme: light; --tinta:#173247; --suave:#526b7c; --borde:#d5e1e8; --fondo:#f2f7f9; --blanco:#fff; --cian:#087f9b; --cian-claro:#e6f6fa; --alerta:#805600; --alerta-fondo:#fff7df; --error:#a02e2e; --error-fondo:#fff0ef; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--fondo); color:var(--tinta); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { width:min(1120px,calc(100% - 32px)); margin:36px auto 64px; }
+    header { margin-bottom:22px; }
+    h1 { margin:0 0 8px; font-size:clamp(1.7rem,4vw,2.4rem); line-height:1.15; }
+    h2 { margin:0 0 12px; font-size:1.17rem; }
+    p { margin:8px 0; }
+    .subtitulo { max-width:790px; color:var(--suave); font-size:1.05rem; }
+    .rejilla { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr); gap:16px; align-items:start; }
+    .tarjeta { padding:20px; border:1px solid var(--borde); border-radius:16px; background:var(--blanco); box-shadow:0 5px 20px #1732470b; }
+    .tarjeta + .tarjeta { margin-top:16px; }
+    .nota { padding:13px 15px; border-radius:11px; background:var(--cian-claro); color:#174c5a; }
+    .nota-alerta { background:var(--alerta-fondo); color:var(--alerta); }
+    .acciones { display:flex; flex-wrap:wrap; gap:10px; margin:15px 0; }
+    button,.boton { display:inline-flex; align-items:center; justify-content:center; min-height:43px; padding:9px 15px; border:1px solid var(--cian); border-radius:9px; background:var(--cian); color:white; font:inherit; font-weight:650; text-decoration:none; cursor:pointer; }
+    button.secundario,.boton.secundario { background:white; color:var(--cian); }
+    button:disabled { opacity:.55; cursor:wait; }
+    input[type=file] { display:block; max-width:100%; margin:10px 0; }
+    .archivo { margin:12px 0; padding:14px; border:1px dashed #94aebb; border-radius:10px; background:#fbfdfe; }
+    .pequeno { color:var(--suave); font-size:.91rem; }
+    .estado { min-height:28px; margin-top:12px; font-weight:600; }
+    .estado.error { color:var(--error); }
+    .estado.ok { color:#176844; }
+    .resultado { display:none; margin-top:16px; padding:18px; border:1px solid #abd5df; border-radius:12px; background:#f2fbfd; }
+    .resultado.visible { display:block; }
+    .numero { margin:4px 0 0; font-size:clamp(2rem,6vw,3.1rem); font-weight:750; letter-spacing:-.04em; line-height:1.1; }
+    .meta { color:var(--suave); }
+    .tabla-contenedor { overflow:auto; max-height:400px; border:1px solid var(--borde); border-radius:9px; }
+    table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    th,td { padding:8px 10px; border-bottom:1px solid var(--borde); text-align:left; white-space:nowrap; }
+    th { position:sticky; top:0; background:#f4f8fa; }
+    code { padding:2px 5px; border-radius:4px; background:#edf2f5; font-size:.9em; }
+    ul { padding-left:20px; }
+    @media (max-width:800px) { main { margin-top:22px; } .rejilla { grid-template-columns:1fr; } .tarjeta { padding:17px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Escenario de caldera</h1>
+    <p class="subtitulo">Demostración local del sensor virtual que estima el caudal de vapor principal <code>ZZQBCHLL.AV_0#</code>. Carga una fila preparada o prueba un escenario sintético.</p>
+  </header>
+
+  <section class="nota" aria-label="Qué estima el modelo">
+    <strong>¿Qué representa la predicción?</strong>
+    <p>Es una estimación consultiva del caudal que produciría la ecuación Ridge a partir de otras señales. Puede servir para contrastar el flujo cuando las entradas estén disponibles y una medición independiente permita revisar el resultado. El archivo no necesita incluir el objetivo: ninguna entrada es el propio caudal ni una transformación suya.</p>
+  </section>
+
+  <div class="rejilla" style="margin-top:16px">
+    <section class="tarjeta">
+      <h2>Evaluar una entrada</h2>
+      <p class="pequeno">Se requieren 17 columnas con los nombres originales del modelo: 15 señales actuales y dos presiones registradas 30 segundos antes. La API no calcula ese historial; el archivo debe traerlo ya preparado.</p>
+      <div class="acciones">
+        <button id="ejemplo" type="button" disabled>Probar escenario sintético</button>
+        <a id="plantilla" class="boton secundario" href="/template.csv">Descargar plantilla CSV</a>
+      </div>
+      <p class="pequeno">El escenario sintético coloca la mediana de ajuste de cada señal; no es una lectura real ni una recomendación operativa.</p>
+      <div class="archivo">
+        <label for="archivo"><strong>Cargar archivo CSV o JSON</strong></label>
+        <input id="archivo" type="file" accept=".csv,.json,text/csv,application/json">
+        <p class="pequeno">CSV: encabezados originales y exactamente una fila de datos. JSON: un objeto con esos mismos 17 nombres. Tamaño máximo: 100 KB. Las filas adicionales se rechazan.</p>
+        <button id="evaluar" type="button" disabled>Validar y estimar</button>
+      </div>
+      <div id="estado" class="estado" role="status" aria-live="polite">Cargando ficha del modelo…</div>
+      <div id="resultado" class="resultado" aria-live="polite">
+        <div id="tipo-escenario" class="meta"></div>
+        <div id="prediccion" class="numero"></div>
+        <div id="unidad" class="meta"></div>
+        <p id="aviso" class="nota nota-alerta"></p>
+      </div>
+    </section>
+
+    <aside>
+      <section class="tarjeta">
+        <h2>Límites para interpretar</h2>
+        <ul class="pequeno">
+          <li>Las dos presiones rezagadas requieren historia previa de 30 segundos en el sistema que prepare el archivo.</li>
+          <li>El rango aceptado es el mínimo y máximo observados en el ajuste, no una banda de seguridad. Un valor operativo válido fuera de ese rango también será rechazado.</li>
+          <li>Los sensores, sus unidades y la independencia instrumental no están certificados. Una predicción por sí sola no diagnostica fallas ni demuestra ahorro de combustible.</li>
+          <li>Es una demostración histórica, no un sistema de control ni una alarma. La evaluación del modelo no es independiente y no incluye el quinto día.</li>
+        </ul>
+      </section>
+      <section class="tarjeta">
+        <h2>Modelo y entradas</h2>
+        <p id="ficha" class="pequeno">Consultando API…</p>
+        <div class="tabla-contenedor">
+          <table>
+            <thead><tr><th>Señal</th><th>Rango observado</th><th>Valor cargado</th></tr></thead>
+            <tbody id="entradas"><tr><td colspan="3">La ficha se cargará desde la API.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+<script>
+"use strict";
+const estado = document.querySelector("#estado");
+const archivo = document.querySelector("#archivo");
+const evaluar = document.querySelector("#evaluar");
+const ejemplo = document.querySelector("#ejemplo");
+const resultado = document.querySelector("#resultado");
+let ficha = null;
+
+function decir(mensaje, tipo = "") {
+  estado.textContent = mensaje;
+  estado.className = `estado ${tipo}`;
+}
+
+function crearCelda(fila, texto, etiqueta = "td") {
+  const celda = document.createElement(etiqueta);
+  celda.textContent = texto;
+  fila.append(celda);
+}
+
+function formato(numero) {
+  return new Intl.NumberFormat("es-GT", { maximumFractionDigits: 4 }).format(numero);
+}
+
+async function consultarFicha() {
+  try {
+    const respuesta = await fetch("/model");
+    if (!respuesta.ok) throw new Error(`La API respondió ${respuesta.status} al cargar el modelo.`);
+    ficha = await respuesta.json();
+    document.querySelector("#ficha").textContent = `${ficha.algoritmo} · ${ficha.entradas.length} entradas · ${formato(ficha.entrenamiento.n_ajuste)} filas de ajuste · validación independiente: ${ficha.entrenamiento.validacion_independiente ? "sí" : "no"}.`;
+    document.querySelector("#entradas").replaceChildren();
+    for (const entrada of ficha.entradas) {
+      const fila = document.createElement("tr");
+      fila.dataset.nombre = entrada.nombre;
+      crearCelda(fila, entrada.nombre, "th");
+      crearCelda(fila, `${formato(entrada.minimo_entrenamiento)} a ${formato(entrada.maximo_entrenamiento)}`);
+      crearCelda(fila, "—");
+      document.querySelector("#entradas").append(fila);
+    }
+    for (const boton of [evaluar, ejemplo]) boton.disabled = false;
+    decir("Ficha cargada. Puedes probar el escenario sintético o seleccionar un archivo.", "ok");
+  } catch (error) {
+    decir(error.message, "error");
+  }
+}
+
+function mostrarEntradas(valores) {
+  for (const fila of document.querySelectorAll("#entradas tr[data-nombre]")) {
+    const valor = valores[fila.dataset.nombre];
+    fila.lastElementChild.textContent = formato(valor);
+  }
+}
+
+function limpiarResultado() {
+  resultado.classList.remove("visible");
+  for (const fila of document.querySelectorAll("#entradas tr[data-nombre]")) {
+    fila.lastElementChild.textContent = "—";
+  }
+}
+
+function mostrarResultado(datos, etiqueta, valores) {
+  document.querySelector("#tipo-escenario").textContent = etiqueta;
+  document.querySelector("#prediccion").textContent = formato(datos.prediccion);
+  document.querySelector("#unidad").textContent = `${datos.objetivo} · ${datos.unidad}`;
+  document.querySelector("#aviso").textContent = datos.advertencia;
+  mostrarEntradas(valores);
+  resultado.classList.add("visible");
+}
+
+async function evaluarMedianas() {
+  if (!ficha) return;
+  const valores = Object.fromEntries(ficha.entradas.map((entrada) => [entrada.nombre, entrada.mediana_imputacion]));
+  await enviar("/predict", JSON.stringify(valores), "application/json", "Escenario sintético: medianas del ajuste; no es una observación real.", valores);
+}
+
+async function evaluarArchivo() {
+  limpiarResultado();
+  const seleccionado = archivo.files[0];
+  if (!seleccionado) {
+    decir("Selecciona un archivo CSV o JSON primero.", "error");
+    return;
+  }
+  if (seleccionado.size > 100_000) {
+    decir("El archivo supera el límite de 100 KB.", "error");
+    return;
+  }
+  const tipo = seleccionado.name.toLowerCase().endsWith(".csv") ? "text/csv" : seleccionado.name.toLowerCase().endsWith(".json") ? "application/json" : "";
+  if (!tipo) {
+    decir("La extensión debe ser .csv o .json.", "error");
+    return;
+  }
+  const texto = await seleccionado.text();
+  let valoresParaTabla = {};
+  if (tipo === "application/json") {
+    try { valoresParaTabla = JSON.parse(texto); } catch { /* La API entregará el diagnóstico del JSON. */ }
+  } else {
+    const lineas = texto.replace(/^\uFEFF/, "").split(/\r?\n/).filter((linea) => linea.trim());
+    if (lineas.length === 2 && ficha) {
+      const encabezados = separarCsv(lineas[0]);
+      const celdas = separarCsv(lineas[1]);
+      if (encabezados.length === celdas.length) valoresParaTabla = Object.fromEntries(encabezados.map((nombre, indice) => [nombre, Number(celdas[indice])]));
+    }
+  }
+  const ruta = "/predict/file";
+  await enviar(ruta, texto, tipo, `Archivo: ${seleccionado.name}`, valoresParaTabla);
+}
+
+function separarCsv(linea) {
+  const campos = [];
+  let campo = "";
+  let entreComillas = false;
+  for (let indice = 0; indice < linea.length; indice += 1) {
+    const caracter = linea[indice];
+    if (caracter === '"' && entreComillas && linea[indice + 1] === '"') { campo += '"'; indice += 1; }
+    else if (caracter === '"') entreComillas = !entreComillas;
+    else if (caracter === "," && !entreComillas) { campos.push(campo); campo = ""; }
+    else campo += caracter;
+  }
+  campos.push(campo);
+  return campos;
+}
+
+async function enviar(ruta, cuerpo, tipo, etiqueta, valores) {
+  limpiarResultado();
+  evaluar.disabled = true;
+  ejemplo.disabled = true;
+  decir("Validando las entradas con la API…");
+  try {
+    const respuesta = await fetch(ruta, { method: "POST", headers: { "Content-Type": tipo }, body: cuerpo });
+    const datos = await respuesta.json();
+    if (!respuesta.ok) {
+      const detalle = Array.isArray(datos.detail) ? datos.detail.map((item) => typeof item === "string" ? item : item.msg || JSON.stringify(item)).join("; ") : datos.detail || `Error HTTP ${respuesta.status}`;
+      throw new Error(detalle);
+    }
+    mostrarResultado(datos, etiqueta, valores);
+    decir("Estimación calculada por la API. Revisa los límites antes de interpretarla.", "ok");
+  } catch (error) {
+    resultado.classList.remove("visible");
+    decir(error.message, "error");
+  } finally {
+    evaluar.disabled = false;
+    ejemplo.disabled = false;
+  }
+}
+
+ejemplo.addEventListener("click", evaluarMedianas);
+evaluar.addEventListener("click", evaluarArchivo);
+consultarFicha();
+</script>
+</body>
+</html>

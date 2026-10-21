@@ -67,7 +67,10 @@ La API tampoco imputa. Aunque el ajuste usó la mediana para 15 filas de `YJJWSL
 |---|---|---|
 | `GET` | `/health` | Comprueba que el proceso está vivo y el modelo cargado. |
 | `GET` | `/model` | Devuelve ficha, entradas, coeficientes, métricas, hash y límites. |
+| `GET` | `/template.csv` | Descarga una fila de encabezados originales, sin valores de ejemplo. |
 | `POST` | `/predict` | Estima el caudal con las diecisiete entradas. |
+| `GET` | `/app` | Interfaz local para probar un escenario sintético o cargar un archivo. |
+| `POST` | `/predict/file` | Recibe un CSV de una fila o un objeto JSON y aplica el mismo modelo. |
 | `GET` | `/docs` | Documentación interactiva Swagger UI. |
 | `GET` | `/openapi.json` | Contrato OpenAPI 3.1. |
 
@@ -94,6 +97,21 @@ La validación rechaza con 422:
 - un valor fuera del mínimo o máximo observado.
 
 Acepta enteros y números decimales dentro de rango. El esquema no impone `strict=True` para no rechazar un `-150` entero cuando el modelo espera un número real.
+
+## Interfaz de escenarios
+
+Al iniciar la API, abre `http://127.0.0.1:8000/app`. La página obtiene la ficha desde `/model` y consume `/predict` o `/predict/file`; no necesita instalar un framework de frontend ni guarda los archivos cargados. Los archivos se procesan en memoria y el límite de carga es 100 KB.
+
+La interfaz ofrece dos caminos:
+
+- **Escenario sintético:** envía las medianas del ajuste a `/predict`. Está rotulado como sintético; no es una lectura real ni una recomendación operativa.
+- **Archivo preparado:** permite descargar una plantilla CSV desde `/template.csv` con los 17 encabezados exactos (incluidos `#` y el sufijo de rezago), o cargar CSV/JSON. La plantilla no trae números inventados. El CSV debe contener exactamente una fila de datos; el JSON debe ser un solo objeto. Los campos ausentes, extra, duplicados, no numéricos, no finitos o fuera de rango se rechazan. No se descartan filas adicionales silenciosamente.
+
+La API predice `ZZQBCHLL.AV_0#` a partir de quince señales actuales y dos presiones de treinta segundos antes. Ninguna entrada es el objetivo ni una derivación del objetivo, por lo que la solicitud no requiere conocer previamente el caudal que se estima. Las correlaciones entre señales del mismo proceso son esperables; eso no demuestra independencia instrumental ni descarta una fuga por disponibilidad temporal. El archivo necesita que el sistema que lo prepara aporte las dos presiones históricas. La API no calcula rezagos ni verifica timestamps.
+
+La pantalla muestra la predicción en unidad nativa no certificada, el modelo usado y el mínimo/máximo observados de cada entrada, junto con los valores cargados. Esos rangos son barreras empíricas: pueden rechazar una condición futura operacionalmente válida que quede fuera de la muestra de ajuste, y no son límites de seguridad. También pueden aceptar combinaciones dentro de rango que sean físicamente imposibles.
+
+La predicción sirve para contrastar consultivamente el flujo cuando las señales requeridas están disponibles; por sí sola no diagnostica fallas de equipo o sensor, no establece una causa ni cuantifica ahorro de combustible. Conviene revisar la calidad e independencia de las entradas y comparar con una medición confiable antes de interpretar el resultado. El ajuste y validación son históricos, la validación no es independiente y el quinto día no se evaluó.
 
 ## Ejecución local
 
@@ -176,7 +194,9 @@ docker compose down
 .\.venv\Scripts\python.exe -m pytest tests\integracion\test_api_modelo_serie2.py -q
 ```
 
-Las pruebas de API cubren salud, ficha, predicción válida, reproducibilidad, límites, entradas faltantes/extra, tipos incorrectos, booleanos, valores fuera de rango, OpenAPI, Swagger y fallo al cargar un modelo inválido. La prueba de integración reconstruye el ajuste desde el CSV y compara la ecuación JSON con el pipeline `joblib` en 500 filas completas y en las 15 filas imputadas. La suite conjunta, incluidas las pruebas unitarias e integración existentes, suma 124 pruebas y pasa completa.
+Las 28 pruebas de API cubren salud, ficha, plantilla, interfaz servida por HTTP, predicción válida, reproducibilidad, límites, entradas faltantes/extra, tipos incorrectos, booleanos, nulos, valores no finitos y fuera de rango, OpenAPI, Swagger y fallo al cargar un modelo inválido. La prueba de integración reconstruye el ajuste desde el CSV y compara la ecuación JSON con el pipeline `joblib` en 500 filas completas y en las 15 filas imputadas. La suite anterior, antes de agregar la interfaz, tenía 124 pruebas y pasó completa. La estructura actual contiene 139 pruebas (111 unitarias/integración previas y 28 de API); después de este cambio ejecuté las 28 de API y las 4 pruebas de integración del modelo, todas aprobadas, pero no repetí las otras 111 pruebas.
+
+La suite de API también verifica que `/app` se sirva por HTTP, que `/template.csv` descargue exactamente los 17 nombres originales, que un CSV con esos encabezados y un objeto JSON produzcan la misma respuesta de `/predict`, que se rechacen columnas faltantes/extra y más de una fila, y que nulos, NaN e infinitos devuelvan 422 serializable. La prueba HTTP confirma el contrato de página, archivo y endpoint; la inspección visual de la interfaz en navegador es una comprobación aparte.
 
 ## Límites
 
