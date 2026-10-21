@@ -165,7 +165,9 @@ Para detener:
 docker compose down
 ```
 
-**Verificación pendiente.** En este equipo no hay Docker CLI ni una distribución WSL instalada, por lo que no ejecuté `docker compose up --build`. Validé la sintaxis YAML y probé la API en un entorno virtual limpio con las dependencias de `requirements-api.txt`. La construcción y el arranque del contenedor deben comprobarse en una máquina con Docker antes de presentar la Serie IV como verificada de extremo a extremo.
+**Revisión estática y simulación.** Revisé el `Dockerfile`, el Compose y el contexto de build. La imagen base `python:3.13-slim` incluye `useradd` y `chown`; las dependencias de `requirements-api.txt` resuelven ruedas Linux para Python 3.13. Copié solo `api/`, `models/` y `requirements-api.txt` a un directorio aislado, instalé esas dependencias en un entorno limpio y ejecuté Uvicorn: `/health`, `/openapi.json`, `/docs`, `/model` y `/predict` respondieron 200; una entrada faltante y un valor fuera de rango respondieron 422. Esto valida el contenido copiado, las rutas y el contrato, no la construcción ni el arranque real del contenedor.
+
+**Verificación pendiente.** En este equipo no hay Docker CLI ni una distribución WSL instalada, por lo que no ejecuté `docker compose up --build`. La construcción y el arranque del contenedor deben comprobarse en una máquina con Docker antes de presentar la Serie IV como verificada de extremo a extremo.
 
 ## Pruebas
 
