@@ -12,7 +12,7 @@ Las tres interacciones examinadas no aportan una mejora suficientemente consiste
 
 ## Método e interpretación
 
-Se comparan la referencia, cada interacción y controles con sus sensores soporte, usando las mismas tres ventanas temporales. Los parámetros de imputación, normalización y selección se aprenden solo en entrenamiento. El quinto día no interviene en este experimento.
+Comparo la referencia, cada interacción y los controles con sus sensores soporte, usando las mismas tres ventanas temporales. Aprendo los parámetros de imputación, normalización y selección solo en entrenamiento. El quinto día no interviene en este experimento.
 
 Los productos y valores absolutos amplían las relaciones que puede representar Ridge. El aire y el oxígeno describen conjuntamente condiciones de combustión; la diferencia entre lados puede representar asimetría; agua y temperatura describen condiciones de atemperación. Sus asociaciones no son medidas de eficiencia ni efectos causales de manipular la caldera.
 

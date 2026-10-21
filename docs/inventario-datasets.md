@@ -18,13 +18,13 @@ Cinco señales repiten cada pareja de lecturas, incluido el caudal objetivo. Las
 
 Fuente local FAOSTAT Production: Crops and livestock products, con tablas de valores/flags y diccionarios en data/raw/serie3/. El cultivo Sugar cane tiene 432 filas área/indicador de 144 áreas y años 1961–2024. El análisis del ejercicio utiliza 1961–2023, área cosechada en ha, rendimiento en kg/ha y producción en t.
 
-La vista de análisis conserva 112 países/territorios y 21,168 celdas; agregados, predecesores no empalmados y 2024 se guardan separados con motivo. Las versiones con y sin flags coinciden numéricamente para caña. Evidencia en el [notebook del EDA](../notebooks/13_eda_faostat_serie3.ipynb).
+La vista de análisis conserva 112 países/territorios y 21,168 celdas; guardo separados, con motivo, los agregados, los predecesores no empalmados y 2024. Las versiones con y sin flags coinciden numéricamente para caña. Evidencia en el [notebook del EDA](../notebooks/13_eda_faostat_serie3.ipynb).
 
 ## Serie III: precios de azúcar
 
 Fuente: [Agricultural Commodities Futures](https://www.kaggle.com/datasets/guillemservera/agricultural-futures), archivo individual_data/Sugar_data.csv. Ruta local data/raw/serie3/Sugar_data.csv: 6,097 filas entre 2000-03-01 y 2024-06-24, con date/open/high/low/close/volume. No hay fechas duplicadas ni celdas vacías.
 
-El archivo conserva volúmenes cero y relaciones OHLC para investigar. No se certifican todavía el enlace de contratos, ajustes o significado de cierre/liquidación. [Procedencia y descarga reproducible](fuente-azucar-serie-III.md).
+El archivo conserva volúmenes cero y relaciones OHLC para investigar. Todavía no certifico el enlace de contratos, los ajustes ni el significado de cierre/liquidación. [Procedencia y descarga reproducible](fuente-azucar-serie-III.md).
 
 ## Conservación y entrega
 

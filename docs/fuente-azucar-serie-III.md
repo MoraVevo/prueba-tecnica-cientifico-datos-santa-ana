@@ -2,7 +2,7 @@
 
 ## Archivo obtenido
 
-El PDF pide Agricultural Commodities Futures, de `guillemservera/agricultural-futures`. El archivo se encuentra dentro de `individual_data/Sugar_data.csv` en el [dataset indicado](https://www.kaggle.com/datasets/guillemservera/agricultural-futures), no en la raíz del paquete. Se descargó desde la API pública de Kaggle sin credenciales.
+El PDF pide Agricultural Commodities Futures, de `guillemservera/agricultural-futures`. El archivo se encuentra dentro de `individual_data/Sugar_data.csv` en el [dataset indicado](https://www.kaggle.com/datasets/guillemservera/agricultural-futures), no en la raíz del paquete. Lo descargué desde la API pública de Kaggle sin credenciales.
 
 - Ruta local: `data/raw/serie3/Sugar_data.csv`.
 - Tamaño: 536,051 bytes, coincidente con el inventario público.
@@ -12,7 +12,7 @@ El PDF pide Agricultural Commodities Futures, de `guillemservera/agricultural-fu
 - Fechas ordenadas, cero fechas repetidas y cero celdas ausentes.
 - 93 filas tienen volumen cero. En 11 filas no se cumple que high/low contengan todos los otros precios OHLC. Son aspectos para investigar, no exclusiones justificadas todavía.
 
-Se conserva el CSV íntegro, sin cambiar encabezados ni retirar observaciones. La procedencia y revisión estructural quedan en `data/raw/serie3/fuente_sugar.json`, ignorados por Git. Los metadatos de la versión 188 declaran Yahoo Finance como origen. El [notebook 15](../notebooks/15_precios_azucar_serie3.ipynb) y las [conclusiones del inciso 2](conclusiones-serie-III.md#2-volatilidad-regímenes-y-extremos-del-azúcar-no-11) analizan volatilidad, estados y extremos, con las [fuentes registradas](fuentes-precios/indice.md). La verificación de continuidad es parcial: faltan reglas e identificadores de contratos, ajustes y definición de cierre/liquidación; no se atribuyen automáticamente todos los saltos a movimientos reales del mismo contrato.
+Conservo el CSV íntegro, sin cambiar encabezados ni retirar observaciones. La procedencia y la revisión estructural están en `data/raw/serie3/fuente_sugar.json`, ignorados por Git. Los metadatos de la versión 188 declaran Yahoo Finance como origen. El [notebook 15](../notebooks/15_precios_azucar_serie3.ipynb) y las [conclusiones del inciso 2](conclusiones-serie-III.md#2-volatilidad-regímenes-y-extremos-del-azúcar-no-11) analizan volatilidad, estados y extremos, con las [fuentes registradas](fuentes-precios/indice.md). La verificación de continuidad es parcial: faltan reglas e identificadores de contratos, ajustes y definición de cierre/liquidación; no atribuyo automáticamente todos los saltos a movimientos reales del mismo contrato.
 
 Para reproducir desde la raíz:
 
