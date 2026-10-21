@@ -145,3 +145,30 @@ def test_extremos_individuales_reconstruyen_referencias_y_no_pierden_picos():
     assert not revision.candidata_IF.any()
     assert np.isnan(revision.demora_desde_extremo_s.iloc[0])
     np.testing.assert_array_equal(revision.demora_desde_extremo_s.iloc[1:], [5., 10.])
+    # Carga de corriente: histograma por índices y búsqueda de episodios independientes
+    # del groupby/rolling usados en el notebook; se incluyen ventanas sin eventos.
+    resumen = json.loads((SALIDA / "evaluacion_carga_corriente.json").read_text(encoding="utf-8"))
+    marca = f["marca::YFJ3_AI.AV_0#"].to_numpy()
+    inicios = np.flatnonzero(marca & ~np.r_[False, marca[:-1]])
+    conteos, _ = np.histogram(inicios, bins=np.arange(721)*120)
+    tiempo = f.date.iloc[inicios].to_numpy()
+    movil = np.arange(len(tiempo))+1-np.searchsorted(tiempo, tiempo-np.timedelta64(10, "m"), side="right")
+    assert resumen["tramos"] == len(inicios) == conteos.sum()
+    assert resumen["lecturas_marcadas"] == marca.sum()
+    assert resumen["ventanas_10min"] == len(conteos) == 720
+    assert resumen["maximo_inicios_10min_fijos"] == conteos.max()
+    assert resumen["maximo_inicios_10min_moviles"] == movil.max()
+    assert resumen["ventanas_sin_inicios"] == (conteos == 0).sum()
+    assert resumen["ventanas_mas_de_un_inicio"] == (conteos > 1).sum()
+    assert np.isclose(resumen["tramos_por_hora"], len(inicios)/120)
+    assert np.isclose(resumen["porcentaje_lecturas_marcadas"], marca.mean()*100)
+    guardados = pd.read_csv(SALIDA / "carga_corriente_ventanas10min.csv")
+    np.testing.assert_array_equal(guardados.inicios, conteos)
+    diarios = pd.read_csv(SALIDA / "carga_corriente_diaria.csv")
+    np.testing.assert_array_equal(diarios.inicios, np.bincount(inicios//17280, minlength=5))
+    e = episodios[episodios.tag.eq("YFJ3_AI.AV_0#") & episodios.tipo.eq("instantaneo")]
+    assert resumen["tramos_una_lectura"] == e.lecturas.eq(1).sum()
+    assert np.isclose(resumen["porcentaje_tramos_una_lectura"], e.lecturas.eq(1).mean()*100)
+    escenarios = pd.read_csv(SALIDA / "escenarios_revision_corriente.csv")
+    np.testing.assert_allclose(escenarios.minutos_revision_por_dia_promedio,
+                               escenarios.segundos_por_tramo_supuesto*len(inicios)/300)
