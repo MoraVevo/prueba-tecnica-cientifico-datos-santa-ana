@@ -1,6 +1,6 @@
 # Respuestas directas a la prueba técnica
 
-Este es el punto de entrada para leer las respuestas de cada serie sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III tiene respondido su primer inciso; sus otros tres incisos y las Series IV–V permanecen pendientes.
+Este es el punto de entrada para leer las respuestas de cada serie sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III tiene respuestas a sus dos primeros incisos, con verificación parcial de continuidad de precios; sus otros dos incisos y las Series IV–V permanecen pendientes.
 
 ## Estado general
 
@@ -8,7 +8,7 @@ Este es el punto de entrada para leer las respuestas de cada serie sin rastrearl
 |---|---|---|
 | I. Campo, variedades y renovación | Cuatro peticiones a Gerencia Agrícola respondidas con datos, modelos y límites. | Análisis completado. |
 | II. Fábrica, caldera | Cinco peticiones respondidas con la serie de sensores externa del enunciado. | Análisis completado; para decisiones de planta se requieren comprobaciones adicionales. |
-| III. Mercado, producción y precio | Perfiles de países, pares de Guatemala y productividad territorial relativa. | Primer inciso respondido con límites; precios, pronósticos y respuesta de oferta pendientes. |
+| III. Mercado, producción y precio | Perfiles de países, pares de Guatemala, productividad territorial y riesgo de precio. | Incisos 1–2 respondidos con límites; continuidad de precios parcialmente verificada. Pronósticos y respuesta de oferta pendientes. |
 | IV. Modelo en producción | API, empaquetado Docker y pruebas de API. | Pendiente; no desarrollada. |
 | V. Presentación ejecutiva | Síntesis para las gerencias y defensa del análisis. | Pendiente; no elaborada. |
 
@@ -98,9 +98,19 @@ La certeza está limitada por calidad y cobertura. El rendimiento de Guatemala d
 
 **Decisión:** usar el núcleo de pares para orientar contraste agronómico y captura de recursos/costos; la comparación no justifica copiar prácticas, prometer aumentos de producción o asignar inversión. **Desarrollo:** [conclusiones de Serie III](conclusiones-serie-III.md), [notebook 14](../notebooks/14_segmentacion_paises_serie3.ipynb) y [EDA del notebook 13](../notebooks/13_eda_faostat_serie3.ipynb).
 
-### 2–4. Precios, pronósticos y respuesta de oferta
+### 2. ¿Qué volatilidad, regímenes y extremos muestra el precio? ¿Son movimientos reales?
 
-Pendientes: auditar construcción/ajustes de contratos de `Sugar_data.csv`, analizar volatilidad/extremos, pronosticar a uno y tres meses con incertidumbre y examinar relaciones entre precio y superficie/producción con rezagos. La fuente de precios está descargada; no hay resultados de esos incisos.
+La volatilidad histórica anualizada del azúcar No. 11 es **33.36 % observada y 31.10 % en la sensibilidad restringida**. Se conservan las 6,097 filas originales; de 6,096 retornos, 5,748 se admiten en esa sensibilidad. Los restantes se apartan con motivo por ventanas de posible enlace o por OHLC inconsistente/volumen cero en alguno de sus extremos, sin recalcular retornos sobre filas comprimidas ni declararlos errores demostrados.
+
+Hay **11 inconsistencias OHLC, todas en fronteras mensuales compatibles con cambios de contrato**, y 93 volúmenes cero. La ficha declara Yahoo Finance como origen, pero no documenta contrato diario ni enlace/ajuste/cierre frente a liquidación. La verificación de movimientos reales es **parcial**: una caída de −11.63 % el 12-11-2010 tiene cotejo puntual de precios del mismo vencimiento en publicaciones contemporáneas; el rebote de +26.55 % del 01-05-2000 coincide con señales sospechosas y no se presenta íntegramente como variación económica del mismo contrato.
+
+Los estados descriptivos de volatilidad móvil a 63 sesiones son baja hasta **24.35 %**, intermedia hasta **34.35 %** y alta por encima. Son cuartiles históricos, con proporciones determinadas por el criterio; no tres clases naturales ni una señal predictiva evaluada. Los años 2008, 2010 y 2011 conservan volatilidades restringidas de **44.85 %, 49.02 % y 40.17 %**. La clasificación depende de ventana y tratamiento de continuidad; se reporta sensibilidad explícita.
+
+**Decisión:** usar esta historia para describir riesgo y escenarios, completando el linaje por contrato antes de calibrar límites comerciales o evaluar coberturas. La sensibilidad no es una serie certificada. **Desarrollo:** [apartado 2 de conclusiones de Serie III](conclusiones-serie-III.md#2-volatilidad-regímenes-y-extremos-del-azúcar-no-11), [notebook 15](../notebooks/15_precios_azucar_serie3.ipynb) y [fuentes y alcance del contraste](fuentes-precios/indice.md).
+
+### 3–4. Pronósticos y respuesta de oferta
+
+Pendientes: pronosticar a uno y tres meses con incertidumbre y validación temporal frente al ingenuo; examinar relaciones entre precio y superficie/producción con rezagos, distinguiendo asociación de causalidad. La continuidad completamente certificada de los precios requiere evidencia adicional y condiciona esos usos.
 
 ## Series IV y V: pendientes
 
