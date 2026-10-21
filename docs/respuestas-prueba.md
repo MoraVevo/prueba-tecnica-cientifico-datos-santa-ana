@@ -1,6 +1,6 @@
 # Respuestas directas a la prueba técnica
 
-Este es el punto de entrada para leer las respuestas de cada serie sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III tiene respuestas a sus dos primeros incisos, con verificación parcial de continuidad de precios; sus otros dos incisos y las Series IV–V permanecen pendientes.
+Este es el punto de entrada para leer las respuestas de cada serie sin rastrearlas entre README, notebooks y resultados. Las Series I y II tienen respuestas analíticas. La Serie III tiene respuestas a sus tres primeros incisos, con verificación parcial de continuidad de precios; su cuarto inciso y las Series IV–V permanecen pendientes.
 
 ## Estado general
 
@@ -8,7 +8,7 @@ Este es el punto de entrada para leer las respuestas de cada serie sin rastrearl
 |---|---|---|
 | I. Campo, variedades y renovación | Cuatro peticiones a Gerencia Agrícola respondidas con datos, modelos y límites. | Análisis completado. |
 | II. Fábrica, caldera | Cinco peticiones respondidas con la serie de sensores externa del enunciado. | Análisis completado; para decisiones de planta se requieren comprobaciones adicionales. |
-| III. Mercado, producción y precio | Perfiles de países, pares de Guatemala, productividad territorial y riesgo de precio. | Incisos 1–2 respondidos con límites; continuidad de precios parcialmente verificada. Pronósticos y respuesta de oferta pendientes. |
+| III. Mercado, producción y precio | Perfiles de países, pares de Guatemala, riesgo y pronósticos de precio. | Incisos 1–3 respondidos con límites; continuidad de precios parcialmente verificada. Respuesta de oferta pendiente. |
 | IV. Modelo en producción | API, empaquetado Docker y pruebas de API. | Pendiente; no desarrollada. |
 | V. Presentación ejecutiva | Síntesis para las gerencias y defensa del análisis. | Pendiente; no elaborada. |
 
@@ -108,9 +108,26 @@ Los estados descriptivos de volatilidad móvil a 63 sesiones son baja hasta **24
 
 **Decisión:** usar esta historia para describir riesgo y escenarios, completando el linaje por contrato antes de calibrar límites comerciales o evaluar coberturas. La sensibilidad no es una serie certificada. **Desarrollo:** [apartado 2 de conclusiones de Serie III](conclusiones-serie-III.md#2-volatilidad-regímenes-y-extremos-del-azúcar-no-11), [notebook 15](../notebooks/15_precios_azucar_serie3.ipynb) y [fuentes y alcance del contraste](fuentes-precios/indice.md).
 
-### 3–4. Pronósticos y respuesta de oferta
+### 3. ¿Qué pronóstico se obtiene a uno y tres meses y con qué incertidumbre?
 
-Pendientes: pronosticar a uno y tres meses con incertidumbre y validación temporal frente al ingenuo; examinar relaciones entre precio y superficie/producción con rezagos, distinguiendo asociación de causalidad. La continuidad completamente certificada de los precios requiere evidencia adicional y condiciona esos usos.
+La solución elegida es **repetir el último cierre diario conocido** para pronosticar el promedio mensual de los cierres publicados a +1 y +3 meses. Se comparó con repetir el promedio mensual y con Ridge de tres rasgos históricos, con selección, calibración de bandas y evaluación posterior separadas. El ingenuo se seleccionó antes de la evaluación; Ridge no muestra una mejora suficiente para justificar complejidad.
+
+En la evaluación desde 2019, el ingenuo obtiene **MAE 0.694 centavos de USD/libra y WAPE 3.95 % a un mes**, y **MAE 1.653 centavos y WAPE 9.31 % a tres meses**. Hay 64/62 emisiones evaluadas, con objetivos hasta mayo de 2024. Los errores cambian entre años; no son tasas futuras garantizadas. Los entrenamientos solo usan objetivos ya maduros en cada origen.
+
+El último ejercicio se emite **con información al cierre de mayo de 2024**, para junio/agosto; no es un pronóstico actual. Las 15 filas del junio parcial se conservan aparte y no se usan como promedio de mes completo.
+
+| Horizonte/mes objetivo | Punto | Banda nominal 80 % | Banda nominal 95 % |
+|---|---:|---|---|
+| +1, junio 2024 | 18.30 | 17.16–19.52 | 15.75–21.27 |
+| +3, agosto 2024 | 18.30 | 15.16–22.08 | 14.42–23.23 |
+
+Todos los valores en centavos de USD/libra. Las bandas se calibran con errores de 2014–2018 y se congelan antes de evaluar. La nominal 80 % cubrió 81.25 % de casos a un mes y 96.77 % a tres: la segunda es amplia y conservadora, con incumplimientos en abril/mayo de 2020. No se interpreta esa cobertura como garantía futura ni como precisión alta.
+
+**Decisión:** conservar el ingenuo como referencia transparente de presupuesto y escenarios. La continuidad no certificada y la diferencia respecto del precio físico/contrato negociable limitan el uso comercial; no se demuestra ahorro ni rentabilidad de cobertura. **Desarrollo:** [apartado 3 de conclusiones](conclusiones-serie-III.md#3-pronóstico-a-uno-y-tres-meses-con-incertidumbre), [notebook 16](../notebooks/16_pronostico_azucar_serie3.ipynb) y [método reproducible](../scripts/pronosticar_azucar_serie3.py).
+
+### 4. Respuesta de oferta al precio
+
+Pendiente: examinar relaciones entre precio y superficie/producción con rezagos, distinguiendo asociación de causalidad. La continuidad completamente certificada de los precios requiere evidencia adicional y condiciona la interpretación.
 
 ## Series IV y V: pendientes
 

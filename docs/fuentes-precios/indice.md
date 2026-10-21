@@ -1,6 +1,6 @@
-# Fuentes: azúcar No. 11 y continuidad de precios
+# Fuentes: azúcar No. 11, continuidad y pronóstico
 
-Registro de evidencia para el segundo inciso de Serie III. Las fuentes respaldan especificaciones, procedencia y contrastes puntuales; ninguna certifica por sí sola toda la serie de Kaggle.
+Registro de evidencia para los incisos 2–3 de Serie III. Las fuentes respaldan especificaciones, procedencia, contrastes puntuales y criterios metodológicos; ninguna certifica por sí sola toda la serie de Kaggle.
 
 | ID | Fuente y localización | Aporte | Límite |
 |---|---|---|---|
@@ -11,8 +11,9 @@ Registro de evidencia para el segundo inciso de Serie III. Las fuentes respaldan
 | f005 | [FNB Agri-Weekly, 12-11-2010](fuentes/f005_fnb_12nov2010.pdf), p. 8, tabla ICE Sugar Futures | Publica 26.21 centavos/libra para Mar-11, coincidente con el CSV. | Es un informe bancario contemporáneo, no un archivo completo de liquidaciones oficiales. |
 | f006 | [Reuters, 23-02-2016](https://www.brecorder.com/news/280393/sugar-soars-over-7pc-as-supply-concerns-take-hold), cotización a 1431 GMT | Respalda un repunte del azúcar y noticias de revisión del déficit ese día. | Es mayo e intradía: no certifica el cierre del CSV ni su variación exacta. |
 | f007 | [Bloomberg, publicación 13-11-2010 IST](https://economictimes.indiatimes.com/markets/commodities/white-sugar-drops-most-in-a-year-on-exports-from-europe/articleshow/6916921.cms), cotización del viernes en Nueva York | Marzo cotiza 27.98 tras caer 1.68: cierre anterior implícito 29.66, coincidente con 11-11-2010. | Cotejo indirecto de un cierre previo, mediante noticia contemporánea. |
+| f008 | [Hyndman y Athanasopoulos, FPP3, capítulo 5](https://otexts.com/fpp3/toolbox.html), secciones 5.2, 5.5, 5.9 y 5.10 | Referencia ingenua, orígenes móviles y evaluación de intervalos mediante cobertura, amplitud y Winkler. | El diseño mensual y la calibración empírica son decisiones del ejercicio. No establece garantía de cobertura bajo dependencia temporal. |
 
-El [registro JSONL](fuentes.jsonl) conserva URL, localización, cita breve, fecha de consulta, alcance y huella del PDF descargado. Se consultaron siete fuentes y se descargó un PDF mediante el script seguro de la skill de recolección; la tabla de FNB se inspeccionó visualmente. No se observaron instrucciones hostiles en las fuentes revisadas.
+El [registro JSONL](fuentes.jsonl) conserva URL, localización, cita breve, fecha de consulta, alcance y huella del PDF descargado. Reúne ocho fuentes para los incisos 2–3; un PDF descargado mediante el script seguro de la skill de recolección, con tabla FNB inspeccionada visualmente. No se observaron instrucciones hostiles en las fuentes revisadas.
 
 ## Evidencia pendiente para certificar continuidad
 

@@ -4,7 +4,7 @@
 
 **Guatemala pertenece al perfil de mayor escala y rendimiento entre las áreas comparables de la muestra. Indonesia, Bolivia y Vietnam forman el núcleo de referencias más persistente por estructura de superficie; Nepal y Kenia son referencias secundarias.** La productividad publicada de Guatemala por hectárea es alta frente a esas referencias, pero no demuestra ventaja comparativa económica ni eficiencia de todos los recursos.
 
-Este apartado responde al primer inciso del PDF: evolución de rendimiento, superficie y producción en 1961–2023, ubicación de Guatemala, pares, diferencias y calidad. El segundo apartado desarrolla precios y su verificación parcial; pronósticos y respuesta de oferta al precio permanecen pendientes.
+Este apartado responde al primer inciso del PDF: evolución de rendimiento, superficie y producción en 1961–2023, ubicación de Guatemala, pares, diferencias y calidad. Los apartados 2–3 desarrollan riesgo y pronósticos de precio con continuidad parcialmente verificada; la respuesta de oferta al precio permanece pendiente.
 
 ### Perfiles productivos
 
@@ -174,11 +174,11 @@ La historia permite discutir escenarios de riesgo y reconocer episodios de alta 
 
 La escala económica es relevante: **un centavo por libra equivale a USD 1,120 por contrato de 112,000 lb**. La caída puntual corroborada de aproximadamente 3.45 centavos representa un cambio bruto de USD 3,864 para una posición larga de un contrato. Es ilustrativo; no incorpora costos, diferencial físico, moneda ni calendario comercial y no estima una pérdida de Santa Ana ni prescribe una cobertura.
 
-La certeza es alta sobre fórmulas, conservación y marcas internas; parcial sobre continuidad y movimientos del mercado. La sensibilidad no entrega una serie certificada. El inciso tiene respuesta analítica con esa limitación explícita; la verificación completa de continuidad queda pendiente, sin presentarse como resuelta. Los incisos 3 y 4 no se han desarrollado.
+La certeza es alta sobre fórmulas, conservación y marcas internas; parcial sobre continuidad y movimientos del mercado. La sensibilidad no entrega una serie certificada. El inciso tiene respuesta analítica con esa limitación explícita; la verificación completa de continuidad queda pendiente, sin presentarse como resuelta. El apartado 3 presenta el pronóstico condicionado a esa fuente; el inciso 4 permanece pendiente.
 
 ### Evidencia y reproducción
 
-[Notebook 15](../notebooks/15_precios_azucar_serie3.ipynb), [módulo de cálculo](../scripts/analizar_precios_serie3.py) y [siete fuentes registradas](fuentes-precios/indice.md). Un PDF público descargado de forma segura, con su tabla inspeccionada visualmente. La fuente cruda conserva SHA-256 `944471f40adce9a236bc992e3824f8c07f8f87b0f1aa7a5e50c47c888dcd52d1`. Tablas, figuras, datos/marcas, extremos, contraste externo y exclusiones están bajo `outputs/serie3_precios/`, ignorado por Git.
+[Notebook 15](../notebooks/15_precios_azucar_serie3.ipynb), [módulo de cálculo](../scripts/analizar_precios_serie3.py) y [fuentes de verificación registradas](fuentes-precios/indice.md). Un PDF público descargado de forma segura, con su tabla inspeccionada visualmente. La fuente cruda conserva SHA-256 `944471f40adce9a236bc992e3824f8c07f8f87b0f1aa7a5e50c47c888dcd52d1`. Tablas, figuras, datos/marcas, extremos, contraste externo y exclusiones están bajo `outputs/serie3_precios/`, ignorado por Git.
 
 ```powershell
 python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 notebooks/15_precios_azucar_serie3.ipynb
@@ -186,3 +186,99 @@ python -m pytest tests/unitarias/test_precios_serie3.py tests/integracion/test_p
 ```
 
 Las cinco pruebas específicas verifican conservación, motivos, ausencia de puentes entre retornos, frontera truncada, ventana sin futuro, volatilidad y estados mediante ecuaciones NumPy. Contrastan los precios externos registrados, sin convertir esa coincidencia en certificación del resto de la fuente.
+
+## 3. Pronóstico a uno y tres meses con incertidumbre
+
+**La solución elegida es persistir el último cierre diario conocido. Ridge no aporta una mejora material con los rasgos estudiados. En evaluación posterior, el ingenuo obtiene MAE de 0.694 centavos de USD/libra y WAPE de 3.95 % a un mes; 1.653 centavos y 9.31 % a tres meses. Las bandas reflejan incertidumbre amplia, especialmente a tres meses, y la continuidad no certificada limita el uso comercial.**
+
+### Qué se pronostica
+
+El objetivo es el **promedio de los cierres diarios observados del mes calendario futuro**, en centavos de USD/libra, a +1 y +3 meses desde el cierre del mes de emisión. Es una referencia mensual del CSV publicado; no equivale a liquidación de un vencimiento identificado ni al precio físico recibido por Santa Ana.
+
+Se consideran 291 meses, de marzo de 2000 a mayo de 2024, calculados con 6,082 filas diarias. Las 15 filas de junio de 2024 permanecen aparte con motivo de mes incompleto; su promedio parcial no se utiliza como objetivo mensual completo. No se imputan días ni se inventan ajustes entre contratos. Las marcas originales de calidad permanecen disponibles.
+
+El último pronóstico se emite **con información al cierre de mayo de 2024**, para junio y agosto de 2024. Es un ejercicio histórico con la fuente del enunciado y no una predicción de precios actuales.
+
+### Selección, calibración y evaluación
+
+La validación utiliza orígenes móviles y horizonte explícito, conforme al criterio de [Hyndman y Athanasopoulos, capítulo 5](https://otexts.com/fpp3/toolbox.html#time-series-cross-validation). Las particiones y candidatos se fijaron antes de comparar errores de este experimento:
+
+| Uso | Orígenes de emisión | Observaciones por horizonte |
+|---|---|---:|
+| Historia inicial | Marzo 2000–enero 2005 | Disponible para entrenamiento. |
+| Selección de método/penalización | Febrero 2005–septiembre 2013 | 104 a cada horizonte. |
+| Separación temporal | Octubre–diciembre 2013 | Esperar la maduración de objetivos a tres meses. |
+| Calibración de bandas | Enero 2014–septiembre 2018 | 57 errores fuera de muestra a cada horizonte. |
+| Separación temporal | Octubre–diciembre 2018 | Esperar los objetivos de calibración. |
+| Evaluación posterior | Desde enero 2019 | 64 a un mes y 62 a tres, con objetivos hasta mayo 2024. |
+
+En cada emisión se reentrena con historia creciente. Una fila originada en j entra al entrenamiento solo cuando **j+h ≤ origen actual**: su objetivo mensual ya se conoce. La estandarización y Ridge se ajustan dentro de ese entrenamiento. No se usan las etiquetas de regímenes calculadas sobre toda la historia como predictores.
+
+El método se elige exclusivamente con los errores de selección. Los cuantiles de las bandas se calculan exclusivamente en calibración y quedan congelados antes de evaluar. Los entrenamientos posteriores incorporan meses ya observados, como ocurriría en uso secuencial; no incorporan objetivos futuros. La serie completa ya se inspeccionó en el EDA: esta evaluación está separada de la selección/calibración, pero no se declara un periodo nuevo ciego.
+
+Los errores comparten historia y, especialmente a tres meses, ventanas de información. No se tratan como réplicas independientes ni se presentan pruebas de significancia basadas en esa suposición.
+
+### Métodos y parsimonia
+
+- **Ingenuo del cierre:** repite el último cierre diario disponible del mes de emisión para ambos horizontes.
+- **Ingenuo del promedio:** repite el promedio del mes de emisión. Sirve para distinguir la información del cierre más reciente del efecto de promediar precios.
+- **Ridge directo:** predice el cambio logarítmico entre el cierre conocido y el promedio futuro. Usa tres rasgos: diferencia cierre/promedio actual y cambios del promedio en uno y tres meses, todos logarítmicos. Se comparan penalizaciones 1, 10 y 100.
+
+Se prefiere el método de menor complejidad a no más de 2 % del menor MAE de selección: ingenuo cierre, ingenuo promedio y luego Ridge con mayor penalización. El **ingenuo cierre se selecciona en ambos horizontes antes de calibrar y evaluar**. Ridge-100 es el representante con menor MAE de selección dentro de Ridge; la comparación posterior no cambia los candidatos.
+
+| Método | MAE a 1 mes | WAPE a 1 mes | MAE a 3 meses | WAPE a 3 meses |
+|---|---:|---:|---:|---:|
+| Ingenuo último cierre, elegido | 0.694 | 3.95 % | 1.653 | 9.31 % |
+| Ingenuo promedio mensual | 0.859 | 4.88 % | 1.710 | 9.63 % |
+| Ridge-100 | 0.703 | 3.99 % | 1.649 | 9.29 % |
+
+MAE en centavos de USD/libra. WAPE es la suma de errores absolutos dividida por la suma de precios observados; no equivale al error porcentual de cada mes. Ridge-100 reduce apenas aproximadamente 0.25 % del MAE posterior a tres meses, mientras empeora a un mes y no supera al ingenuo en selección. No hay evidencia suficiente para justificar esa complejidad. Esto no demuestra que ningún modelo o dato adicional pueda mejorar el pronóstico.
+
+Las métricas varían por año. En el ingenuo a tres meses, WAPE es 16.01 % en 2020 y 10.48 % en 2023; para los cinco objetivos de 2024 disponibles es 14.53 %. El agregado de 9.31 % no describe todos los periodos por igual. El desglose completo permanece en los resultados.
+
+### Intervalos de incertidumbre
+
+Para cada método y horizonte se toman los 57 errores de calibración `|ln(observado/predicho)|`. Para cobertura nominal c se usa el valor ordenado en posición `ceil((n+1)×c)` y la banda `[p×exp(−q), p×exp(q)]`. No se extrapola la incertidumbre a tres meses aplicando automáticamente una raíz del tiempo ni se impone normalidad. Las bandas mantienen precios positivos.
+
+Son **bandas empíricas de predicción**, no intervalos de confianza del precio medio estimado ni garantías de cobertura futura. La dependencia temporal, muestra pequeña y cambios de distribución limitan la interpretación nominal. Se evalúan conjuntamente cobertura, amplitud y Winkler, que penaliza anchura e incumplimientos; menor Winkler es mejor.
+
+| Horizonte | Cobertura nominal | Casos cubiertos | Cobertura observada | Amplitud media | Winkler medio |
+|---|---:|---:|---:|---:|---:|
+| 1 mes | 80 % | 52/64 | 81.25 % | 2.26 | 3.55 |
+| 1 mes | 95 % | 62/64 | 96.88 % | 5.29 | 5.80 |
+| 3 meses | 80 % | 60/62 | 96.77 % | 6.59 | 7.14 |
+| 3 meses | 95 % | 60/62 | 96.77 % | 8.39 | 9.82 |
+
+Amplitud y Winkler en centavos de USD/libra. A tres meses, la banda del 80 % es conservadora y ancha. Sus dos incumplimientos, también fuera del 95 %, corresponden a los objetivos de abril/mayo de 2020; no son fallas independientes. La cobertura alta no se interpreta como precisión alta. Las bandas no se estrechan después de observar la evaluación para aparentar mejor calibración.
+
+### Pronóstico del último origen completo
+
+El último cierre de mayo de 2024 es 18.30 centavos de USD/libra. La persistencia produce el mismo punto a ambos horizontes, con distintas bandas:
+
+| Objetivo desde mayo 2024 | Pronóstico | Banda nominal 80 % | Banda nominal 95 % |
+|---|---:|---|---|
+| Junio 2024, +1 mes | 18.30 | 17.16–19.52 | 15.75–21.27 |
+| Agosto 2024, +3 meses | 18.30 | 15.16–22.08 | 14.42–23.23 |
+
+Todas las cifras en centavos de USD/libra. Se mantiene aparte el junio parcial disponible en la fuente; no se evalúa ese promedio de 15 días como si fuera el mes completo. No hay pronóstico intermedio inventado para julio.
+
+### Calidad, utilidad comercial y certeza
+
+La sensibilidad de evaluación conserva únicamente emisiones/objetivos sin marcas directas de OHLC inconsistente o volumen cero en sus meses, manteniendo las mismas predicciones y sin reentrenar para mejorar la cifra. Quedan 47 casos a un mes y 42 a tres: WAPE ingenuo 3.42 % y 8.11 %. Ridge-100 tampoco lo mejora en esa vista. Los casos apartados se conservan con motivo. La ausencia de esas marcas no certifica continuidad ni todos los días de cada mes.
+
+Recomiendo conservar el ingenuo como referencia transparente de presupuesto y escenarios para la serie publicada. El horizonte de tres meses admite errores y bandas amplias; el punto por sí solo no basta para comprometer precio, margen o una cobertura. El beneficio cuantificado es la precisión histórica frente a alternativas probadas; **no se estima ahorro o rentabilidad comercial** con esta fuente.
+
+Para uso comercial faltan linaje por contrato, liquidaciones y método de enlace/ajuste, además del diferencial físico, moneda, volumen y calendario de exposición de Santa Ana. La agregación mensual puede suavizar algunos extremos diarios, pero no resuelve la mezcla de vencimientos. Los resultados no aseguran comportamiento posterior ni constituyen una recomendación para operar hoy.
+
+La certeza es alta respecto de reproducción y separación computacional comprobada; limitada respecto del precio negociable representado, precisión futura y cobertura de nuevos regímenes. El inciso 3 tiene respuesta analítica condicionada a esas limitaciones; el inciso 4 permanece pendiente.
+
+### Evidencia y reproducción
+
+[Notebook 16](../notebooks/16_pronostico_azucar_serie3.ipynb), [módulo](../scripts/pronosticar_azucar_serie3.py) y [fuentes metodológicas](fuentes-precios/indice.md). En `outputs/serie3_pronostico/` quedan meses, filas del junio parcial, papeles de todos los orígenes, predicciones por fase, parámetros de cada ajuste, métricas por año/calidad, cuantiles, bandas evaluadas, pronósticos finales y artefacto seleccionado; fuera de Git. La fuente conserva su huella original.
+
+```powershell
+python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 notebooks/16_pronostico_azucar_serie3.ipynb
+python -m pytest tests/unitarias/test_pronostico_serie3.py tests/integracion/test_pronostico_serie3_resultados.py -q
+```
+
+Seis pruebas específicas reconstruyen agregación, pronósticos por solución matricial, etiquetas maduras, elección, cuantiles, cobertura y Winkler. Las pruebas de perturbación futura y de selección separada protegen contra usar información posterior; no certifican los precios ni una cobertura probabilística futura.
