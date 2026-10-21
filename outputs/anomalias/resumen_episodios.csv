@@ -1,0 +1,5 @@
+tipo,episodios,cobertura_min,mediana_cobertura_s,maxima_cobertura_s
+calidad,2,2.5,75.0,140
+candidata,164,76.58333333333333,5.0,520
+multivariable,28,115.91666666666667,205.0,815
+temperatura,85,585.9166666666666,330.0,1475

@@ -1,0 +1,127 @@
+area,objetivo,escala,rezago_precio,n,correlacion
+Guatemala,superficie,log,0,20,0.45100750823779545
+Guatemala,superficie,log,1,20,0.6984888671210038
+Guatemala,superficie,log,2,20,0.8446581408303698
+Guatemala,superficie,g,0,20,-0.3906923884390493
+Guatemala,superficie,g,1,20,0.22261351079934905
+Guatemala,superficie,g,2,20,0.310509960458107
+Guatemala,produccion,log,0,20,0.17419758925710002
+Guatemala,produccion,log,1,20,0.4060837346237841
+Guatemala,produccion,log,2,20,0.6645280973989303
+Guatemala,produccion,g,0,20,-0.39104318512332803
+Guatemala,produccion,g,1,20,-0.21125261518998825
+Guatemala,produccion,g,2,20,0.0005282446654654938
+Guatemala,rendimiento,log,0,20,-0.19509276156174793
+Guatemala,rendimiento,log,1,20,-0.059407074406718614
+Guatemala,rendimiento,log,2,20,0.23709350840241172
+Guatemala,rendimiento,g,0,20,-0.2588296096395479
+Guatemala,rendimiento,g,1,20,-0.36434232250683674
+Guatemala,rendimiento,g,2,20,-0.16012698639118716
+Indonesia,superficie,log,0,20,0.689882733987719
+Indonesia,superficie,log,1,20,0.6845178769287773
+Indonesia,superficie,log,2,20,0.6506740619971824
+Indonesia,superficie,g,0,20,0.0719875919782103
+Indonesia,superficie,g,1,20,0.19818392800168214
+Indonesia,superficie,g,2,20,0.16543720954130303
+Indonesia,produccion,log,0,20,0.09521928524508512
+Indonesia,produccion,log,1,20,-0.007325601239993447
+Indonesia,produccion,log,2,20,0.010188335452990856
+Indonesia,produccion,g,0,20,0.1718780491373945
+Indonesia,produccion,g,1,20,-0.11389445093737989
+Indonesia,produccion,g,2,20,-0.19503179830654657
+Indonesia,rendimiento,log,0,20,-0.5557396384786772
+Indonesia,rendimiento,log,1,20,-0.6286425474471286
+Indonesia,rendimiento,log,2,20,-0.5845502595819375
+Indonesia,rendimiento,g,0,20,0.1017560325610908
+Indonesia,rendimiento,g,1,20,-0.21811714438894883
+Indonesia,rendimiento,g,2,20,-0.266909761523077
+Bolivia (Plurinational State of),superficie,log,0,20,0.4769846813078436
+Bolivia (Plurinational State of),superficie,log,1,20,0.519997745071196
+Bolivia (Plurinational State of),superficie,log,2,20,0.634092641796195
+Bolivia (Plurinational State of),superficie,g,0,20,-0.16311511911541757
+Bolivia (Plurinational State of),superficie,g,1,20,-0.21553076368533247
+Bolivia (Plurinational State of),superficie,g,2,20,0.3685027249780067
+Bolivia (Plurinational State of),produccion,log,0,20,0.3752674705333553
+Bolivia (Plurinational State of),produccion,log,1,20,0.4463015833675619
+Bolivia (Plurinational State of),produccion,log,2,20,0.5300225139689292
+Bolivia (Plurinational State of),produccion,g,0,20,-0.05029358795791991
+Bolivia (Plurinational State of),produccion,g,1,20,0.029321837186029966
+Bolivia (Plurinational State of),produccion,g,2,20,0.020148662438003555
+Bolivia (Plurinational State of),rendimiento,log,0,20,0.0033968512661131326
+Bolivia (Plurinational State of),rendimiento,log,1,20,0.10534487937427144
+Bolivia (Plurinational State of),rendimiento,log,2,20,0.08964325896498543
+Bolivia (Plurinational State of),rendimiento,g,0,20,0.0944207154098839
+Bolivia (Plurinational State of),rendimiento,g,1,20,0.2466638579849385
+Bolivia (Plurinational State of),rendimiento,g,2,20,-0.33228216389485354
+Viet Nam,superficie,log,0,20,-0.21984244243002202
+Viet Nam,superficie,log,1,20,0.038395228362747155
+Viet Nam,superficie,log,2,20,0.06987100267162995
+Viet Nam,superficie,g,0,20,-0.15238088356058166
+Viet Nam,superficie,g,1,20,0.5269815260460302
+Viet Nam,superficie,g,2,20,0.3798402480106102
+Viet Nam,produccion,log,0,20,-0.07685616455518486
+Viet Nam,produccion,log,1,20,0.2570321425156504
+Viet Nam,produccion,log,2,20,0.3241810122677692
+Viet Nam,produccion,g,0,20,-0.1168016650675675
+Viet Nam,produccion,g,1,20,0.5071643421939173
+Viet Nam,produccion,g,2,20,0.4461942351310906
+Viet Nam,rendimiento,log,0,20,0.5051334163053657
+Viet Nam,rendimiento,log,1,20,0.6880264956737903
+Viet Nam,rendimiento,log,2,20,0.794608165906062
+Viet Nam,rendimiento,g,0,20,0.039876037250744616
+Viet Nam,rendimiento,g,1,20,0.3085820667281326
+Viet Nam,rendimiento,g,2,20,0.5712447684087448
+Nepal,superficie,log,0,20,-0.0031542036743253594
+Nepal,superficie,log,1,20,0.21083746214655907
+Nepal,superficie,log,2,20,0.4466833229214631
+Nepal,superficie,g,0,20,0.01948816332501653
+Nepal,superficie,g,1,20,-0.1461416608513961
+Nepal,superficie,g,2,20,0.39243992260046795
+Nepal,produccion,log,0,20,0.24272337501115224
+Nepal,produccion,log,1,20,0.35760018568754137
+Nepal,produccion,log,2,20,0.5509240602994621
+Nepal,produccion,g,0,20,0.12102719327418482
+Nepal,produccion,g,1,20,-0.21798330390873025
+Nepal,produccion,g,2,20,0.26386787513262144
+Nepal,rendimiento,log,0,20,0.4192639867624249
+Nepal,rendimiento,log,1,20,0.422144769973676
+Nepal,rendimiento,log,2,20,0.539768246055385
+Nepal,rendimiento,g,0,20,0.20882482959016324
+Nepal,rendimiento,g,1,20,-0.24663296880314442
+Nepal,rendimiento,g,2,20,0.047275798232929024
+Kenya,superficie,log,0,20,0.5790358613358528
+Kenya,superficie,log,1,20,0.6134214019094117
+Kenya,superficie,log,2,20,0.5636707763634808
+Kenya,superficie,g,0,20,0.007611990695943777
+Kenya,superficie,g,1,20,0.18182353525916545
+Kenya,superficie,g,2,20,-0.14976588537996274
+Kenya,produccion,log,0,20,0.38187073258400306
+Kenya,produccion,log,1,20,0.35926266820987945
+Kenya,produccion,log,2,20,0.36756038012761316
+Kenya,produccion,g,0,20,-0.1020100673803893
+Kenya,produccion,g,1,20,-0.05896038058469434
+Kenya,produccion,g,2,20,-0.1801827440249101
+Kenya,rendimiento,log,0,20,-0.4301125443094774
+Kenya,rendimiento,log,1,20,-0.5261346567512866
+Kenya,rendimiento,log,2,20,-0.42520081250701697
+Kenya,rendimiento,g,0,20,-0.1919342639786719
+Kenya,rendimiento,g,1,20,-0.3700630611458571
+Kenya,rendimiento,g,2,20,-0.10064936966044254
+World,superficie,log,0,20,0.5377408108799073
+World,superficie,log,1,20,0.7218261193421619
+World,superficie,log,2,20,0.8711030129844155
+World,superficie,g,0,20,-0.1810865751282815
+World,superficie,g,1,20,0.06341548203274934
+World,superficie,g,2,20,0.7179587081247196
+World,produccion,log,0,20,0.5501998856344082
+World,produccion,log,1,20,0.7089288059719322
+World,produccion,log,2,20,0.8384793072030107
+World,produccion,g,0,20,-0.20743151894867928
+World,produccion,g,1,20,0.09662685321484257
+World,produccion,g,2,20,0.7755326616571804
+World,rendimiento,log,0,20,0.4848404662649585
+World,rendimiento,log,1,20,0.5196136100537591
+World,rendimiento,log,2,20,0.5515093756452916
+World,rendimiento,g,0,20,-0.1659617413499751
+World,rendimiento,g,1,20,0.12291635505557254
+World,rendimiento,g,2,20,0.5313429155552561
