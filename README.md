@@ -211,15 +211,15 @@ El notebook 04 y las pruebas comparten `scripts/modelado_serie1.py`. Las predicc
 
 `notebooks/` contiene evidencia reproducible; `scripts/` contiene descarga y ETL; `docs/` contiene conclusiones y continuidad; `bitacora.md` registra decisiones e hipótesis descartadas. `requirements.txt` fija dependencias generales y `requirements-api.txt` las de ejecución de la API. Los datasets y el PDF confidencial están excluidos de Git y del ZIP. Se incluyen solo CSV consolidados seleccionados que respaldan cifras presentadas; no matrices fuente. El ZIP incluye `.git`, según el enunciado.
 
-## Estado de la entrega y límites pendientes de verificación
+## Alcance y limitaciones
 
-Las Series I–III desarrollan sus trece incisos como análisis con evidencia. La Serie II se basa en cinco días de otra instalación y no sustituye confirmación instrumental, un periodo nuevo ni pruebas operativas en planta. En Serie III, la continuidad del contrato de azúcar está parcialmente verificada; la propuesta de pronóstico usa evaluación temporal observada y requiere datos nuevos para una confirmación independiente. La comparación de oferta incluye Guatemala y cinco países; World se presenta solo como contexto.
+Las Series I–III presentan análisis con evidencia en notebooks, scripts y resultados incluidos. La Serie IV añade una API local con interfaz, OpenAPI y pruebas. El ZIP de entrega está preparado, incluye `.git` y excluye datasets y el PDF confidencial.
 
-La Serie IV es una extensión opcional con API, interfaz local, OpenAPI y pruebas. La construcción y el arranque con Docker Compose no se verificaron porque este equipo no tiene Docker ni WSL. La instalación aislada de `requirements-api.txt` tampoco se comprobó: la resolución de paquetes falló por DNS hacia el índice configurado. En el entorno del proyecto aprobaron 28 pruebas de API y 4 integraciones API-modelo; `python -m pytest -q` ejecuta 85 pruebas (57 unitarias y 28 de API) según `pytest.ini`.
+La recomendación agrícola usa ensayos de Louisiana y supuestos del enunciado; el análisis industrial usa datos de una instalación externa. Ninguno equivale a validación en Santa Ana, confirmación instrumental ni evaluación en datos nuevos. En Serie III, la continuidad contractual está parcialmente verificada; el pronóstico es exploratorio y retrospectivo, sin bloque independiente reservado; la asociación entre precio y oferta no es causal.
 
-La Serie V cuenta con presentación final en PPTX y PDF, ambos de 20 diapositivas/páginas. El paquete de entrega está preparado en el ZIP descrito en “Archivos y entrega”.
+No se verificaron la construcción y el arranque con Docker Compose ni la instalación aislada de `requirements-api.txt`; esta última no se completó por un fallo DNS del índice configurado.
 
 
 ## Presentación ejecutiva
 
-La presentación final de Serie V está en [PPTX](presentacion/Serie-V-Santa-Ana-final.pptx) y [PDF](presentacion/Serie-V-Santa-Ana-final.pdf). Ambos contienen 20 diapositivas/páginas. El PDF se renderizó en 20 páginas y se revisó visualmente; la presentación resume las series con sus límites explícitos. Las cifras seleccionadas se respaldan con notebooks, scripts y CSV consolidados incluidos en el paquete.
+La presentación ejecutiva sintetiza recomendaciones de renovación, oportunidades de revisión operativa y hallazgos de mercado, con evidencia, incertidumbre, límites y próximos pasos. Está disponible en [PPTX](presentacion/Serie-V-Santa-Ana-final.pptx) y [PDF](presentacion/Serie-V-Santa-Ana-final.pdf).
